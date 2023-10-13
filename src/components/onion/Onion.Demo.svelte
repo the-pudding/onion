@@ -1,10 +1,11 @@
 <script>
-	import { scaleLinear } from "d3";
-	import { format } from "d3";
+	import { format, scaleLinear } from "d3";
 	import OnionAxisX from "$components/onion/Onion.AxisX.svelte";
 	import OnionAxisY from "$components/onion/Onion.AxisY.svelte";
 	import Onion from "$components/onion/Onion.svelte";
 	import OnionCuts from "$components/onion/Onion.Cuts.svelte";
+	import ButtonSet from "$components/helpers/ButtonSet.svelte";
+	import Range from "$components/helpers/Range.svelte";
 
 	let width = 600;
 	let height = width / 2;
@@ -12,6 +13,7 @@
 	let maxCuts = numLayers;
 	let numCuts = maxCuts;
 	let cutType = "vertical";
+	const options = [{ value: "vertical" }, { value: "radial" }];
 	let cutTargetDepthPercentage = 0;
 	let debug = false;
 
@@ -60,50 +62,25 @@
 </svg>
 
 <div class="controls">
-	<label class="slider-control">
-		number of cuts: {numCuts}
-		<input type="range" bind:value={numCuts} min="1" max={maxCuts} step="1" />
-	</label>
+	<p>number of cuts: {numCuts}</p>
+	<Range min={1} max={maxCuts} label="number of cuts" bind:value={numCuts} />
 
-	<fieldset>
-		<legend>cut type</legend>
+	<ButtonSet legend="cut type" {options} bind:value={cutType} />
 
-		<div class="radio-group">
-			<label>
-				<input
-					type="radio"
-					name="cut-type"
-					bind:group={cutType}
-					value="vertical"
-					checked
-				/>
-				vertical
-			</label>
+	<div class:hidden={cutType !== "radial"}>
+		<p>
+			cut target height:
+			{formatPercentageAsNegative(cutTargetDepthPercentage)} of outer radius
+		</p>
 
-			<label>
-				<input
-					type="radio"
-					name="cut-type"
-					bind:group={cutType}
-					value="radial"
-				/>
-				radial
-			</label>
-		</div>
-	</fieldset>
-
-	<label class="slider-control">
-		cut target height:
-		{formatPercentageAsNegative(cutTargetDepthPercentage)} of outer radius
-		<input
-			type="range"
+		<Range
+			min={0}
+			max={1}
+			step={0.01}
 			bind:value={cutTargetDepthPercentage}
-			min="0"
-			max="1"
-			step="0.01"
-			disabled={cutType !== "radial"}
+			label="cut target depth percentage"
 		/>
-	</label>
+	</div>
 </div>
 
 <style>
@@ -123,27 +100,7 @@
 		width: 300px;
 	}
 
-	.slider-control,
-	fieldset {
-		margin-bottom: 1rem;
-	}
-
-	.controls :is(label, input) {
-		cursor: pointer;
-	}
-
-	.slider-control {
-		display: inline-flex;
-		flex-direction: column;
-	}
-
-	.slider-control:has([disabled]),
-	.slider-control input[disabled] {
-		cursor: not-allowed;
-	}
-
-	.radio-group {
-		display: flex;
-		flex-direction: column;
+	.hidden {
+		visibility: hidden;
 	}
 </style>
