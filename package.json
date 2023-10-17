@@ -8,7 +8,8 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"lint": "prettier --check --plugin-search-dir=. .",
-		"format": "prettier --write --plugin-search-dir=. ."
+		"format": "prettier --write --plugin-search-dir=. .",
+		"test": "vitest"
 	},
 	"devDependencies": {
 		"@rollup/plugin-dsv": "^3.0.2",
@@ -30,7 +31,8 @@
 		"svelte-copy": "^1.4.1",
 		"svelte-preprocess": "^5.0.4",
 		"vite": "^4.4.9",
-		"vite-plugin-svgstring": "^1.0.0"
+		"vite-plugin-svgstring": "^1.0.0",
+		"vitest": "^0.34.6"
 	},
 	"type": "module",
 	"engines": {
