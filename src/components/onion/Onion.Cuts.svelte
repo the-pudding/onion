@@ -1,11 +1,13 @@
 <script>
 	import { polarToCartesian } from "$utils/math";
-	import { numCuts, cutAngleScale, cutWidthScale } from "$stores/onion";
+	import { numCuts, cutAngleScale, cutWidthScale, yScale } from "$stores/onion";
 
 	export let cutType;
 	export let height;
 	export let radius;
 	export let cutTargetDepthPercentage;
+
+	$: cutTargetDepth = height * cutTargetDepthPercentage;
 </script>
 
 <g class="cuts">
@@ -22,9 +24,9 @@
 
 			<line
 				x1={xIntercept * 2}
-				y1={height - yIntercept * 2 - cutTargetDepthPercentage * height}
+				y1={$yScale(yIntercept * 2 + cutTargetDepth)}
 				x2="0"
-				y2={height + cutTargetDepthPercentage * height}
+				y2={$yScale(-cutTargetDepth)}
 			/>
 		{/if}
 	{/each}
