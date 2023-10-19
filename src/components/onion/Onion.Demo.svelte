@@ -1,32 +1,33 @@
 <script>
-	import { scaleLinear } from "d3";
 	import OnionAxisX from "$components/onion/Onion.AxisX.svelte";
 	import OnionAxisY from "$components/onion/Onion.AxisY.svelte";
 	import Onion from "$components/onion/Onion.svelte";
 	import OnionCuts from "$components/onion/Onion.Cuts.svelte";
+	import OnionPieceAnalyzer from "$components/onion/Onion.PieceAnalyzer.svelte";
 	import ButtonSet from "$components/helpers/ButtonSet.svelte";
 	import Range from "$components/helpers/Range.svelte";
 	import { formatPercentageAsNegative } from "$utils/math";
+	import { get } from "svelte/store";
+	import {
+		width as widthStore,
+		height as heightStore,
+		radius as radiusStore,
+		rScale as rScaleStore,
+		numLayers as numLayersStore,
+		numCuts
+	} from "$stores/onion";
 
-	let width = 600;
-	let height = width / 2;
-	let numLayers = 10;
+	// TODO move these gets to each component
+	const width = get(widthStore);
+	const height = get(heightStore);
+	const radius = get(radiusStore);
+	const rScale = get(rScaleStore);
+	const numLayers = get(numLayersStore);
+
 	let maxCuts = numLayers;
-	let numCuts = maxCuts;
 	let cutType = "vertical";
 	const options = [{ value: "vertical" }, { value: "radial" }];
 	let cutTargetDepthPercentage = 0;
-	let debug = false;
-
-	if (debug) {
-		numLayers = 1;
-		numCuts = 1;
-	}
-
-	const radiusPercentage = 0.8; // proportional to graph height
-	const radius = height * radiusPercentage;
-
-	const rScale = scaleLinear().domain([0, numLayers]).range([0, radius]);
 </script>
 
 <svg {width} {height} viewBox="{-width / 2} 0 {width} {height}">
@@ -38,12 +39,14 @@
 
 	<Onion {height} {numLayers} {rScale} />
 
-	<OnionCuts {cutType} {numCuts} {height} {radius} {cutTargetDepthPercentage} />
+	<OnionCuts {cutType} {height} {radius} {cutTargetDepthPercentage} />
+
+	<OnionPieceAnalyzer />
 </svg>
 
 <div class="controls">
-	<p>number of cuts: {numCuts}</p>
-	<Range min={1} max={maxCuts} label="number of cuts" bind:value={numCuts} />
+	<p>number of cuts: {$numCuts}</p>
+	<Range min={1} max={maxCuts} label="number of cuts" bind:value={$numCuts} />
 
 	<ButtonSet legend="cut type" {options} bind:value={cutType} />
 
