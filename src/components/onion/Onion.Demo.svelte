@@ -12,7 +12,6 @@
 		width as widthStore,
 		height as heightStore,
 		radius as radiusStore,
-		rScale as rScaleStore,
 		numLayers as numLayersStore,
 		numCuts
 	} from "$stores/onion";
@@ -21,7 +20,6 @@
 	const width = get(widthStore);
 	const height = get(heightStore);
 	const radius = get(radiusStore);
-	const rScale = get(rScaleStore);
 	const numLayers = get(numLayersStore);
 
 	let maxCuts = numLayers;
@@ -37,7 +35,7 @@
 	<!-- TODO responsive sizing: move y axis when screen resizes -->
 	<OnionAxisY {height} />
 
-	<Onion {height} {numLayers} {rScale} />
+	<Onion {height} />
 
 	<OnionCuts {cutType} {height} {radius} {cutTargetDepthPercentage} />
 

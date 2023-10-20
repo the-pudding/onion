@@ -1,12 +1,12 @@
 <script>
+	import { layerRadii } from "$stores/onion";
+
 	export let height;
-	export let numLayers;
-	export let rScale;
 </script>
 
 <g class="onion">
-	{#each { length: numLayers } as _, i}
-		<circle cx="0" cy={height} r={rScale(i + 1)} />
+	{#each $layerRadii as r}
+		<circle cx="0" cy={height} {r} />
 	{/each}
 </g>
 
