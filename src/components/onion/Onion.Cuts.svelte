@@ -1,6 +1,11 @@
 <script>
 	import { polarToCartesian } from "$utils/math";
-	import { numCuts, cutAngleScale, cutWidthScale, yScale } from "$stores/onion";
+	import {
+		cutAngleScale,
+		cutWidthScale,
+		yScale,
+		cutNumbers
+	} from "$stores/onion";
 
 	export let cutType;
 	export let height;
@@ -11,7 +16,7 @@
 </script>
 
 <g class="cuts">
-	{#each { length: $numCuts } as _, i}
+	{#each $cutNumbers as i}
 		{#if cutType === "vertical"}
 			{@const x = $cutWidthScale(i)}
 			s

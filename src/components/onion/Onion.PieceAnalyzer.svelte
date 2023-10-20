@@ -1,5 +1,5 @@
 <script>
-	import { cutWidthScale, layerRadii, numCuts, yScale } from "$stores/onion";
+	import { cutNumbers, cutWidthScale, layerRadii, yScale } from "$stores/onion";
 
 	$: layerArcs = $layerRadii.map(
 		(layerRadius) => (x) =>
@@ -7,7 +7,7 @@
 	);
 </script>
 
-{#each { length: $numCuts } as _, i}
+{#each $cutNumbers as i}
 	{@const cutX = $cutWidthScale(i)}
 
 	{#each layerArcs.filter((_, i) => $layerRadii[i] >= cutX) as getYOnLayerArc}
