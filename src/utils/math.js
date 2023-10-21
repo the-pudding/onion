@@ -13,7 +13,7 @@ export function polarToCartesian(r, theta) {
 // getVerticalCutArea returns the area of a vertical slice of a quarter circle in the first quadrant,
 //   starting from x = 0
 //   i.e., integral of sqrt(radius^2 - x^2)dx, from x1 to x2
-// the antiderivative of this is (-(r^2)/2) * (theta - sin(theta) * cos(theta)),
+// the antiderivative of this is (-1/2 * r^2) * (theta - sin(theta) * cos(theta)),
 // where theta is arccos(x/r)
 export function getVerticalCutArea(radius, x1, x2) {
 	function getTheta(x) {
@@ -22,7 +22,7 @@ export function getVerticalCutArea(radius, x1, x2) {
 
 	function getAntiderivative(theta) {
 		return (
-			((-radius * radius) / 2) * (theta - Math.sin(theta) * Math.cos(theta))
+			(-1 / 2) * radius * radius * (theta - Math.sin(theta) * Math.cos(theta))
 		);
 	}
 
