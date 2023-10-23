@@ -23,3 +23,37 @@ test("limits of integration work as expected", () => {
 
 	expect(leftArea + rightArea).toBe(totalArea);
 });
+
+// $numLayers = 2
+// $numCuts = 3
+// proportions between areas scaled up by doubling radius should be 4x
+test("geometric similarity with 2 layers and 3 cuts", () => {
+	const innerRadius = radius / 2;
+	const expectedAreaScaleFactor = 4;
+	const leftCut = radius / 3;
+	const rightCut = radius * (2 / 3);
+
+	const innerCircularSegmentAreaLeft = getVerticalCutArea(
+		innerRadius,
+		0,
+		leftCut
+	);
+	const innerCircularSegmentAreaRight = getVerticalCutArea(
+		innerRadius,
+		leftCut,
+		rightCut
+	);
+	const outerCircularSegmentAreaLeft = getVerticalCutArea(radius, 0, rightCut);
+	const outerCircularSegmentAreaRight = getVerticalCutArea(
+		radius,
+		rightCut,
+		radius
+	);
+
+	expect(outerCircularSegmentAreaLeft / innerCircularSegmentAreaLeft).toBe(
+		expectedAreaScaleFactor
+	);
+	expect(outerCircularSegmentAreaRight / innerCircularSegmentAreaRight).toBe(
+		expectedAreaScaleFactor
+	);
+});

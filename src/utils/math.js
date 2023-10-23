@@ -16,6 +16,9 @@ export function polarToCartesian(r, theta) {
 // the antiderivative of this is (-1/2 * r^2) * (theta - sin(theta) * cos(theta)),
 // where theta is arccos(x/r)
 export function getVerticalCutArea(radius, x1, x2) {
+	// acos' domain is [-1, 1], so acos of anything > 1 will return NaN
+	x2 = Math.min(x2, radius);
+
 	function getTheta(x) {
 		return Math.acos(x / radius);
 	}
