@@ -2,26 +2,48 @@
 	import { getVerticalCutArea } from "$utils/math";
 	import { cutNumbers, cutWidthScale, layerRadii, yScale } from "$stores/onion";
 
-	$: layerArcs = $layerRadii.map(
-		(layerRadius) => (x) =>
-			$yScale(Math.sqrt(layerRadius * layerRadius - x * x))
-	);
+	// $: layerArcs = $layerRadii.map(
+	// 	(layerRadius) => (x) =>
+	// 		$yScale(Math.sqrt(layerRadius * layerRadius - x * x))
+	// );
+
+	// pieceAreas is a 2D array whose major index corresponds to cutNumbers
+	// the minor index (for pieceColumn array) corresponds to piece index within a column of pieces,
+	//   counted from the bottom upward
+	$: pieceAreas = $cutNumbers.map((i) => ({
+		cutX: $cutWidthScale(i),
+		pieceColumn: []
+	}));
+
+	// reactively calculate piece areas
+	$: {
+		$cutNumbers.forEach((i) => {
+			const { cutX, pieceColumn } = pieceAreas[i];
+
+			$layerRadii.forEach((layerRadius) => {
+				if (layerRadius > cutX) {
+					const nextCutX = $cutWidthScale(i + 1);
+					const verticalCutArea = getVerticalCutArea(
+						layerRadius,
+						cutX,
+						nextCutX
+					);
+					const pieceArea = pieceColumn.length
+						? verticalCutArea - pieceColumn.at(-1).verticalCutArea
+						: verticalCutArea;
+
+					pieceColumn.push({ layerRadius, verticalCutArea, pieceArea });
+				}
+			});
+		});
+
+		console.log({ pieceAreas });
+	}
 </script>
 
-<!-- calculate area of each piece -->
-{#each $cutNumbers as i}
-	{@const cutX = $cutWidthScale(i)}
-
-	{#each $layerRadii as layerRadius}
-		{#if layerRadius > cutX}
-			{@const nextCutX = $cutWidthScale(i + 1)}
-			{@const pieceArea = getVerticalCutArea(layerRadius, cutX, nextCutX)}
-
-			<!-- TODO to get piece areas for each layer, need to subtract piece area of layer(s) below -->
-
-			<!-- TODO instead of writing text, store this data in a variable (or a file?) -->
-			<text x={cutX} y={$yScale(layerRadius)}>{Math.trunc(pieceArea)}</text>
-		{/if}
+{#each pieceAreas as { cutX, pieceColumn }}
+	{#each pieceColumn as { layerRadius, pieceArea }}
+		<text x={cutX} y={$yScale(layerRadius)}>{Math.trunc(pieceArea)}</text>
 	{/each}
 {/each}
 
