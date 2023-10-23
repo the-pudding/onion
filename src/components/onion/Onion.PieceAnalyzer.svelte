@@ -13,7 +13,7 @@
 	{@const cutX = $cutWidthScale(i)}
 
 	{#each $layerRadii as layerRadius}
-		{#if layerRadius > 0 && layerRadius >= cutX}
+		{#if layerRadius > cutX}
 			{@const nextCutX = $cutWidthScale(i + 1)}
 			{@const pieceArea = getVerticalCutArea(layerRadius, cutX, nextCutX)}
 
