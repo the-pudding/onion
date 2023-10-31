@@ -7,6 +7,8 @@
 	// 		$yScale(Math.sqrt(layerRadius * layerRadius - x * x))
 	// );
 
+	// TODO load all pieceAreas from $data
+
 	// pieceAreas is a 2D array whose major index corresponds to cutNumbers
 	// the minor index (for pieceColumn array) corresponds to piece index within a column of pieces,
 	//   counted from the bottom upward
