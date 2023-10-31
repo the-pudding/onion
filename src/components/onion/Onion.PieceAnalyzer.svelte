@@ -1,44 +1,13 @@
 <script>
-	import { getVerticalCutArea } from "$utils/math";
-	import { cutNumbers, cutWidthScale, layerRadii, yScale } from "$stores/onion";
+	import { numCuts, yScale } from "$stores/onion";
+	import ALL_VERTICAL_AREAS from "$data/onion-piece-areas.json";
 
 	// $: layerArcs = $layerRadii.map(
 	// 	(layerRadius) => (x) =>
 	// 		$yScale(Math.sqrt(layerRadius * layerRadius - x * x))
 	// );
 
-	// pieceAreas is a 2D array whose major index corresponds to cutNumbers
-	// the minor index (for pieceColumn array) corresponds to piece index within a column of pieces,
-	//   counted from the bottom upward
-	$: pieceAreas = $cutNumbers.map((i) => ({
-		cutX: $cutWidthScale(i),
-		pieceColumn: []
-	}));
-
-	// reactively calculate piece areas
-	$: {
-		$cutNumbers.forEach((i) => {
-			const { cutX, pieceColumn } = pieceAreas[i];
-
-			$layerRadii.forEach((layerRadius) => {
-				if (layerRadius > cutX) {
-					const nextCutX = $cutWidthScale(i + 1);
-					const verticalCutArea = getVerticalCutArea(
-						layerRadius,
-						cutX,
-						nextCutX
-					);
-					const pieceArea = pieceColumn.length
-						? verticalCutArea - pieceColumn.at(-1).verticalCutArea
-						: verticalCutArea;
-
-					pieceColumn.push({ layerRadius, verticalCutArea, pieceArea });
-				}
-			});
-		});
-
-		console.log({ pieceAreas });
-	}
+	$: pieceAreas = ALL_VERTICAL_AREAS[$numCuts];
 </script>
 
 {#each pieceAreas as { cutX, pieceColumn }}
