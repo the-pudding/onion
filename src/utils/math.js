@@ -33,7 +33,7 @@ export function getVerticalCutArea(radius, x1, x2) {
 }
 
 // getRadialCutArea returns the area of a radial slice in the first quadrant
-//   i.e., double integral: (dr, from radius1 to radius2) d theta, from theta1 to theta2
+//   i.e., double integral: (r dr, from radius1 to radius2) d theta, from theta1 to theta2
 export function getRadialCutArea({ radius1 = 0, radius2, theta1 = 0, theta2 }) {
 	return (1 / 2) * (radius2 * radius2 - radius1 * radius1) * (theta2 - theta1);
 }
