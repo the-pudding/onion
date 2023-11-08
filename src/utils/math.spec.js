@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 import { getRadialCutArea, getVerticalCutArea } from "$utils/math";
 
 const radius = 1;
-const quarterCircleArea = (Math.PI * radius * radius) / 4;
+const quarterCircleArea = (Math.PI * radius ** 2) / 4;
 const areaScaleFactorWhenRadiusIsDoubled = 4;
 
 describe("vertical cuts", () => {

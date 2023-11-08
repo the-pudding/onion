@@ -16,7 +16,7 @@
 
 	// $: layerArcs = $layerRadii.map(
 	// 	(layerRadius) => (x) =>
-	// 		$yScale(Math.sqrt(layerRadius * layerRadius - x * x))
+	// 		$yScale(Math.sqrt(layerRadius ** 2 - x ** 2))
 	// );
 
 	// TODO uncomment vertical
