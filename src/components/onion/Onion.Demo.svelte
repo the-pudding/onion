@@ -73,10 +73,6 @@
 		stroke: black;
 	}
 
-	:global(.cuts line) {
-		stroke-dasharray: 5;
-	}
-
 	.controls {
 		width: 300px;
 	}

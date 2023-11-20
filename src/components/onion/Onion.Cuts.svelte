@@ -36,3 +36,9 @@
 		{/if}
 	{/each}
 </g>
+
+<style>
+	line {
+		stroke-dasharray: 5;
+	}
+</style>
