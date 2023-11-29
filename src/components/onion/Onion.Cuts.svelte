@@ -10,9 +10,7 @@
 	export let cutType;
 	export let height;
 	export let radius;
-	export let cutTargetDepthPercentage;
-
-	$: cutTargetDepth = radius * cutTargetDepthPercentage;
+	export let cutTargetDepth;
 </script>
 
 <g class="cuts">

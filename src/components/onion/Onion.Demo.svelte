@@ -26,6 +26,8 @@
 	let cutType = "vertical";
 	const options = [{ value: "vertical" }, { value: "radial" }];
 	let cutTargetDepthPercentage = 0;
+
+	$: cutTargetDepth = radius * cutTargetDepthPercentage;
 </script>
 
 <svg {width} {height} viewBox="{-width / 2} 0 {width} {height}">
@@ -37,7 +39,7 @@
 
 	<Onion {height} />
 
-	<OnionCuts {cutType} {height} {radius} {cutTargetDepthPercentage} />
+	<OnionCuts {cutType} {height} {radius} {cutTargetDepth} />
 
 	<OnionPieceAnalyzer />
 </svg>
