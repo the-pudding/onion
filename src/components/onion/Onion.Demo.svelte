@@ -41,7 +41,7 @@
 
 	<OnionCuts {cutType} {height} {radius} {cutTargetDepth} />
 
-	<OnionPieceAnalyzer />
+	<OnionPieceAnalyzer {cutType} {cutTargetDepth} />
 </svg>
 
 <div class="controls">
