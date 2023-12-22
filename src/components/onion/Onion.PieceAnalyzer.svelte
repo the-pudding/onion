@@ -51,35 +51,80 @@
 		});
 	}
 
+	// count total number of pieces for each layer
 	// TODO should layerRadii be `slice(1)`ed everywhere?
-	$: pieceNums = $layerRadii.slice(1).map((layerRadius, layerNum) => {
+	$: layerPieceData = $layerRadii.slice(1).map((layerRadius, layerNum) => {
 		const layerArcFunction = layerArcs.slice(1)[layerNum];
-		const xsOfIntersection = [0];
+		const pieces = [{ xOfLeftCutIntersection: 0 }];
 
-		$cutNumbers.slice(1).forEach((cutNum) => {
-			const theta = $cutAngleScale(cutNum);
-			const m =
-				(cutTargetDepth + $radius * Math.sin(theta)) /
-				($radius * Math.cos(theta));
-			const cutLineFunction = (x) => m * x - cutTargetDepth;
-			const discriminant =
-				cutTargetDepth ** 2 * m ** 2 -
-				(m ** 2 + 1) * (cutTargetDepth ** 2 - layerRadius ** 2);
+		// $cutNumbers is reversed so that we can count cuts from vertical towards horizontal
+		// TODO selectively reversing like this is likely to cause issues later
+		$cutNumbers
+			.slice(1)
+			.reverse()
+			.forEach((cutNum) => {
+				const theta = $cutAngleScale(cutNum);
+				const m =
+					(cutTargetDepth + $radius * Math.sin(theta)) /
+					($radius * Math.cos(theta));
+				const cutLineFunction = (x) => m * x - cutTargetDepth;
+				const discriminant =
+					cutTargetDepth ** 2 * m ** 2 -
+					(m ** 2 + 1) * (cutTargetDepth ** 2 - layerRadius ** 2);
 
-			if (discriminant > 0) {
-				// x is where layerArcFunction(x) === cutLineFunction(x) (quadratic formula)
-				const x = (cutTargetDepth * m + Math.sqrt(discriminant)) / (m ** 2 + 1);
+				if (discriminant > 0) {
+					// x is where layerArcFunction(x) === cutLineFunction(x) (quadratic formula)
+					const x =
+						(cutTargetDepth * m + Math.sqrt(discriminant)) / (m ** 2 + 1);
 
-				if (x > 0 && cutLineFunction(x) > 0) {
-					xsOfIntersection.push(x);
+					if (x > 0 && cutLineFunction(x) > 0) {
+						pieces.push({
+							xOfLeftCutIntersection: x,
+							leftCutLineSlope: m
+						});
+					}
 				}
-			}
-		});
+			});
 
-		return { layerRadius, layerArcFunction, xsOfIntersection };
+		return { layerRadius, layerArcFunction, pieces };
 	});
 
-	// $: console.log({ pieceNums });
+	// calculate areas for each piece
+	$: layerPieceData.forEach((layerWithPieces, layerNum, layers) => {
+		const previousLayer = layers[layerNum - 1];
+
+		layerWithPieces.pieces.forEach((piece, pieceNum, pieces) => {
+			const isFirstPiece = pieceNum === 0;
+			const isLastPiece = pieceNum === pieces.length - 1;
+			const { leftCutLineSlope } = piece;
+			const xRange = [undefined, undefined];
+
+			// find piece's x range
+			xRange[0] = piece.xOfLeftCutIntersection;
+			xRange[1] = isLastPiece
+				? layerWithPieces.layerRadius
+				: pieces[pieceNum + 1].xOfLeftCutIntersection;
+
+			if (!isFirstPiece) {
+				const xWhereLeftCutIntersectsPreviousLayer =
+					previousLayer?.pieces[pieceNum]?.xOfLeftCutIntersection;
+				const xWhereLeftCutIntersectsCuttingBoard =
+					cutTargetDepth / leftCutLineSlope;
+
+				xRange[0] =
+					xWhereLeftCutIntersectsPreviousLayer ??
+					xWhereLeftCutIntersectsCuttingBoard;
+			}
+
+			piece.xRange = xRange;
+
+			// TODO find all of piece's bounding functions
+
+			// TODO calculate piece's area by adding/subtracting
+		});
+	});
+
+	// $: console.log({ layerPieceData });
 	// $: console.log({ pieceAreas });
 </script>
 
@@ -106,23 +151,45 @@
 	{/each} -->
 {:else if cutType === "radial"}
 	<!-- counting piece numbers -->
-	{#each pieceNums as { layerRadius, layerArcFunction, xsOfIntersection }}
-		{@const numPieces = xsOfIntersection.length}
+	{#each layerPieceData as { layerRadius, layerArcFunction, pieces }}
+		{@const numPieces = pieces.length}
 
 		<text x="-100" y={$yScale(layerRadius)} alignment-baseline="middle">
 			{numPieces} piece{numPieces === 1 ? "" : "s"}
 		</text>
 
 		<!-- plot points at each intersection of cut and layer boundary -->
-		<!-- {#each xsOfIntersection as x}
+		{#each pieces as { xOfLeftCutIntersection, xRange }, pieceNum}
+			{@const x = xOfLeftCutIntersection}
 			{@const y = layerArcFunction(x)}
 			{@const yNormalized = $yScale(y)}
 
-			<text {x} y={yNormalized} font-size="x-small">
+			<!-- <text {x} y={yNormalized} font-size="x-small">
 				({Math.round(x)}, {Math.round(y)})
-			</text>
+			</text> -->
 			<circle cx={x} cy={yNormalized} r="2" />
-		{/each} -->
+
+			<!-- {@debug pieces} -->
+
+			<!-- <text
+				{x}
+				y={$yScale(0 + pieceNum * 5)}
+				font-size="x-small"
+				class="x-range"
+			>
+				[{Math.round(xRange[0])}, {Math.round(xRange[1])}]
+			</text> -->
+			{@const markerY = $yScale(layerArcFunction(xOfLeftCutIntersection))}
+
+			<line
+				x1={xRange[0]}
+				y1={markerY}
+				x2={xRange[1]}
+				y2={markerY}
+				font-size="x-small"
+				class="x-range-marker"
+			/>
+		{/each}
 	{/each}
 
 	{#if cutTargetDepth === 0}
@@ -135,3 +202,9 @@
 		{/each}
 	{/if}
 {/if}
+
+<style>
+	.x-range-marker {
+		stroke: red;
+	}
+</style>
