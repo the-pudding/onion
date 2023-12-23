@@ -9,10 +9,25 @@
 		yScale
 	} from "$stores/onion";
 	import ALL_VERTICAL_AREAS from "$data/onion-piece-areas.json";
-	import { getRadialCutArea, polarToCartesian } from "$utils/math";
+	import {
+		getRadialCutArea,
+		getVerticalCutArea,
+		polarToCartesian
+	} from "$utils/math";
 
 	export let cutType;
 	export let cutTargetDepth;
+
+	function getSlope(cutNum) {
+		const theta = $cutAngleScale(cutNum);
+		return (
+			(cutTargetDepth + $radius * Math.sin(theta)) / ($radius * Math.cos(theta))
+		);
+	}
+
+	function getCutLineFunction(slope) {
+		return (x) => slope * x - cutTargetDepth;
+	}
 
 	$: layerArcs = $layerRadii.map(
 		(layerRadius) => (x) => Math.sqrt(layerRadius ** 2 - x ** 2)
@@ -63,11 +78,8 @@
 			.slice(1)
 			.reverse()
 			.forEach((cutNum) => {
-				const theta = $cutAngleScale(cutNum);
-				const m =
-					(cutTargetDepth + $radius * Math.sin(theta)) /
-					($radius * Math.cos(theta));
-				const cutLineFunction = (x) => m * x - cutTargetDepth;
+				const m = getSlope(cutNum);
+				const cutLineFunction = getCutLineFunction(m);
 				const discriminant =
 					cutTargetDepth ** 2 * m ** 2 -
 					(m ** 2 + 1) * (cutTargetDepth ** 2 - layerRadius ** 2);
@@ -91,6 +103,7 @@
 
 	// calculate areas for each piece
 	$: layerPieceData.forEach((layerWithPieces, layerNum, layers) => {
+		const isFirstLayer = layerNum === 0;
 		const previousLayer = layers[layerNum - 1];
 
 		layerWithPieces.pieces.forEach((piece, pieceNum, pieces) => {
@@ -98,6 +111,18 @@
 			const isLastPiece = pieceNum === pieces.length - 1;
 			const { leftCutLineSlope } = piece;
 			const xRange = [undefined, undefined];
+
+			// find all of piece's bounding functions
+			piece.boundingFunctions = {
+				leftCut: isFirstPiece
+					? undefined
+					: getCutLineFunction(leftCutLineSlope),
+				rightCut: isLastPiece
+					? undefined
+					: pieces[pieceNum + 1].leftCutLineSlope,
+				topLayerArc: layerArcs[layerNum],
+				bottomLayerArc: isFirstLayer ? undefined : layerArcs[layerNum - 1]
+			};
 
 			// find piece's x range
 			xRange[0] = piece.xOfLeftCutIntersection;
@@ -118,9 +143,19 @@
 
 			piece.xRange = xRange;
 
-			// TODO find all of piece's bounding functions
+			// TODO write this area to pieceAreas
+			// calculate piece's area by adding/subtracting integrals
+			piece.area = getVerticalCutArea(
+				layerWithPieces.layerRadius,
+				piece.xOfLeftCutIntersection,
+				xRange[1]
+			);
 
-			// TODO calculate piece's area by adding/subtracting
+			// TODO add left cut's integral
+
+			// TODO subtract right cut's integral
+
+			// TODO subtract previous layer's vertical cut
 		});
 	});
 
@@ -206,5 +241,6 @@
 <style>
 	.x-range-marker {
 		stroke: red;
+		stroke-width: 2;
 	}
 </style>
