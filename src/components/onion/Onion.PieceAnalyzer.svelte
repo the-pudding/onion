@@ -169,10 +169,10 @@
 	{/each}
 
 	<!-- plot points at each intersection of cut and layer boundary -->
-	<!-- {#each $cutNumbers as i}
-		{@const cutX = $cutWidthScale(i)}
+	<!-- {#each $cutNumbers as cutNum}
+		{@const cutX = $cutWidthScale(cutNum)}
 
-		{#each layerArcs.filter((_, i) => $layerRadii[i] >= cutX) as getYOnLayerArc}
+		{#each layerArcs.filter((_, layerNum) => $layerRadii[layerNum] >= cutX) as getYOnLayerArc}
 			{@const cutY = $yScale(getYOnLayerArc(cutX))}
 
 			<circle r="3" cx={cutX} cy={cutY} />
