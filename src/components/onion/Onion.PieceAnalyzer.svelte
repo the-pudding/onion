@@ -36,31 +36,29 @@
 	$: pieceAreas =
 		cutType === "vertical"
 			? ALL_VERTICAL_AREAS[$numCuts]
-			: // with radial cuts, pieceAreas is a 2D array whose major index corresponds to cutNumbers
-			  // the minor index (for pieceSlice array) corresponds to piece index within a slice of pieces,
-			  //   counted from the cut target outward
-			  $cutNumbers.map((i) => ({
-					cutAngle: $cutAngleScale(i),
-					pieceSlice: []
-			  }));
+			: // with radial cuts, pieceAreas is a 2D array whose major index corresponds to layer number
+			  // the minor index corresponds to cut number
+			  $layerRadii.map(() => []);
 
 	// TODO move this to generate-onion-data.js
 	// reactively calculate radial piece areas
 	$: if (cutType === "radial" && cutTargetDepth === 0) {
-		$cutNumbers.forEach((i) => {
-			const { cutAngle, pieceSlice } = pieceAreas[i];
+		$layerRadii.forEach((layerRadius, layerNum) => {
+			const layerWithPieces = pieceAreas[layerNum];
 
-			$layerRadii.forEach((layerRadius, j) => {
+			$cutNumbers.forEach((cutNum) => {
+				const cutAngle = $cutAngleScale(cutNum);
+
 				if (layerRadius > 0) {
-					const nextCutAngle = $cutAngleScale(i + 1);
+					const nextCutAngle = $cutAngleScale(cutNum + 1);
 					const pieceArea = getRadialCutArea({
-						...(j > 0 && { radius1: $layerRadii[j - 1] }),
+						...(layerNum > 0 && { radius1: $layerRadii[layerNum - 1] }),
 						radius2: layerRadius,
 						theta1: cutAngle,
 						theta2: nextCutAngle
 					});
 
-					pieceSlice.push({ layerRadius, pieceArea });
+					layerWithPieces.push({ layerRadius, cutAngle, pieceArea });
 				}
 			});
 		});
@@ -228,8 +226,10 @@
 	{/each}
 
 	{#if cutTargetDepth === 0}
-		{#each pieceAreas as { cutAngle, pieceSlice }}
-			{#each pieceSlice as { layerRadius, pieceArea }}
+		{#each pieceAreas as layerWithPieces, layerNum}
+			{@const layerRadius = $layerRadii[layerNum]}
+
+			{#each layerWithPieces as { cutAngle, pieceArea }}
 				{@const [x, y] = polarToCartesian(layerRadius, cutAngle)}
 
 				<text {x} y={$yScale(y)}>{Math.round(pieceArea)}</text>
