@@ -37,6 +37,6 @@ export function getRadialCutArea({ radius1 = 0, radius2, theta1 = 0, theta2 }) {
 }
 
 // getAreaUnderLine returns the area under a line defined by y = mx + b
-export function getAreaUnderLine(m, b, x1, x2) {
-	return (1 / 2) * m * (x2 ** 2 - x1 ** 2) + b * (x2 - x1);
+export function getAreaUnderLine({ slope, yIntercept, x1, x2 }) {
+	return (1 / 2) * slope * (x2 ** 2 - x1 ** 2) + yIntercept * (x2 - x1);
 }

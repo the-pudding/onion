@@ -147,12 +147,12 @@
 
 			// add left cut's integral
 			if (!isFirstPiece) {
-				area += getAreaUnderLine(
-					leftCutLineSlope,
-					-cutTargetDepth,
-					xRange[0],
-					xOfLeftCutIntersection
-				);
+				area += getAreaUnderLine({
+					slope: leftCutLineSlope,
+					yIntercept: -cutTargetDepth,
+					x1: xRange[0],
+					x2: xOfLeftCutIntersection
+				});
 			}
 
 			// subtract right cut's integral
@@ -161,12 +161,12 @@
 					pieceNum + 1
 				);
 
-				area -= getAreaUnderLine(
-					pieces[pieceNum + 1].leftCutLineSlope,
-					-cutTargetDepth,
-					xOfRightCutIntersectionWithPreviousLayer,
-					xRange[1]
-				);
+				area -= getAreaUnderLine({
+					slope: pieces[pieceNum + 1].leftCutLineSlope,
+					yIntercept: -cutTargetDepth,
+					x1: xOfRightCutIntersectionWithPreviousLayer,
+					x2: xRange[1]
+				});
 			}
 
 			// subtract previous layer's vertical cut

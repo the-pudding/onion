@@ -120,34 +120,34 @@ describe("radial cuts", () => {
 
 describe("getAreaUnderLine", () => {
 	test("slope and y-intercept are 0", () => {
-		const m = 0;
-		const b = 0;
+		const slope = 0;
+		const yIntercept = 0;
 
-		expect(getAreaUnderLine(m, b, 0, 1)).toBe(0);
-		expect(getAreaUnderLine(m, b, 1, 2)).toBe(0);
+		expect(getAreaUnderLine({ slope, yIntercept, x1: 0, x2: 1 })).toBe(0);
+		expect(getAreaUnderLine({ slope, yIntercept, x1: 1, x2: 2 })).toBe(0);
 	});
 
 	test("slope is 0", () => {
-		const m = 0;
-		const b = 1;
+		const slope = 0;
+		const yIntercept = 1;
 
-		expect(getAreaUnderLine(m, b, 0, 1)).toBe(1);
-		expect(getAreaUnderLine(m, b, 1, 2)).toBe(1);
+		expect(getAreaUnderLine({ slope, yIntercept, x1: 0, x2: 1 })).toBe(1);
+		expect(getAreaUnderLine({ slope, yIntercept, x1: 1, x2: 2 })).toBe(1);
 	});
 
 	test("y-intercept is zero", () => {
-		const m = 1;
-		const b = 0;
+		const slope = 1;
+		const yIntercept = 0;
 
-		expect(getAreaUnderLine(m, b, 0, 1)).toBe(1 / 2);
-		expect(getAreaUnderLine(m, b, 1, 2)).toBe(3 / 2);
+		expect(getAreaUnderLine({ slope, yIntercept, x1: 0, x2: 1 })).toBe(1 / 2);
+		expect(getAreaUnderLine({ slope, yIntercept, x1: 1, x2: 2 })).toBe(3 / 2);
 	});
 
 	test("y-intercept is negative", () => {
-		const m = 1;
-		const b = -1;
+		const slope = 1;
+		const yIntercept = -1;
 
-		expect(getAreaUnderLine(m, b, 0, 1)).toBe(-1 / 2);
-		expect(getAreaUnderLine(m, b, 1, 2)).toBe(1 / 2);
+		expect(getAreaUnderLine({ slope, yIntercept, x1: 0, x2: 1 })).toBe(-1 / 2);
+		expect(getAreaUnderLine({ slope, yIntercept, x1: 1, x2: 2 })).toBe(1 / 2);
 	});
 });
