@@ -38,5 +38,5 @@ export const cutWidthScale = derived([numCuts, radius], ([$numCuts, $radius]) =>
 export const cutAngleScale = derived(numCuts, ($numCuts) =>
 	scaleLinear()
 		.domain([0, $numCuts])
-		.range([0, Math.PI / 2])
+		.range([Math.PI / 2, 0])
 );

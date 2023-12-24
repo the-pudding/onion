@@ -21,6 +21,7 @@
 
 	function getSlope(cutNum) {
 		const theta = $cutAngleScale(cutNum);
+
 		return (
 			(cutTargetDepth + $radius * Math.sin(theta)) / ($radius * Math.cos(theta))
 		);
@@ -73,31 +74,25 @@
 		const layerArcFunction = layerArcs.slice(1)[layerNum];
 		const pieces = [{ xOfLeftCutIntersection: 0 }];
 
-		// $cutNumbers is reversed so that we can count cuts from vertical towards horizontal
-		// TODO selectively reversing like this is likely to cause issues later
-		$cutNumbers
-			.slice(1)
-			.reverse()
-			.forEach((cutNum) => {
-				const m = getSlope(cutNum);
-				const cutLineFunction = getCutLineFunction(m);
-				const discriminant =
-					cutTargetDepth ** 2 * m ** 2 -
-					(m ** 2 + 1) * (cutTargetDepth ** 2 - layerRadius ** 2);
+		$cutNumbers.slice(1).forEach((cutNum) => {
+			const m = getSlope(cutNum);
+			const cutLineFunction = getCutLineFunction(m);
+			const discriminant =
+				cutTargetDepth ** 2 * m ** 2 -
+				(m ** 2 + 1) * (cutTargetDepth ** 2 - layerRadius ** 2);
 
-				if (discriminant > 0) {
-					// x is where layerArcFunction(x) === cutLineFunction(x) (quadratic formula)
-					const x =
-						(cutTargetDepth * m + Math.sqrt(discriminant)) / (m ** 2 + 1);
+			if (discriminant > 0) {
+				// x is where layerArcFunction(x) === cutLineFunction(x) (quadratic formula)
+				const x = (cutTargetDepth * m + Math.sqrt(discriminant)) / (m ** 2 + 1);
 
-					if (x > 0 && cutLineFunction(x) > 0) {
-						pieces.push({
-							xOfLeftCutIntersection: x,
-							leftCutLineSlope: m
-						});
-					}
+				if (x > 0 && cutLineFunction(x) > 0) {
+					pieces.push({
+						xOfLeftCutIntersection: x,
+						leftCutLineSlope: m
+					});
 				}
-			});
+			}
+		});
 
 		return { layerRadius, layerArcFunction, pieces };
 	});

@@ -20,7 +20,7 @@
 			s
 			<line x1={x} y1="0" x2={x} y2={height} />
 		{:else if cutType === "radial"}
-			{@const theta = $cutAngleScale(i)}
+			{@const theta = $cutAngleScale(i + 1)}
 
 			<!-- where cut intercepts onion's outermost layer -->
 			{@const [xIntercept, yIntercept] = polarToCartesian(radius, theta)}
