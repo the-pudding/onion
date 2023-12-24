@@ -1,5 +1,9 @@
 import { describe, expect, test } from "vitest";
-import { getRadialCutArea, getVerticalCutArea } from "$utils/math";
+import {
+	getAreaUnderLine,
+	getRadialCutArea,
+	getVerticalCutArea
+} from "$utils/math";
 
 const radius = 1;
 const quarterCircleArea = (Math.PI * radius ** 2) / 4;
@@ -111,5 +115,39 @@ describe("radial cuts", () => {
 		});
 
 		expect(outerArea / innerArea).toBe(areaScaleFactorWhenRadiusIsDoubled);
+	});
+});
+
+describe("getAreaUnderLine", () => {
+	test("slope and y-intercept are 0", () => {
+		const m = 0;
+		const b = 0;
+
+		expect(getAreaUnderLine(m, b, 0, 1)).toBe(0);
+		expect(getAreaUnderLine(m, b, 1, 2)).toBe(0);
+	});
+
+	test("slope is 0", () => {
+		const m = 0;
+		const b = 1;
+
+		expect(getAreaUnderLine(m, b, 0, 1)).toBe(1);
+		expect(getAreaUnderLine(m, b, 1, 2)).toBe(1);
+	});
+
+	test("y-intercept is zero", () => {
+		const m = 1;
+		const b = 0;
+
+		expect(getAreaUnderLine(m, b, 0, 1)).toBe(1 / 2);
+		expect(getAreaUnderLine(m, b, 1, 2)).toBe(3 / 2);
+	});
+
+	test("y-intercept is negative", () => {
+		const m = 1;
+		const b = -1;
+
+		expect(getAreaUnderLine(m, b, 0, 1)).toBe(-1 / 2);
+		expect(getAreaUnderLine(m, b, 1, 2)).toBe(1 / 2);
 	});
 });
