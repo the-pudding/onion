@@ -113,6 +113,18 @@
 			const { leftCutLineSlope, xOfLeftCutIntersection } = piece;
 			const xRange = [undefined, undefined];
 
+			function getXLowerBound(_pieceNum) {
+				const xWhereLeftCutIntersectsPreviousLayer =
+					previousLayer?.pieces[_pieceNum]?.xOfLeftCutIntersection;
+				const xWhereLeftCutIntersectsCuttingBoard =
+					cutTargetDepth / pieces[_pieceNum]?.leftCutLineSlope;
+
+				return (
+					xWhereLeftCutIntersectsPreviousLayer ??
+					xWhereLeftCutIntersectsCuttingBoard
+				);
+			}
+
 			// find piece's x range
 			xRange[0] = xOfLeftCutIntersection;
 			xRange[1] = isLastPiece
@@ -120,20 +132,13 @@
 				: pieces[pieceNum + 1].xOfLeftCutIntersection;
 
 			if (!isFirstPiece) {
-				const xWhereLeftCutIntersectsPreviousLayer =
-					previousLayer?.pieces[pieceNum]?.xOfLeftCutIntersection;
-				const xWhereLeftCutIntersectsCuttingBoard =
-					cutTargetDepth / leftCutLineSlope;
-
-				xRange[0] =
-					xWhereLeftCutIntersectsPreviousLayer ??
-					xWhereLeftCutIntersectsCuttingBoard;
+				xRange[0] = getXLowerBound(pieceNum);
 			}
 
 			piece.xRange = xRange;
 
-			// TODO write this area to pieceAreas
 			// calculate piece's area by adding/subtracting integrals
+			// TODO write this area to pieceAreas
 			let area = getVerticalCutArea(
 				layerWithPieces.layerRadius,
 				piece.xOfLeftCutIntersection,
@@ -152,10 +157,9 @@
 
 			// subtract right cut's integral
 			if (!isLastPiece) {
-				// TODO this calculation is repeated from above; equivalent to pieces[pieceNum + 1].xRange[0]
-				const xOfRightCutIntersectionWithPreviousLayer =
-					previousLayer?.pieces[pieceNum + 1]?.xOfLeftCutIntersection ??
-					cutTargetDepth / pieces[pieceNum + 1].leftCutLineSlope;
+				const xOfRightCutIntersectionWithPreviousLayer = getXLowerBound(
+					pieceNum + 1
+				);
 
 				area -= getAreaUnderLine(
 					pieces[pieceNum + 1].leftCutLineSlope,
