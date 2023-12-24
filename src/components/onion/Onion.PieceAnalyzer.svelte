@@ -69,12 +69,11 @@
 	// layerPieceData is a variable specific to this component (Onion.PieceAnalyzer), separate from pieceAreas,
 	//   used to graphically debug/verify values
 	// count total number of pieces for each layer
-	// TODO should layerRadii be `slice(1)`ed everywhere?
-	$: layerPieceData = $layerRadii.slice(1).map((layerRadius, layerNum) => {
-		const layerArcFunction = layerArcs.slice(1)[layerNum];
+	$: layerPieceData = $layerRadii.map((layerRadius, layerNum) => {
+		const layerArcFunction = layerArcs[layerNum];
 		const pieces = [{ xOfLeftCutIntersection: 0 }];
 
-		$cutNumbers.slice(1).forEach((cutNum) => {
+		$cutNumbers.forEach((cutNum) => {
 			const m = getSlope(cutNum);
 			const cutLineFunction = getCutLineFunction(m);
 			const discriminant =
