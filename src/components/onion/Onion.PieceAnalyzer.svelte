@@ -71,7 +71,7 @@
 	// count total number of pieces for each layer
 	$: layerPieceData = $layerRadii.map((layerRadius, layerNum) => {
 		const layerArcFunction = layerArcs[layerNum];
-		const pieces = [{ xOfLeftCutIntersection: 0 }];
+		const pieces = [];
 
 		$cutNumbers.forEach((cutNum) => {
 			const m = getSlope(cutNum);
