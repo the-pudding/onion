@@ -22,7 +22,6 @@
 	const radius = get(radiusStore);
 	const numLayers = get(numLayersStore);
 
-	let maxCuts = numLayers;
 	let cutType = "vertical";
 	const options = [{ value: "vertical" }, { value: "radial" }];
 	let cutTargetDepthPercentage = 0;
@@ -46,7 +45,7 @@
 
 <div class="controls">
 	<p>number of cuts: {$numCuts}</p>
-	<Range min={1} max={maxCuts} label="number of cuts" bind:value={$numCuts} />
+	<Range min={1} max={10} label="number of cuts" bind:value={$numCuts} />
 
 	<ButtonSet legend="cut type" {options} bind:value={cutType} />
 
