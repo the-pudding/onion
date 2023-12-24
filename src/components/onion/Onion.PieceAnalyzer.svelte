@@ -37,7 +37,7 @@
 		cutType === "vertical"
 			? ALL_VERTICAL_AREAS[$numCuts]
 			: // with radial cuts, pieceAreas is a 2D array whose major index corresponds to layer number
-			  // the minor index corresponds to cut number
+			  // the minor index corresponds to piece number
 			  $layerRadii.map(() => []);
 
 	// TODO move this to generate-onion-data.js
@@ -58,12 +58,14 @@
 						theta2: nextCutAngle
 					});
 
-					layerWithPieces.push({ layerRadius, cutAngle, pieceArea });
+					layerWithPieces.push({ cutAngle, pieceArea });
 				}
 			});
 		});
 	}
 
+	// layerPieceData is a variable specific to this component (Onion.PieceAnalyzer), separate from pieceAreas,
+	//   used to graphically debug/verify values
 	// count total number of pieces for each layer
 	// TODO should layerRadii be `slice(1)`ed everywhere?
 	$: layerPieceData = $layerRadii.slice(1).map((layerRadius, layerNum) => {
@@ -192,7 +194,7 @@
 		</text>
 
 		<!-- plot points at each intersection of cut and layer boundary -->
-		{#each pieces as { xOfLeftCutIntersection, xRange }, pieceNum}
+		{#each pieces as { xOfLeftCutIntersection, xRange, area }, pieceNum}
 			{@const x = xOfLeftCutIntersection}
 			{@const y = layerArcFunction(x)}
 			{@const yNormalized = $yScale(y)}
@@ -200,6 +202,9 @@
 			<!-- <text {x} y={yNormalized} font-size="x-small">
 				({Math.round(x)}, {Math.round(y)})
 			</text> -->
+			<text {x} y={yNormalized} font-size="x-small">
+				{Math.round(area)}
+			</text>
 			<circle cx={x} cy={yNormalized} r="2" />
 
 			<!-- {@debug pieces} -->
@@ -214,33 +219,33 @@
 			</text> -->
 			{@const markerY = $yScale(layerArcFunction(xOfLeftCutIntersection))}
 
-			<line
+			<!-- <line
 				x1={xRange[0]}
 				y1={markerY}
 				x2={xRange[1]}
 				y2={markerY}
 				font-size="x-small"
 				class="x-range-marker"
-			/>
+			/> -->
 		{/each}
 	{/each}
 
-	{#if cutTargetDepth === 0}
+	<!-- {#if cutTargetDepth === 0}
 		{#each pieceAreas as layerWithPieces, layerNum}
 			{@const layerRadius = $layerRadii[layerNum]}
 
-			{#each layerWithPieces as { cutAngle, pieceArea }}
+			{#each layerWithPieces as { cutAngle, area }}
 				{@const [x, y] = polarToCartesian(layerRadius, cutAngle)}
 
-				<text {x} y={$yScale(y)}>{Math.round(pieceArea)}</text>
+				<text {x} y={$yScale(y)} class="area-label">{Math.round(area)}</text>
 			{/each}
 		{/each}
-	{/if}
+	{/if} -->
 {/if}
 
 <style>
-	.x-range-marker {
+	/*.x-range-marker {
 		stroke: red;
 		stroke-width: 2;
-	}
+	}*/
 </style>
