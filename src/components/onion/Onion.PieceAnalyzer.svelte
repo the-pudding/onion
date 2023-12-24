@@ -10,6 +10,7 @@
 	} from "$stores/onion";
 	import ALL_VERTICAL_AREAS from "$data/onion-piece-areas.json";
 	import {
+		getAreaUnderLine,
 		getRadialCutArea,
 		getVerticalCutArea,
 		polarToCartesian
@@ -109,23 +110,11 @@
 		layerWithPieces.pieces.forEach((piece, pieceNum, pieces) => {
 			const isFirstPiece = pieceNum === 0;
 			const isLastPiece = pieceNum === pieces.length - 1;
-			const { leftCutLineSlope } = piece;
+			const { leftCutLineSlope, xOfLeftCutIntersection } = piece;
 			const xRange = [undefined, undefined];
 
-			// find all of piece's bounding functions
-			piece.boundingFunctions = {
-				leftCut: isFirstPiece
-					? undefined
-					: getCutLineFunction(leftCutLineSlope),
-				rightCut: isLastPiece
-					? undefined
-					: pieces[pieceNum + 1].leftCutLineSlope,
-				topLayerArc: layerArcs[layerNum],
-				bottomLayerArc: isFirstLayer ? undefined : layerArcs[layerNum - 1]
-			};
-
 			// find piece's x range
-			xRange[0] = piece.xOfLeftCutIntersection;
+			xRange[0] = xOfLeftCutIntersection;
 			xRange[1] = isLastPiece
 				? layerWithPieces.layerRadius
 				: pieces[pieceNum + 1].xOfLeftCutIntersection;
@@ -145,17 +134,52 @@
 
 			// TODO write this area to pieceAreas
 			// calculate piece's area by adding/subtracting integrals
-			piece.area = getVerticalCutArea(
+			let area = getVerticalCutArea(
 				layerWithPieces.layerRadius,
 				piece.xOfLeftCutIntersection,
 				xRange[1]
 			);
 
-			// TODO add left cut's integral
+			// add left cut's integral
+			if (!isFirstPiece) {
+				area += getAreaUnderLine(
+					leftCutLineSlope,
+					-cutTargetDepth,
+					xRange[0],
+					xOfLeftCutIntersection
+				);
+			}
 
-			// TODO subtract right cut's integral
+			// subtract right cut's integral
+			if (!isLastPiece) {
+				// TODO this calculation is repeated from above; equivalent to pieces[pieceNum + 1].xRange[0]
+				const xOfRightCutIntersectionWithPreviousLayer =
+					previousLayer?.pieces[pieceNum + 1]?.xOfLeftCutIntersection ??
+					cutTargetDepth / pieces[pieceNum + 1].leftCutLineSlope;
 
-			// TODO subtract previous layer's vertical cut
+				area -= getAreaUnderLine(
+					pieces[pieceNum + 1].leftCutLineSlope,
+					-cutTargetDepth,
+					xOfRightCutIntersectionWithPreviousLayer,
+					xRange[1]
+				);
+			}
+
+			// subtract previous layer's vertical cut
+			const xOfLeftCutIntersectionWithPreviousLayer =
+				previousLayer?.pieces[pieceNum]?.xRange[1];
+			const hasPieceBelowInSlice =
+				!isFirstLayer && xOfLeftCutIntersectionWithPreviousLayer > xRange[0];
+
+			if (hasPieceBelowInSlice) {
+				area -= getVerticalCutArea(
+					previousLayer.layerRadius,
+					previousLayer.pieces[pieceNum]?.xOfLeftCutIntersection,
+					xOfLeftCutIntersectionWithPreviousLayer
+				);
+			}
+
+			piece.area = area;
 		});
 	});
 
