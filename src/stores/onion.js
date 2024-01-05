@@ -22,7 +22,7 @@ export const rScale = derived([numLayers, radius], ([$numLayers, $radius]) =>
 export const layerRadii = derived(
 	[numLayers, rScale],
 	([$numLayers, $rScale]) =>
-		Array.from({ length: $numLayers + 1 }).map((_, i) => $rScale(i))
+		Array.from({ length: $numLayers }).map((_, i) => $rScale(i + 1))
 );
 
 export const numCuts = writable(10);
@@ -38,5 +38,5 @@ export const cutWidthScale = derived([numCuts, radius], ([$numCuts, $radius]) =>
 export const cutAngleScale = derived(numCuts, ($numCuts) =>
 	scaleLinear()
 		.domain([0, $numCuts])
-		.range([0, Math.PI / 2])
+		.range([Math.PI / 2, 0])
 );

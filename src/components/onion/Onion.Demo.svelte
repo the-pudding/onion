@@ -22,10 +22,11 @@
 	const radius = get(radiusStore);
 	const numLayers = get(numLayersStore);
 
-	let maxCuts = numLayers;
 	let cutType = "vertical";
 	const options = [{ value: "vertical" }, { value: "radial" }];
 	let cutTargetDepthPercentage = 0;
+
+	$: cutTargetDepth = radius * cutTargetDepthPercentage;
 </script>
 
 <svg {width} {height} viewBox="{-width / 2} 0 {width} {height}">
@@ -37,14 +38,14 @@
 
 	<Onion {height} />
 
-	<OnionCuts {cutType} {height} {radius} {cutTargetDepthPercentage} />
+	<OnionCuts {cutType} {height} {radius} {cutTargetDepth} />
 
-	<OnionPieceAnalyzer />
+	<OnionPieceAnalyzer {cutType} {cutTargetDepth} />
 </svg>
 
 <div class="controls">
 	<p>number of cuts: {$numCuts}</p>
-	<Range min={1} max={maxCuts} label="number of cuts" bind:value={$numCuts} />
+	<Range min={1} max={10} label="number of cuts" bind:value={$numCuts} />
 
 	<ButtonSet legend="cut type" {options} bind:value={cutType} />
 
@@ -71,10 +72,6 @@
 
 	:global(line) {
 		stroke: black;
-	}
-
-	:global(.cuts line) {
-		stroke-dasharray: 5;
 	}
 
 	.controls {
