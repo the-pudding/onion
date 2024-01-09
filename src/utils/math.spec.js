@@ -1,13 +1,21 @@
 import { describe, expect, test } from "vitest";
 import {
 	getAreaUnderLine,
-	getRadialCutArea,
+	getRadialCutAreaPolar,
+	getRadialCutAreas,
 	getVerticalCutArea
 } from "$utils/math";
+import { numCuts, numLayers, width } from "$stores/onion";
 
 const radius = 1;
 const quarterCircleArea = (Math.PI * radius ** 2) / 4;
 const areaScaleFactorWhenRadiusIsDoubled = 4;
+
+function setTestRadius(testRadius) {
+	// height is 50% of width
+	// radius is 80% of height
+	width.set(testRadius / 0.8 / 0.5);
+}
 
 describe("vertical cuts", () => {
 	test("calculates 0-width cut area", () => {
@@ -68,15 +76,15 @@ describe("vertical cuts", () => {
 	});
 });
 
-describe("radial cuts", () => {
+describe("radial cuts aimed at center", () => {
 	test("calculates 0-angle-width cut area", () => {
-		const area = getRadialCutArea({ radius2: radius, theta2: 0 });
+		const area = getRadialCutAreaPolar({ radius2: radius, theta2: 0 });
 
 		expect(area).toBe(0);
 	});
 
 	test("calculates integral equal to quarter onion area", () => {
-		const integralArea = getRadialCutArea({
+		const integralArea = getRadialCutAreaPolar({
 			radius2: radius,
 			theta2: Math.PI / 2
 		});
@@ -85,11 +93,11 @@ describe("radial cuts", () => {
 	});
 
 	test("limits of integration work as expected", () => {
-		const rightArea = getRadialCutArea({
+		const rightArea = getRadialCutAreaPolar({
 			radius2: radius,
 			theta2: Math.PI / 4
 		});
-		const leftArea = getRadialCutArea({
+		const leftArea = getRadialCutAreaPolar({
 			radius2: radius,
 			theta1: Math.PI / 4,
 			theta2: Math.PI / 2
@@ -105,11 +113,11 @@ describe("radial cuts", () => {
 		const innerRadius = radius / 2;
 		const diagonalCutAngle = Math.PI / 4;
 
-		const innerArea = getRadialCutArea({
+		const innerArea = getRadialCutAreaPolar({
 			radius2: innerRadius,
 			theta2: diagonalCutAngle
 		});
-		const outerArea = getRadialCutArea({
+		const outerArea = getRadialCutAreaPolar({
 			radius2: radius,
 			theta2: diagonalCutAngle
 		});
@@ -149,5 +157,46 @@ describe("getAreaUnderLine", () => {
 
 		expect(getAreaUnderLine({ slope, yIntercept, x1: 0, x2: 1 })).toBe(-1 / 2);
 		expect(getAreaUnderLine({ slope, yIntercept, x1: 1, x2: 2 })).toBe(1 / 2);
+	});
+});
+
+describe("radial cuts aimed below center", () => {
+	describe("aimed at center, but calculated with piecewise integrals", () => {
+		const testLayerRadii = [3, 6, 9];
+		setTestRadius(9);
+		const testLayers = testLayerRadii.length;
+		const testCuts = 3;
+		numLayers.set(testLayers);
+		numCuts.set(testCuts);
+		const areas = getRadialCutAreas();
+
+		const expectedAreas = testLayerRadii.map((radius, layerNum) =>
+			getRadialCutAreaPolar({
+				...(layerNum > 0 && { radius1: testLayerRadii[layerNum - 1] }),
+				radius2: radius,
+				theta2: Math.PI / 6
+			})
+		);
+
+		const testCoordinates = Array.from({ length: testLayers })
+			.map((_, layerNum) =>
+				Array.from({ length: testCuts }).map((_, pieceNum) => ({
+					layerNum,
+					pieceNum
+				}))
+			)
+			.flat();
+
+		test.each(testCoordinates)(
+			"layer $layerNum, piece $pieceNum",
+			({ layerNum, pieceNum }) => {
+				// 13 digits after the decimal point is pretty darn close
+				// any difference past that is likely due to rounding errors
+				expect(areas[layerNum].pieces[pieceNum].area).toBeCloseTo(
+					expectedAreas[layerNum],
+					13
+				);
+			}
+		);
 	});
 });

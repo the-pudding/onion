@@ -22,7 +22,7 @@
 	const radius = get(radiusStore);
 	const numLayers = get(numLayersStore);
 
-	let cutType = "vertical";
+	let cutType = "radial";
 	const options = [{ value: "vertical" }, { value: "radial" }];
 	let cutTargetDepthPercentage = 0;
 
