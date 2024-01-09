@@ -1,5 +1,5 @@
 import { scaleLinear } from "d3";
-import { derived, readable, writable } from "svelte/store";
+import { derived, writable } from "svelte/store";
 
 export const width = writable(600);
 export const height = derived(width, ($width) => $width / 2);

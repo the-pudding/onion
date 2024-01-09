@@ -5,7 +5,14 @@ import {
 	getRadialCutAreas,
 	getVerticalCutArea
 } from "$utils/math";
-import { numCuts, numLayers, width } from "$stores/onion";
+import {
+	cutTargetDepth,
+	cutTargetDepthPercentage,
+	numCuts,
+	numLayers,
+	width
+} from "$stores/onion";
+import { get } from "svelte/store";
 
 const radius = 1;
 const quarterCircleArea = (Math.PI * radius ** 2) / 4;
@@ -198,5 +205,33 @@ describe("radial cuts aimed below center", () => {
 				);
 			}
 		);
+	});
+
+	describe("aimed 100% below center", () => {
+		const testLayerRadii = [3, 6, 9];
+		setTestRadius(9);
+		const testLayers = testLayerRadii.length;
+		const testCuts = 3;
+		numLayers.set(testLayers);
+		numCuts.set(testCuts);
+		cutTargetDepthPercentage.set(100);
+		const areas = getRadialCutAreas(get(cutTargetDepth));
+
+		const expectedAreas = testLayerRadii.map((radius, layerNum) =>
+			getRadialCutAreaPolar({
+				...(layerNum > 0 && { radius1: testLayerRadii[layerNum - 1] }),
+				radius2: radius,
+				theta2: Math.PI / 2
+			})
+		);
+
+		test.each([0, 1, 2])("layer %i", (layerNum) => {
+			const layerArea = areas[layerNum].pieces.reduce(
+				(total, { area }) => total + area,
+				0
+			);
+
+			expect(layerArea).toBeCloseTo(expectedAreas[layerNum], 13);
+		});
 	});
 });
