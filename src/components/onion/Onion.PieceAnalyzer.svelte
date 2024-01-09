@@ -1,25 +1,21 @@
 <script>
 	import {
+		cutTargetDepth,
 		layerArcs,
 		layerRadii,
 		numCuts,
-		numLayers,
-		radius,
 		yScale
 	} from "$stores/onion";
 	import ALL_VERTICAL_AREAS from "$data/onion-piece-areas.json";
 	import { getRadialCutAreas } from "$utils/math";
 
 	export let cutType;
-	export let cutTargetDepth;
 
 	// TODO cache pieceAreas in localStorage for demo parameters we've set before
 	$: pieceAreas =
 		cutType === "vertical"
 			? ALL_VERTICAL_AREAS[$numCuts]
-			: // with radial cuts, pieceAreas is a 2D array whose major index corresponds to layer number
-			  // the minor index corresponds to piece number
-			  getRadialCutAreas(cutTargetDepth);
+			: getRadialCutAreas($cutTargetDepth);
 
 	// $: console.log({ pieceAreas });
 </script>

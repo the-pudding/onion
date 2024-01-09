@@ -44,3 +44,10 @@ export const cutAngleScale = derived(numCuts, ($numCuts) =>
 export const layerArcs = derived(layerRadii, ($layerRadii) =>
 	$layerRadii.map((layerRadius) => (x) => Math.sqrt(layerRadius ** 2 - x ** 2))
 );
+
+export const cutTargetDepthPercentage = writable(0);
+
+export const cutTargetDepth = derived(
+	[radius, cutTargetDepthPercentage],
+	([$radius, $cutTargetDepthPercentage]) => $radius * $cutTargetDepthPercentage
+);
