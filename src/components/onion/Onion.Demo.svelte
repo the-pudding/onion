@@ -13,7 +13,8 @@
 		height as heightStore,
 		radius as radiusStore,
 		numCuts,
-		cutTargetDepthPercentage
+		cutTargetDepthPercentage,
+		numLayers
 	} from "$stores/onion";
 
 	// TODO move these gets to each component
@@ -40,6 +41,9 @@
 </svg>
 
 <div class="controls">
+	<p>number of layers: {$numLayers}</p>
+	<Range min={7} max={13} label="number of layers" bind:value={$numLayers} />
+
 	<p>number of cuts: {$numCuts}</p>
 	<Range min={1} max={10} label="number of cuts" bind:value={$numCuts} />
 

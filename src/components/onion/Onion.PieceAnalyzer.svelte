@@ -4,6 +4,7 @@
 		layerArcs,
 		layerRadii,
 		numCuts,
+		numLayers,
 		yScale
 	} from "$stores/onion";
 	import ALL_VERTICAL_AREAS from "$data/onion-piece-areas.json";
@@ -12,10 +13,11 @@
 	export let cutType;
 
 	// TODO cache pieceAreas in localStorage for demo parameters we've set before
+	// TODO how to re-calculate radial pieceAreas when numLayers changes, without passing numLayers as an arg?
 	$: pieceAreas =
 		cutType === "vertical"
 			? ALL_VERTICAL_AREAS[$numCuts]
-			: getRadialCutAreas($cutTargetDepth);
+			: getRadialCutAreas($cutTargetDepth, $numLayers);
 
 	// $: console.log({ pieceAreas });
 </script>
