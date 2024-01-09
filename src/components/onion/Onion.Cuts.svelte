@@ -4,13 +4,13 @@
 		cutAngleScale,
 		cutWidthScale,
 		yScale,
-		cutNumbers
+		cutNumbers,
+		cutTargetDepth
 	} from "$stores/onion";
 
 	export let cutType;
 	export let height;
 	export let radius;
-	export let cutTargetDepth;
 </script>
 
 <g class="cuts">
@@ -27,9 +27,9 @@
 
 			<line
 				x1={xIntercept * 2}
-				y1={$yScale(yIntercept * 2 + cutTargetDepth)}
+				y1={$yScale(yIntercept * 2 + $cutTargetDepth)}
 				x2="0"
-				y2={$yScale(-cutTargetDepth)}
+				y2={$yScale(-$cutTargetDepth)}
 			/>
 		{/if}
 	{/each}

@@ -12,21 +12,17 @@
 		width as widthStore,
 		height as heightStore,
 		radius as radiusStore,
-		numLayers as numLayersStore,
-		numCuts
+		numCuts,
+		cutTargetDepthPercentage
 	} from "$stores/onion";
 
 	// TODO move these gets to each component
 	const width = get(widthStore);
 	const height = get(heightStore);
 	const radius = get(radiusStore);
-	const numLayers = get(numLayersStore);
 
-	let cutType = "vertical";
+	let cutType = "radial";
 	const options = [{ value: "vertical" }, { value: "radial" }];
-	let cutTargetDepthPercentage = 0;
-
-	$: cutTargetDepth = radius * cutTargetDepthPercentage;
 </script>
 
 <svg {width} {height} viewBox="{-width / 2} 0 {width} {height}">
@@ -38,9 +34,9 @@
 
 	<Onion {height} />
 
-	<OnionCuts {cutType} {height} {radius} {cutTargetDepth} />
+	<OnionCuts {cutType} {height} {radius} />
 
-	<OnionPieceAnalyzer {cutType} {cutTargetDepth} />
+	<OnionPieceAnalyzer {cutType} />
 </svg>
 
 <div class="controls">
@@ -52,14 +48,14 @@
 	<div class:hidden={cutType !== "radial"}>
 		<p>
 			cut target height:
-			{formatPercentageAsNegative(cutTargetDepthPercentage)} of outer radius
+			{formatPercentageAsNegative($cutTargetDepthPercentage)} of outer radius
 		</p>
 
 		<Range
 			min={0}
 			max={1}
 			step={0.01}
-			bind:value={cutTargetDepthPercentage}
+			bind:value={$cutTargetDepthPercentage}
 			label="cut target depth percentage"
 		/>
 	</div>
