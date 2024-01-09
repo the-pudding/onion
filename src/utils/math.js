@@ -1,6 +1,7 @@
 import {
 	cutAngleScale,
 	cutNumbers,
+	cutTargetDepth,
 	cutWidthScale,
 	layerArcs,
 	layerRadii,
@@ -104,22 +105,24 @@ export function getAreaUnderLine({ slope, yIntercept, x1, x2 }) {
 
 // cutTargetDepth store's value gets passed as an arg when getRadialCutAreas is called,
 //   so that this function can rerun when cutTargetDepth store changes
-export function getRadialCutAreas(cutTargetDepth = 0) {
+export function getRadialCutAreas() {
 	const $layerRadii = get(layerRadii);
 	const $cutAngleScale = get(cutAngleScale);
 	const $radius = get(radius);
 	const $layerArcs = get(layerArcs);
 	const $cutNumbers = get(cutNumbers);
+	const $cutTargetDepth = get(cutTargetDepth);
 
 	function getCutLineFunction(slope) {
-		return (x) => slope * x - cutTargetDepth;
+		return (x) => slope * x - $cutTargetDepth;
 	}
 
 	function getSlope(cutNum) {
 		const theta = $cutAngleScale(cutNum);
 
 		return (
-			(cutTargetDepth + $radius * Math.sin(theta)) / ($radius * Math.cos(theta))
+			($cutTargetDepth + $radius * Math.sin(theta)) /
+			($radius * Math.cos(theta))
 		);
 	}
 
@@ -138,13 +141,14 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 			const { discriminant, doesIntersect } = doesLineIntersectCircleAboveXAxis(
 				{
 					slope: m,
-					yIntercept: -cutTargetDepth,
+					yIntercept: -$cutTargetDepth,
 					radius: layerRadius
 				}
 			);
 
 			if (doesIntersect) {
-				const x = (cutTargetDepth * m + Math.sqrt(discriminant)) / (m ** 2 + 1);
+				const x =
+					($cutTargetDepth * m + Math.sqrt(discriminant)) / (m ** 2 + 1);
 
 				if (x > 0 && cutLineFunction(x) > 0) {
 					pieces.push({
@@ -174,7 +178,7 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 				const xWhereLeftCutIntersectsPreviousLayer =
 					previousLayer?.pieces[_pieceNum]?.xOfLeftCutIntersection;
 				const xWhereLeftCutIntersectsCuttingBoard =
-					cutTargetDepth / pieces[_pieceNum]?.leftCutLineSlope;
+					$cutTargetDepth / pieces[_pieceNum]?.leftCutLineSlope;
 
 				return (
 					xWhereLeftCutIntersectsPreviousLayer ??
@@ -205,7 +209,7 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 			if (!isFirstPiece) {
 				area += getAreaUnderLine({
 					slope: leftCutLineSlope,
-					yIntercept: -cutTargetDepth,
+					yIntercept: -$cutTargetDepth,
 					x1: xRange[0],
 					x2: xOfLeftCutIntersection
 				});
@@ -219,7 +223,7 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 
 				area -= getAreaUnderLine({
 					slope: pieces[pieceNum + 1].leftCutLineSlope,
-					yIntercept: -cutTargetDepth,
+					yIntercept: -$cutTargetDepth,
 					x1: xOfRightCutIntersectionWithPreviousLayer,
 					x2: xRange[1]
 				});

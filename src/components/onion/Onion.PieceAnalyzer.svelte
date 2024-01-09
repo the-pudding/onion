@@ -11,18 +11,18 @@
 
 	export let cutType;
 
-	// TODO cache pieceAreas in localStorage for demo parameters we've set before
-	// TODO how to re-calculate radial pieceAreas when numLayers changes, without passing numLayers as an arg?
-	$: pieceAreas =
-		cutType === "vertical"
-			? getVerticalAreas($numCuts)
-			: getRadialCutAreas($cutTargetDepth, $numLayers);
+	let verticalPieceAreas, radialPieceAreas;
 
-	// $: console.log({ pieceAreas });
+	// TODO cache piece areas in localStorage for demo parameters we've set before
+	$: $numCuts, $numLayers, (verticalPieceAreas = getVerticalAreas());
+	$: $numCuts,
+		$numLayers,
+		$cutTargetDepth,
+		(radialPieceAreas = getRadialCutAreas());
 </script>
 
 {#if cutType === "vertical"}
-	{#each pieceAreas as { cutX, pieceColumn }}
+	{#each verticalPieceAreas as { cutX, pieceColumn }}
 		<text x={cutX} y={$yScale(0)} font-size="x-small">
 			{pieceColumn.length}x
 		</text>
@@ -41,7 +41,7 @@
 		{/each}
 	{/each}
 {:else if cutType === "radial"}
-	{#each pieceAreas as { layerRadius, layerArcFunction, pieces }}
+	{#each radialPieceAreas as { layerRadius, layerArcFunction, pieces }}
 		{@const numPieces = pieces.length}
 
 		<text
@@ -53,7 +53,7 @@
 			{numPieces} piece{numPieces === 1 ? "" : "s"}
 		</text>
 
-		{#each pieces as { xOfLeftCutIntersection, xRange, area }, pieceNum}
+		{#each pieces as { xOfLeftCutIntersection, xRange, area }}
 			{@const x = xOfLeftCutIntersection}
 			{@const y = layerArcFunction(x)}
 			{@const yNormalized = $yScale(y)}
