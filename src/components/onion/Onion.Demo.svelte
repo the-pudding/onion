@@ -22,7 +22,7 @@
 	const height = get(heightStore);
 	const radius = get(radiusStore);
 
-	let cutType = "radial";
+	let cutType = "vertical";
 	const options = [{ value: "vertical" }, { value: "radial" }];
 </script>
 

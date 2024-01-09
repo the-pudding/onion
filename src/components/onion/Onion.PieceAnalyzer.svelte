@@ -7,8 +7,7 @@
 		numLayers,
 		yScale
 	} from "$stores/onion";
-	import ALL_VERTICAL_AREAS from "$data/onion-piece-areas.json";
-	import { getRadialCutAreas } from "$utils/math";
+	import { getRadialCutAreas, getVerticalAreas } from "$utils/math";
 
 	export let cutType;
 
@@ -16,7 +15,7 @@
 	// TODO how to re-calculate radial pieceAreas when numLayers changes, without passing numLayers as an arg?
 	$: pieceAreas =
 		cutType === "vertical"
-			? ALL_VERTICAL_AREAS[$numCuts]
+			? getVerticalAreas($numCuts)
 			: getRadialCutAreas($cutTargetDepth, $numLayers);
 
 	// $: console.log({ pieceAreas });

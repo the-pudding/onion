@@ -25,7 +25,7 @@ export const layerRadii = derived(
 		Array.from({ length: $numLayers }).map((_, i) => $rScale(i + 1))
 );
 
-export const numCuts = writable(3);
+export const numCuts = writable(10);
 
 export const cutNumbers = derived(numCuts, ($numCuts) =>
 	Array.from({ length: $numCuts }).map((_, i) => i)
