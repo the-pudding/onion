@@ -83,6 +83,8 @@ export function getRadialCutAreaPolar({
 	return (1 / 2) * (radius2 ** 2 - radius1 ** 2) * (theta2 - theta1);
 }
 
+// discriminant is obtained from quadratic formula,
+//   when setting circle function equal to line function to find intersection
 export function doesLineIntersectCircleAboveXAxis({
 	slope,
 	yIntercept,
@@ -103,16 +105,21 @@ export function getAreaUnderLine({ slope, yIntercept, x1, x2 }) {
 // cutTargetDepth store's value gets passed as an arg when getRadialCutAreas is called,
 //   so that this function can rerun when cutTargetDepth store changes
 export function getRadialCutAreas(cutTargetDepth = 0) {
+	const $layerRadii = get(layerRadii);
+	const $cutAngleScale = get(cutAngleScale);
+	const $radius = get(radius);
+	const $layerArcs = get(layerArcs);
+	const $cutNumbers = get(cutNumbers);
+
 	function getCutLineFunction(slope) {
 		return (x) => slope * x - cutTargetDepth;
 	}
 
 	function getSlope(cutNum) {
-		const theta = get(cutAngleScale)(cutNum);
+		const theta = $cutAngleScale(cutNum);
 
 		return (
-			(cutTargetDepth + get(radius) * Math.sin(theta)) /
-			(get(radius) * Math.cos(theta))
+			(cutTargetDepth + $radius * Math.sin(theta)) / ($radius * Math.cos(theta))
 		);
 	}
 
@@ -121,11 +128,11 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 
 	// first, count total number of pieces for each layer
 	// TODO can we calculate areas within this first pass?
-	const pieceAreas = get(layerRadii).map((layerRadius, layerNum) => {
-		const layerArcFunction = get(layerArcs)[layerNum];
+	const pieceAreas = $layerRadii.map((layerRadius, layerNum) => {
+		const layerArcFunction = $layerArcs[layerNum];
 		const pieces = [];
 
-		get(cutNumbers).forEach((cutNum) => {
+		$cutNumbers.forEach((cutNum) => {
 			const m = getSlope(cutNum);
 			const cutLineFunction = getCutLineFunction(m);
 			const { discriminant, doesIntersect } = doesLineIntersectCircleAboveXAxis(
@@ -137,7 +144,6 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 			);
 
 			if (doesIntersect) {
-				// x is where layerArcFunction(x) === cutLineFunction(x) (quadratic formula)
 				const x = (cutTargetDepth * m + Math.sqrt(discriminant)) / (m ** 2 + 1);
 
 				if (x > 0 && cutLineFunction(x) > 0) {
