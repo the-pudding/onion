@@ -6,7 +6,7 @@
 	import OnionPieceAnalyzer from "$components/onion/Onion.PieceAnalyzer.svelte";
 	import ButtonSet from "$components/helpers/ButtonSet.svelte";
 	import Range from "$components/helpers/Range.svelte";
-	import { formatPercentageAsNegative } from "$utils/math";
+	import { formatPercentage } from "$utils/math";
 	import { get } from "svelte/store";
 	import {
 		width as widthStore,
@@ -52,7 +52,7 @@
 	<div class:hidden={cutType !== "radial"}>
 		<p>
 			cut target height:
-			{formatPercentageAsNegative($cutTargetDepthPercentage)} of outer radius
+			{formatPercentage(-$cutTargetDepthPercentage)} of outer radius
 		</p>
 
 		<Range

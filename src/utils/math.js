@@ -10,8 +10,8 @@ import {
 import { format } from "d3";
 import { get } from "svelte/store";
 
-export function formatPercentageAsNegative(n) {
-	return format(".0%")(-n);
+export function formatPercentage(n) {
+	return format(".0%")(n);
 }
 
 export function polarToCartesian(r, theta) {

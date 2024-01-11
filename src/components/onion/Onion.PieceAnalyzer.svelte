@@ -1,24 +1,61 @@
 <script>
 	import {
-		cutTargetDepth,
+		cutTargetDepthPercentage,
 		layerArcs,
 		layerRadii,
 		numCuts,
 		numLayers,
 		yScale
 	} from "$stores/onion";
-	import { getRadialCutAreas, getVerticalAreas } from "$utils/math";
+	import {
+		formatPercentage,
+		getRadialCutAreas,
+		getVerticalAreas
+	} from "$utils/math";
+	import localStorage from "$utils/localStorage";
 
 	export let cutType;
 
 	let verticalPieceAreas, radialPieceAreas;
 
-	// TODO cache piece areas in localStorage for demo parameters we've set before
-	$: $numCuts, $numLayers, (verticalPieceAreas = getVerticalAreas());
-	$: $numCuts,
-		$numLayers,
-		$cutTargetDepth,
-		(radialPieceAreas = getRadialCutAreas());
+	$: key = [
+		"areas",
+		`${$numLayers}layers`,
+		`${$numCuts}cuts`,
+		cutType,
+		...(cutType === "radial"
+			? [`${formatPercentage($cutTargetDepthPercentage)}below`]
+			: [])
+	].join(":");
+
+	$: readOrCalculateAreas = (areaFunction) => {
+		let areas = localStorage.get(key);
+
+		if (!areas) {
+			areas = areaFunction();
+			localStorage.set(key, areas);
+		} else {
+			// TODO remove log
+			console.log("found localStorage areas!");
+		}
+
+		return areas;
+	};
+
+	$: if (cutType === "vertical") {
+		verticalPieceAreas = readOrCalculateAreas(getVerticalAreas);
+	} else if (cutType === "radial") {
+		// TODO read radial piece areas from localStorage
+		// if the below line is `radialPieceAreas = readOrCalculateAreas(getRadialCutAreas)`, this error is thrown:
+		//   Uncaught (in promise) TypeError: child_ctx[22] is not a function
+		//     at get_each_context_3 (Onion.PieceAnalyzer.svelte:89:32)
+		//     at Object.update [as p] (Onion.PieceAnalyzer.svelte:87:9)
+		//     at Object.update [as p] (Onion.PieceAnalyzer.svelte:75:8)
+		//     at Object.update [as p] (Onion.PieceAnalyzer.svelte:74:31)
+		//     at update (chunk-BU6ETVJE.js?v=dcda6272:1351:32)
+		//     at flush (chunk-BU6ETVJE.js?v=dcda6272:1317:9)
+		radialPieceAreas = getRadialCutAreas();
+	}
 </script>
 
 {#if cutType === "vertical"}
