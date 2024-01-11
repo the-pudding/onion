@@ -1,5 +1,6 @@
 <script>
-	import { ChevronLeft, ChevronRight } from "lucide-svelte";
+	import ChevronLeft from "lucide-svelte/icons/chevron-left";
+	import ChevronRight from "lucide-svelte/icons/chevron-right";
 	import { createEventDispatcher } from "svelte";
 
 	export let debug = false;
@@ -18,7 +19,7 @@
 	let innerHeight;
 
 	$: getW = (dir) =>
-		["left", "right"].includes(dir) ? size : full ? "100%" : size;
+		Array.isArray(size) ? size[directions.indexOf(dir)] : full ? "100%" : size;
 	$: getH = (dir) =>
 		["up", "down"].includes(dir) ? size : full ? "100%" : size;
 
