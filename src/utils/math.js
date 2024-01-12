@@ -3,7 +3,6 @@ import {
 	cutNumbers,
 	cutTargetDepth,
 	cutWidthScale,
-	layerArcs,
 	layerRadii,
 	radius
 } from "../stores/onion";
@@ -109,7 +108,6 @@ export function getRadialCutAreas() {
 	const $layerRadii = get(layerRadii);
 	const $cutAngleScale = get(cutAngleScale);
 	const $radius = get(radius);
-	const $layerArcs = get(layerArcs);
 	const $cutNumbers = get(cutNumbers);
 	const $cutTargetDepth = get(cutTargetDepth);
 
@@ -131,8 +129,7 @@ export function getRadialCutAreas() {
 
 	// first, count total number of pieces for each layer
 	// TODO can we calculate areas within this first pass?
-	const pieceAreas = $layerRadii.map((layerRadius, layerNum) => {
-		const layerArcFunction = $layerArcs[layerNum];
+	const pieceAreas = $layerRadii.map((layerRadius) => {
 		const pieces = [];
 
 		$cutNumbers.forEach((cutNum) => {
@@ -159,7 +156,7 @@ export function getRadialCutAreas() {
 			}
 		});
 
-		return { layerRadius, layerArcFunction, pieces };
+		return { layerRadius, pieces };
 	});
 
 	// after each layer's pieces are counted,

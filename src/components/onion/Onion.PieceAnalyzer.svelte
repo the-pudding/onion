@@ -34,9 +34,6 @@
 		if (!areas) {
 			areas = areaFunction();
 			localStorage.set(key, areas);
-		} else {
-			// TODO remove log
-			console.log("found localStorage areas!");
 		}
 
 		return areas;
@@ -45,16 +42,7 @@
 	$: if (cutType === "vertical") {
 		verticalPieceAreas = readOrCalculateAreas(getVerticalAreas);
 	} else if (cutType === "radial") {
-		// TODO read radial piece areas from localStorage
-		// if the below line is `radialPieceAreas = readOrCalculateAreas(getRadialCutAreas)`, this error is thrown:
-		//   Uncaught (in promise) TypeError: child_ctx[22] is not a function
-		//     at get_each_context_3 (Onion.PieceAnalyzer.svelte:89:32)
-		//     at Object.update [as p] (Onion.PieceAnalyzer.svelte:87:9)
-		//     at Object.update [as p] (Onion.PieceAnalyzer.svelte:75:8)
-		//     at Object.update [as p] (Onion.PieceAnalyzer.svelte:74:31)
-		//     at update (chunk-BU6ETVJE.js?v=dcda6272:1351:32)
-		//     at flush (chunk-BU6ETVJE.js?v=dcda6272:1317:9)
-		radialPieceAreas = getRadialCutAreas();
+		radialPieceAreas = readOrCalculateAreas(getRadialCutAreas);
 	}
 </script>
 
@@ -65,10 +53,10 @@
 		</text>
 
 		{#each pieceColumn as { layerRadius, pieceArea }, layerNum}
-			{@const getYOnLayerArc = $layerArcs.filter(
+			{@const layerArcFunction = $layerArcs.filter(
 				(_, arcNum) => $layerRadii[arcNum] > cutX
 			)[layerNum]}
-			{@const cutY = $yScale(getYOnLayerArc(cutX))}
+			{@const cutY = $yScale(layerArcFunction(cutX))}
 
 			<text x={cutX} y={cutY} font-size="x-small">
 				{Math.round(pieceArea)}
@@ -78,7 +66,7 @@
 		{/each}
 	{/each}
 {:else if cutType === "radial"}
-	{#each radialPieceAreas as { layerRadius, layerArcFunction, pieces }}
+	{#each radialPieceAreas as { layerRadius, pieces }, layerNum}
 		{@const numPieces = pieces.length}
 
 		<text
@@ -92,6 +80,7 @@
 
 		{#each pieces as { xOfLeftCutIntersection, xRange, area }}
 			{@const x = xOfLeftCutIntersection}
+			{@const layerArcFunction = $layerArcs[layerNum]}
 			{@const y = layerArcFunction(x)}
 			{@const yNormalized = $yScale(y)}
 
