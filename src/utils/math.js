@@ -1,15 +1,16 @@
 import {
 	cutAngleScale,
 	cutNumbers,
-	layerArcs,
+	cutTargetDepth,
+	cutWidthScale,
 	layerRadii,
 	radius
 } from "../stores/onion";
 import { format } from "d3";
 import { get } from "svelte/store";
 
-export function formatPercentageAsNegative(n) {
-	return format(".0%")(-n);
+export function formatPercentage(n) {
+	return format(".0%")(n);
 }
 
 export function polarToCartesian(r, theta) {
@@ -38,6 +39,38 @@ export function getVerticalCutArea(radius, x1, x2) {
 	return getAntiderivative(getTheta(x2)) - getAntiderivative(getTheta(x1));
 }
 
+export function getVerticalAreas() {
+	const $cutNumbers = get(cutNumbers);
+	const $cutWidthScale = get(cutWidthScale);
+	const $layerRadii = get(layerRadii);
+
+	// with vertical cuts, pieceAreas is a 2D array whose major index corresponds to cutNumbers
+	// the minor index (for pieceColumn array) corresponds to piece index within a column of pieces,
+	//   counted from the bottom upward
+	const pieceAreas = $cutNumbers.map((i) => ({
+		cutX: $cutWidthScale(i),
+		pieceColumn: []
+	}));
+
+	$cutNumbers.forEach((i) => {
+		const { cutX, pieceColumn } = pieceAreas[i];
+
+		$layerRadii.forEach((layerRadius) => {
+			if (layerRadius > cutX) {
+				const nextCutX = $cutWidthScale(i + 1);
+				const verticalCutArea = getVerticalCutArea(layerRadius, cutX, nextCutX);
+				const pieceArea = pieceColumn.length
+					? verticalCutArea - pieceColumn.at(-1).verticalCutArea
+					: verticalCutArea;
+
+				pieceColumn.push({ layerRadius, verticalCutArea, pieceArea });
+			}
+		});
+	});
+
+	return pieceAreas;
+}
+
 // getRadialCutArea returns the area of a radial slice in the first quadrant
 //   i.e., double integral: (r dr, from radius1 to radius2) d theta, from theta1 to theta2
 // only applies if cutTargetDepth === 0
@@ -50,6 +83,8 @@ export function getRadialCutAreaPolar({
 	return (1 / 2) * (radius2 ** 2 - radius1 ** 2) * (theta2 - theta1);
 }
 
+// discriminant is obtained from quadratic formula,
+//   when setting circle function equal to line function to find intersection
 export function doesLineIntersectCircleAboveXAxis({
 	slope,
 	yIntercept,
@@ -69,17 +104,23 @@ export function getAreaUnderLine({ slope, yIntercept, x1, x2 }) {
 
 // cutTargetDepth store's value gets passed as an arg when getRadialCutAreas is called,
 //   so that this function can rerun when cutTargetDepth store changes
-export function getRadialCutAreas(cutTargetDepth = 0) {
+export function getRadialCutAreas() {
+	const $layerRadii = get(layerRadii);
+	const $cutAngleScale = get(cutAngleScale);
+	const $radius = get(radius);
+	const $cutNumbers = get(cutNumbers);
+	const $cutTargetDepth = get(cutTargetDepth);
+
 	function getCutLineFunction(slope) {
-		return (x) => slope * x - cutTargetDepth;
+		return (x) => slope * x - $cutTargetDepth;
 	}
 
 	function getSlope(cutNum) {
-		const theta = get(cutAngleScale)(cutNum);
+		const theta = $cutAngleScale(cutNum);
 
 		return (
-			(cutTargetDepth + get(radius) * Math.sin(theta)) /
-			(get(radius) * Math.cos(theta))
+			($cutTargetDepth + $radius * Math.sin(theta)) /
+			($radius * Math.cos(theta))
 		);
 	}
 
@@ -88,24 +129,23 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 
 	// first, count total number of pieces for each layer
 	// TODO can we calculate areas within this first pass?
-	const pieceAreas = get(layerRadii).map((layerRadius, layerNum) => {
-		const layerArcFunction = get(layerArcs)[layerNum];
+	const pieceAreas = $layerRadii.map((layerRadius) => {
 		const pieces = [];
 
-		get(cutNumbers).forEach((cutNum) => {
+		$cutNumbers.forEach((cutNum) => {
 			const m = getSlope(cutNum);
 			const cutLineFunction = getCutLineFunction(m);
 			const { discriminant, doesIntersect } = doesLineIntersectCircleAboveXAxis(
 				{
 					slope: m,
-					yIntercept: -cutTargetDepth,
+					yIntercept: -$cutTargetDepth,
 					radius: layerRadius
 				}
 			);
 
 			if (doesIntersect) {
-				// x is where layerArcFunction(x) === cutLineFunction(x) (quadratic formula)
-				const x = (cutTargetDepth * m + Math.sqrt(discriminant)) / (m ** 2 + 1);
+				const x =
+					($cutTargetDepth * m + Math.sqrt(discriminant)) / (m ** 2 + 1);
 
 				if (x > 0 && cutLineFunction(x) > 0) {
 					pieces.push({
@@ -116,7 +156,7 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 			}
 		});
 
-		return { layerRadius, layerArcFunction, pieces };
+		return { layerRadius, pieces };
 	});
 
 	// after each layer's pieces are counted,
@@ -135,7 +175,7 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 				const xWhereLeftCutIntersectsPreviousLayer =
 					previousLayer?.pieces[_pieceNum]?.xOfLeftCutIntersection;
 				const xWhereLeftCutIntersectsCuttingBoard =
-					cutTargetDepth / pieces[_pieceNum]?.leftCutLineSlope;
+					$cutTargetDepth / pieces[_pieceNum]?.leftCutLineSlope;
 
 				return (
 					xWhereLeftCutIntersectsPreviousLayer ??
@@ -166,7 +206,7 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 			if (!isFirstPiece) {
 				area += getAreaUnderLine({
 					slope: leftCutLineSlope,
-					yIntercept: -cutTargetDepth,
+					yIntercept: -$cutTargetDepth,
 					x1: xRange[0],
 					x2: xOfLeftCutIntersection
 				});
@@ -180,7 +220,7 @@ export function getRadialCutAreas(cutTargetDepth = 0) {
 
 				area -= getAreaUnderLine({
 					slope: pieces[pieceNum + 1].leftCutLineSlope,
-					yIntercept: -cutTargetDepth,
+					yIntercept: -$cutTargetDepth,
 					x1: xOfRightCutIntersectionWithPreviousLayer,
 					x2: xRange[1]
 				});

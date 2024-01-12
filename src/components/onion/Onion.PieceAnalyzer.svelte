@@ -1,38 +1,62 @@
 <script>
 	import {
-		cutTargetDepth,
+		cutTargetDepthPercentage,
 		layerArcs,
 		layerRadii,
 		numCuts,
 		numLayers,
 		yScale
 	} from "$stores/onion";
-	import ALL_VERTICAL_AREAS from "$data/onion-piece-areas.json";
-	import { getRadialCutAreas } from "$utils/math";
+	import {
+		formatPercentage,
+		getRadialCutAreas,
+		getVerticalAreas
+	} from "$utils/math";
+	import localStorage from "$utils/localStorage";
 
 	export let cutType;
 
-	// TODO cache pieceAreas in localStorage for demo parameters we've set before
-	// TODO how to re-calculate radial pieceAreas when numLayers changes, without passing numLayers as an arg?
-	$: pieceAreas =
-		cutType === "vertical"
-			? ALL_VERTICAL_AREAS[$numCuts]
-			: getRadialCutAreas($cutTargetDepth, $numLayers);
+	let verticalPieceAreas, radialPieceAreas;
 
-	// $: console.log({ pieceAreas });
+	$: key = [
+		"areas",
+		`${$numLayers}layers`,
+		`${$numCuts}cuts`,
+		cutType,
+		...(cutType === "radial"
+			? [`${formatPercentage($cutTargetDepthPercentage)}below`]
+			: [])
+	].join(":");
+
+	$: readOrCalculateAreas = (areaFunction) => {
+		let areas = localStorage.get(key);
+
+		if (!areas) {
+			areas = areaFunction();
+			localStorage.set(key, areas);
+		}
+
+		return areas;
+	};
+
+	$: if (cutType === "vertical") {
+		verticalPieceAreas = readOrCalculateAreas(getVerticalAreas);
+	} else if (cutType === "radial") {
+		radialPieceAreas = readOrCalculateAreas(getRadialCutAreas);
+	}
 </script>
 
 {#if cutType === "vertical"}
-	{#each pieceAreas as { cutX, pieceColumn }}
+	{#each verticalPieceAreas as { cutX, pieceColumn }}
 		<text x={cutX} y={$yScale(0)} font-size="x-small">
 			{pieceColumn.length}x
 		</text>
 
 		{#each pieceColumn as { layerRadius, pieceArea }, layerNum}
-			{@const getYOnLayerArc = $layerArcs.filter(
+			{@const layerArcFunction = $layerArcs.filter(
 				(_, arcNum) => $layerRadii[arcNum] > cutX
 			)[layerNum]}
-			{@const cutY = $yScale(getYOnLayerArc(cutX))}
+			{@const cutY = $yScale(layerArcFunction(cutX))}
 
 			<text x={cutX} y={cutY} font-size="x-small">
 				{Math.round(pieceArea)}
@@ -42,7 +66,7 @@
 		{/each}
 	{/each}
 {:else if cutType === "radial"}
-	{#each pieceAreas as { layerRadius, layerArcFunction, pieces }}
+	{#each radialPieceAreas as { layerRadius, pieces }, layerNum}
 		{@const numPieces = pieces.length}
 
 		<text
@@ -54,8 +78,9 @@
 			{numPieces} piece{numPieces === 1 ? "" : "s"}
 		</text>
 
-		{#each pieces as { xOfLeftCutIntersection, xRange, area }, pieceNum}
+		{#each pieces as { xOfLeftCutIntersection, xRange, area }}
 			{@const x = xOfLeftCutIntersection}
+			{@const layerArcFunction = $layerArcs[layerNum]}
 			{@const y = layerArcFunction(x)}
 			{@const yNormalized = $yScale(y)}
 

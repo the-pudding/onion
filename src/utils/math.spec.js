@@ -215,7 +215,7 @@ describe("radial cuts aimed below center", () => {
 		numLayers.set(testLayers);
 		numCuts.set(testCuts);
 		cutTargetDepthPercentage.set(100);
-		const areas = getRadialCutAreas(get(cutTargetDepth));
+		const areas = getRadialCutAreas();
 
 		const expectedAreas = testLayerRadii.map((radius, layerNum) =>
 			getRadialCutAreaPolar({
