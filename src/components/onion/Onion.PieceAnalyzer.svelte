@@ -2,6 +2,7 @@
 	import { deviation, mean, sum } from "d3";
 	import {
 		cutTargetDepthPercentage,
+		cutType,
 		layerArcs,
 		layerRadii,
 		numCuts,
@@ -16,16 +17,14 @@
 	} from "$utils/math";
 	import localStorage from "$utils/localStorage";
 
-	export let cutType;
-
 	let verticalPieceAreas, radialPieceAreas;
 
 	$: key = [
 		"areas",
 		`${$numLayers}layers`,
 		`${$numCuts}cuts`,
-		cutType,
-		...(cutType === "radial"
+		$cutType,
+		...($cutType === "radial"
 			? [`${formatPercentage($cutTargetDepthPercentage)}below`]
 			: [])
 	].join(":");
@@ -41,14 +40,14 @@
 		return areas;
 	};
 
-	$: if (cutType === "vertical") {
+	$: if ($cutType === "vertical") {
 		verticalPieceAreas = readOrCalculateAreas(getVerticalAreas);
-	} else if (cutType === "radial") {
+	} else if ($cutType === "radial") {
 		radialPieceAreas = readOrCalculateAreas(getRadialCutAreas);
 	}
 
 	$: allAreas =
-		cutType === "vertical"
+		$cutType === "vertical"
 			? verticalPieceAreas
 					.map(({ pieceColumn }) =>
 						pieceColumn.map(({ pieceArea }) => pieceArea)
@@ -64,8 +63,8 @@
 	$: totalArea = sum(allAreas);
 	$: meanArea = mean(allAreas);
 	$: console.log({
-		cutType,
-		numCuts: $numCuts,
+		$cutType,
+		$numCuts,
 		totalArea: totalArea.toFixed(2),
 		meanArea: meanArea.toFixed(2),
 		meanAreaPercentage: ((meanArea / totalArea) * 100).toFixed(2),
@@ -76,7 +75,7 @@
 	});
 </script>
 
-{#if cutType === "vertical"}
+{#if $cutType === "vertical"}
 	{#each verticalPieceAreas as { cutX, pieceColumn }}
 		<text x={cutX} y={$yScale(0)} font-size="x-small">
 			{pieceColumn.length}x
@@ -95,7 +94,7 @@
 			<circle r="2" cx={cutX} cy={cutY} />
 		{/each}
 	{/each}
-{:else if cutType === "radial"}
+{:else if $cutType === "radial"}
 	{#each radialPieceAreas as { layerRadius, pieces }, layerNum}
 		{@const numPieces = pieces.length}
 

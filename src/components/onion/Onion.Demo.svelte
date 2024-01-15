@@ -15,7 +15,8 @@
 		radius as radiusStore,
 		numCuts,
 		cutTargetDepthPercentage,
-		numLayers
+		numLayers,
+		cutType
 	} from "$stores/onion";
 
 	// TODO move these gets to each component
@@ -23,7 +24,6 @@
 	const height = get(heightStore);
 	const radius = get(radiusStore);
 
-	let cutType = "vertical";
 	const options = [{ value: "vertical" }, { value: "radial" }];
 </script>
 
@@ -36,9 +36,9 @@
 
 	<Onion {height} />
 
-	<OnionCuts {cutType} {height} {radius} />
+	<OnionCuts {height} {radius} />
 
-	<OnionPieceAnalyzer {cutType} />
+	<OnionPieceAnalyzer />
 </svg>
 
 <div class="controls">
@@ -48,9 +48,9 @@
 	<p>number of cuts: {$numCuts}</p>
 	<Range min={1} max={10} label="number of cuts" bind:value={$numCuts} />
 
-	<ButtonSet legend="cut type" {options} bind:value={cutType} />
+	<ButtonSet legend="cut type" {options} bind:value={$cutType} />
 
-	<div class:hidden={cutType !== "radial"}>
+	<div class:hidden={$cutType !== "radial"}>
 		<p>
 			cut target height:
 			{formatPercentage(-$cutTargetDepthPercentage)} of outer radius
@@ -67,7 +67,12 @@
 </div>
 
 <h2>standard deviation in piece size</h2>
+
+<h3>vertical cuts</h3>
 <OnionStandardDeviationGraph />
+
+<h3>60% radial cuts</h3>
+<p>TODO</p>
 
 <style>
 	svg {

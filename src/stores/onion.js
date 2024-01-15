@@ -51,3 +51,5 @@ export const cutTargetDepth = derived(
 	[radius, cutTargetDepthPercentage],
 	([$radius, $cutTargetDepthPercentage]) => $radius * $cutTargetDepthPercentage
 );
+
+export const cutType = writable("vertical");
