@@ -44,6 +44,19 @@
 	} else if (cutType === "radial") {
 		radialPieceAreas = readOrCalculateAreas(getRadialCutAreas);
 	}
+
+	$: allAreas =
+		cutType === "vertical"
+			? verticalPieceAreas
+					.map(({ pieceColumn }) =>
+						pieceColumn.map(({ pieceArea }) => pieceArea)
+					)
+					.flat()
+			: radialPieceAreas
+					.map(({ pieces }) => pieces.map(({ area }) => area))
+					.flat();
+
+	$: console.log({ allAreas });
 </script>
 
 {#if cutType === "vertical"}
