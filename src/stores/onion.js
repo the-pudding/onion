@@ -1,3 +1,4 @@
+import { formatPercentage } from "$utils/math";
 import { scaleLinear } from "d3";
 import { derived, writable } from "svelte/store";
 
@@ -53,3 +54,17 @@ export const cutTargetDepth = derived(
 );
 
 export const cutType = writable("vertical");
+
+export const storageKey = derived(
+	[numLayers, numCuts, cutType, cutTargetDepthPercentage],
+	([$numLayers, $numCuts, $cutType, $cutTargetDepthPercentage]) =>
+		[
+			"areas",
+			`${$numLayers}layers`,
+			`${$numCuts}cuts`,
+			$cutType,
+			...($cutType === "radial"
+				? [`${formatPercentage($cutTargetDepthPercentage)}below`]
+				: [])
+		].join(":")
+);

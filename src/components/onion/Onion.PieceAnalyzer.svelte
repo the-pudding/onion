@@ -1,40 +1,24 @@
 <script>
 	import { deviation, mean, sum } from "d3";
 	import {
-		cutTargetDepthPercentage,
 		cutType,
 		layerArcs,
 		layerRadii,
 		numCuts,
-		numLayers,
-		width,
+		storageKey,
 		yScale
 	} from "$stores/onion";
-	import {
-		formatPercentage,
-		getRadialCutAreas,
-		getVerticalAreas
-	} from "$utils/math";
+	import { getRadialCutAreas, getVerticalAreas } from "$utils/math";
 	import localStorage from "$utils/localStorage";
 
 	let verticalPieceAreas, radialPieceAreas;
 
-	$: key = [
-		"areas",
-		`${$numLayers}layers`,
-		`${$numCuts}cuts`,
-		$cutType,
-		...($cutType === "radial"
-			? [`${formatPercentage($cutTargetDepthPercentage)}below`]
-			: [])
-	].join(":");
-
 	$: readOrCalculateAreas = (areaFunction) => {
-		let areas = localStorage.get(key);
+		let areas = localStorage.get($storageKey);
 
 		if (!areas) {
 			areas = areaFunction();
-			localStorage.set(key, areas);
+			localStorage.set($storageKey, areas);
 		}
 
 		return areas;
