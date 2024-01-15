@@ -4,6 +4,7 @@
 	import Onion from "$components/onion/Onion.svelte";
 	import OnionCuts from "$components/onion/Onion.Cuts.svelte";
 	import OnionPieceAnalyzer from "$components/onion/Onion.PieceAnalyzer.svelte";
+	import OnionStandardDeviationGraph from "$components/onion/Onion.StandardDeviationGraph.svelte";
 	import ButtonSet from "$components/helpers/ButtonSet.svelte";
 	import Range from "$components/helpers/Range.svelte";
 	import { formatPercentage } from "$utils/math";
@@ -64,6 +65,9 @@
 		/>
 	</div>
 </div>
+
+<h2>standard deviation in piece size</h2>
+<OnionStandardDeviationGraph />
 
 <style>
 	svg {
