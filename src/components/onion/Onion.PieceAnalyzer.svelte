@@ -1,10 +1,12 @@
 <script>
+	import { deviation } from "d3";
 	import {
 		cutTargetDepthPercentage,
 		layerArcs,
 		layerRadii,
 		numCuts,
 		numLayers,
+		width,
 		yScale
 	} from "$stores/onion";
 	import {
@@ -56,8 +58,13 @@
 					.map(({ pieces }) => pieces.map(({ area }) => area))
 					.flat();
 
-	$: console.log({ allAreas });
+	$: standardDeviation = deviation(allAreas);
 </script>
+
+<!-- TODO generate graphs based on multiple parameters -->
+<text x={-$width / 2} y={$yScale(0)}>
+	standard deviation: {standardDeviation.toFixed(3)}
+</text>
 
 {#if cutType === "vertical"}
 	{#each verticalPieceAreas as { cutX, pieceColumn }}
