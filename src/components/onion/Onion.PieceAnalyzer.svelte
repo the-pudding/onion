@@ -1,5 +1,5 @@
 <script>
-	import { deviation } from "d3";
+	import { deviation, mean, sum } from "d3";
 	import {
 		cutTargetDepthPercentage,
 		layerArcs,
@@ -59,12 +59,22 @@
 					.flat();
 
 	$: standardDeviation = deviation(allAreas);
-</script>
 
-<!-- TODO generate graphs based on multiple parameters -->
-<text x={-$width / 2} y={$yScale(0)}>
-	standard deviation: {standardDeviation.toFixed(3)}
-</text>
+	// TODO generate graphs based on multiple parameters
+	$: totalArea = sum(allAreas);
+	$: meanArea = mean(allAreas);
+	$: console.log({
+		cutType,
+		numCuts: $numCuts,
+		totalArea: totalArea.toFixed(2),
+		meanArea: meanArea.toFixed(2),
+		meanAreaPercentage: ((meanArea / totalArea) * 100).toFixed(2),
+		standardDeviation: standardDeviation.toFixed(2),
+		standardDeviationPercentage: ((standardDeviation / meanArea) * 100).toFixed(
+			2
+		)
+	});
+</script>
 
 {#if cutType === "vertical"}
 	{#each verticalPieceAreas as { cutX, pieceColumn }}

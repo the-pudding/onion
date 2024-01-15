@@ -1,3 +1,5 @@
+<!-- based on LayerCake's MultiLine example -->
+<!-- https://layercake.graphics/example/MultiLine -->
 <script>
 	import { LayerCake, Svg, Html, groupLonger, flatten } from "layercake";
 
