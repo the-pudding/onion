@@ -4,6 +4,7 @@
 	import Onion from "$components/onion/Onion.svelte";
 	import OnionCuts from "$components/onion/Onion.Cuts.svelte";
 	import OnionPieceAnalyzer from "$components/onion/Onion.PieceAnalyzer.svelte";
+	import OnionRadialStandardDeviationGraph from "$components/onion/Onion.RadialStandardDeviationGraph.svelte";
 	import OnionStandardDeviationGraph from "$components/onion/Onion.StandardDeviationGraph.svelte";
 	import ButtonSet from "$components/helpers/ButtonSet.svelte";
 	import Range from "$components/helpers/Range.svelte";
@@ -68,11 +69,11 @@
 
 <h2>standard deviation in piece size</h2>
 
+<h3>radial cuts, across cut target depth range</h3>
+<OnionRadialStandardDeviationGraph />
+
 <h3>vertical cuts</h3>
 <OnionStandardDeviationGraph />
-
-<h3>60% radial cuts</h3>
-<p>TODO</p>
 
 <style>
 	svg {
