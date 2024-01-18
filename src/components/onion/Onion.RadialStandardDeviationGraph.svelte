@@ -7,6 +7,7 @@
 
 	// This example loads csv data as json using @rollup/plugin-dsv
 	import data from "$data/onion-standard-deviation-radial.json";
+	import { formatPercentage } from "$utils/math";
 
 	const xKey = "cutTargetDepthPercentage";
 	const yKey = "rsd";
@@ -22,7 +23,7 @@
 		{data}
 	>
 		<Svg>
-			<AxisX />
+			<AxisX formatTick={(d) => formatPercentage(d)} />
 			<AxisY ticks={4} />
 			<Line />
 		</Svg>
