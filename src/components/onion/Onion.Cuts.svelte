@@ -5,21 +5,20 @@
 		cutWidthScale,
 		yScale,
 		cutNumbers,
-		cutTargetDepth
+		cutTargetDepth,
+		cutType
 	} from "$stores/onion";
 
-	export let cutType;
 	export let height;
 	export let radius;
 </script>
 
 <g class="cuts">
 	{#each $cutNumbers as i}
-		{#if cutType === "vertical"}
+		{#if $cutType === "vertical"}
 			{@const x = $cutWidthScale(i)}
-			s
 			<line x1={x} y1="0" x2={x} y2={height} />
-		{:else if cutType === "radial"}
+		{:else if $cutType === "radial"}
 			{@const theta = $cutAngleScale(i + 1)}
 
 			<!-- where cut intercepts onion's outermost layer -->

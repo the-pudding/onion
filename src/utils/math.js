@@ -5,7 +5,7 @@ import {
 	cutWidthScale,
 	layerRadii,
 	radius
-} from "../stores/onion";
+} from "../stores/onion.js";
 import { format } from "d3";
 import { get } from "svelte/store";
 
@@ -245,4 +245,9 @@ export function getRadialCutAreas() {
 	});
 
 	return pieceAreas;
+}
+
+// radialAreas is returned by getRadialCutAreas
+export function flattenRadialAreas(radialAreas) {
+	return radialAreas.map(({ pieces }) => pieces.map(({ area }) => area)).flat();
 }

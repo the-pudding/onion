@@ -1,52 +1,66 @@
 <script>
+	import { deviation, mean } from "d3";
 	import {
 		cutTargetDepthPercentage,
+		cutType,
 		layerArcs,
 		layerRadii,
 		numCuts,
-		numLayers,
+		storageKey,
 		yScale
 	} from "$stores/onion";
 	import {
-		formatPercentage,
+		flattenRadialAreas,
 		getRadialCutAreas,
 		getVerticalAreas
 	} from "$utils/math";
 	import localStorage from "$utils/localStorage";
 
-	export let cutType;
-
 	let verticalPieceAreas, radialPieceAreas;
 
-	$: key = [
-		"areas",
-		`${$numLayers}layers`,
-		`${$numCuts}cuts`,
-		cutType,
-		...(cutType === "radial"
-			? [`${formatPercentage($cutTargetDepthPercentage)}below`]
-			: [])
-	].join(":");
-
 	$: readOrCalculateAreas = (areaFunction) => {
-		let areas = localStorage.get(key);
+		let areas = localStorage.get($storageKey);
 
 		if (!areas) {
 			areas = areaFunction();
-			localStorage.set(key, areas);
+			localStorage.set($storageKey, areas);
 		}
 
 		return areas;
 	};
 
-	$: if (cutType === "vertical") {
+	$: if ($cutType === "vertical") {
 		verticalPieceAreas = readOrCalculateAreas(getVerticalAreas);
-	} else if (cutType === "radial") {
+	} else if ($cutType === "radial") {
 		radialPieceAreas = readOrCalculateAreas(getRadialCutAreas);
 	}
+
+	$: allAreas =
+		$cutType === "vertical"
+			? verticalPieceAreas
+					.map(({ pieceColumn }) =>
+						pieceColumn.map(({ pieceArea }) => pieceArea)
+					)
+					.flat()
+			: flattenRadialAreas(radialPieceAreas);
+
+	$: console.log({ allAreas });
+	$: standardDeviation = deviation(allAreas);
+
+	// TODO generate graphs based on multiple parameters
+	$: meanArea = mean(allAreas);
+	$: console.log({
+		$cutType,
+		$numCuts,
+		$cutTargetDepthPercentage,
+		meanArea,
+		standardDeviationPercentage: ((standardDeviation / meanArea) * 100).toFixed(
+			2
+		)
+	});
 </script>
 
-{#if cutType === "vertical"}
+{#if $cutType === "vertical"}
 	{#each verticalPieceAreas as { cutX, pieceColumn }}
 		<text x={cutX} y={$yScale(0)} font-size="x-small">
 			{pieceColumn.length}x
@@ -65,7 +79,7 @@
 			<circle r="2" cx={cutX} cy={cutY} />
 		{/each}
 	{/each}
-{:else if cutType === "radial"}
+{:else if $cutType === "radial"}
 	{#each radialPieceAreas as { layerRadius, pieces }, layerNum}
 		{@const numPieces = pieces.length}
 
