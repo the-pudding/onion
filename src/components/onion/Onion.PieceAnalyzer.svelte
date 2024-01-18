@@ -1,6 +1,7 @@
 <script>
-	import { deviation, mean, sum } from "d3";
+	import { deviation, mean } from "d3";
 	import {
+		cutTargetDepthPercentage,
 		cutType,
 		layerArcs,
 		layerRadii,
@@ -8,7 +9,11 @@
 		storageKey,
 		yScale
 	} from "$stores/onion";
-	import { getRadialCutAreas, getVerticalAreas } from "$utils/math";
+	import {
+		flattenRadialAreas,
+		getRadialCutAreas,
+		getVerticalAreas
+	} from "$utils/math";
 	import localStorage from "$utils/localStorage";
 
 	let verticalPieceAreas, radialPieceAreas;
@@ -37,22 +42,18 @@
 						pieceColumn.map(({ pieceArea }) => pieceArea)
 					)
 					.flat()
-			: radialPieceAreas
-					.map(({ pieces }) => pieces.map(({ area }) => area))
-					.flat();
+			: flattenRadialAreas(radialPieceAreas);
 
+	$: console.log({ allAreas });
 	$: standardDeviation = deviation(allAreas);
 
 	// TODO generate graphs based on multiple parameters
-	$: totalArea = sum(allAreas);
 	$: meanArea = mean(allAreas);
 	$: console.log({
 		$cutType,
 		$numCuts,
-		totalArea: totalArea.toFixed(2),
-		meanArea: meanArea.toFixed(2),
-		meanAreaPercentage: ((meanArea / totalArea) * 100).toFixed(2),
-		standardDeviation: standardDeviation.toFixed(2),
+		$cutTargetDepthPercentage,
+		meanArea,
 		standardDeviationPercentage: ((standardDeviation / meanArea) * 100).toFixed(
 			2
 		)

@@ -1,4 +1,4 @@
-import { formatPercentage } from "$utils/math";
+import { formatPercentage } from "../utils/math.js";
 import { scaleLinear } from "d3";
 import { derived, writable } from "svelte/store";
 

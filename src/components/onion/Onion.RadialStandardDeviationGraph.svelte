@@ -6,14 +6,10 @@
 	import AxisY from "$components/layercake/AxisY.svg.svelte";
 
 	// This example loads csv data as json using @rollup/plugin-dsv
-	import data from "$data/points.csv";
+	import data from "$data/onion-standard-deviation-radial.json";
 
-	const xKey = "myX";
-	const yKey = "myY";
-
-	data.forEach((d) => {
-		d[yKey] = +d[yKey];
-	});
+	const xKey = "cutTargetDepthPercentage";
+	const yKey = "rsd";
 </script>
 
 <div class="chart-container">

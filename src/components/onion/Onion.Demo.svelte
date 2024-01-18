@@ -69,7 +69,7 @@
 
 <h2>standard deviation in piece size</h2>
 
-<h3>radial cuts, across cut target depth range</h3>
+<h3>radial cuts, from cut target depth 0-100% of onion radius</h3>
 <OnionRadialStandardDeviationGraph />
 
 <h3>vertical cuts</h3>
