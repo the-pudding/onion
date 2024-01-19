@@ -17,7 +17,8 @@
 		numCuts,
 		cutTargetDepthPercentage,
 		numLayers,
-		cutType
+		cutType,
+		numHorizontalCuts
 	} from "$stores/onion";
 
 	// TODO move these gets to each component
@@ -65,6 +66,14 @@
 			label="cut target depth percentage"
 		/>
 	</div>
+
+	<p>horizontal cuts: {$numHorizontalCuts}</p>
+	<Range
+		min={0}
+		max={2}
+		label="horizontal cuts"
+		bind:value={$numHorizontalCuts}
+	/>
 </div>
 
 <h2>standard deviation in piece size</h2>

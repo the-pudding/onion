@@ -68,3 +68,19 @@ export const storageKey = derived(
 				: [])
 		].join(":")
 );
+
+export const numHorizontalCuts = writable(0);
+
+export const horizontalCutNumbers = derived(
+	numHorizontalCuts,
+	($numHorizontalCuts) =>
+		Array.from({ length: $numHorizontalCuts }).map((_, i) => i)
+);
+
+export const horizontalCutScale = derived(
+	numHorizontalCuts,
+	($numHorizontalCuts) =>
+		scaleLinear()
+			.domain([0, $numHorizontalCuts])
+			.range([1 / ($numHorizontalCuts + 1), 1])
+);
