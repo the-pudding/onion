@@ -66,17 +66,26 @@
 			{pieceColumn.length}x
 		</text>
 
-		{#each pieceColumn as { layerRadius, pieceArea }, layerNum}
+		{#each pieceColumn as { layerRadius, pieceArea, yRange }, layerNum}
+			<!-- {@debug pieceColumn} -->
+
 			{@const layerArcFunction = $layerArcs.filter(
 				(_, arcNum) => $layerRadii[arcNum] > cutX
 			)[layerNum]}
-			{@const cutY = $yScale(layerArcFunction(cutX))}
+			{@const y = layerArcFunction(cutX)}
+			{@const cutY = $yScale(y)}
+
+			<!-- <text x={cutX} y={cutY} font-size="x-small">
+				{Math.round(pieceArea)}
+			</text> -->
 
 			<text x={cutX} y={cutY} font-size="x-small">
-				{Math.round(pieceArea)}
+				({Math.round(cutX)},{Math.round(y)})
 			</text>
-
-			<circle r="2" cx={cutX} cy={cutY} />
+			<circle r="2" cx={cutX} cy={cutY} fill="red" />
+			<text x={cutX} y={cutY} font-size="xx-small" alignment-baseline="hanging">
+				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+			</text>
 		{/each}
 	{/each}
 {:else if $cutType === "radial"}
@@ -105,7 +114,7 @@
 				{Math.round(area)}
 			</text>
 
-			<circle cx={x} cy={yNormalized} r="2" />
+			<circle cx={x} cy={yNormalized} r="2" fill="red" />
 
 			<!-- {@const markerY = $yScale(layerArcFunction(xOfLeftCutIntersection))} -->
 			<!-- <text {x} y={markerY} font-size="x-small">

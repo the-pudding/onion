@@ -52,18 +52,28 @@ export function getVerticalAreas() {
 		pieceColumn: []
 	}));
 
-	$cutNumbers.forEach((i) => {
-		const { cutX, pieceColumn } = pieceAreas[i];
+	$cutNumbers.forEach((cutNum) => {
+		const { cutX, pieceColumn } = pieceAreas[cutNum];
 
-		$layerRadii.forEach((layerRadius) => {
+		$layerRadii.forEach((layerRadius, layerNum) => {
+			const isFirstLayer = layerNum === 0;
+
 			if (layerRadius > cutX) {
-				const nextCutX = $cutWidthScale(i + 1);
+				const nextCutX = $cutWidthScale(cutNum + 1);
 				const verticalCutArea = getVerticalCutArea(layerRadius, cutX, nextCutX);
 				const pieceArea = pieceColumn.length
 					? verticalCutArea - pieceColumn.at(-1).verticalCutArea
 					: verticalCutArea;
 
-				pieceColumn.push({ layerRadius, verticalCutArea, pieceArea });
+				// y-range is necessary for finding piece areas created by horizontal cuts
+				const yRange = [
+					isFirstLayer
+						? 0
+						: Math.sqrt($layerRadii[layerNum - 1] ** 2 - nextCutX ** 2) || 0,
+					Math.sqrt(layerRadius ** 2 - cutX ** 2)
+				];
+
+				pieceColumn.push({ layerRadius, verticalCutArea, pieceArea, yRange });
 			}
 		});
 	});
@@ -170,6 +180,7 @@ export function getRadialCutAreas() {
 			const isLastPiece = pieceNum === pieces.length - 1;
 			const { leftCutLineSlope, xOfLeftCutIntersection } = piece;
 			const xRange = [undefined, undefined];
+			const yRange = [undefined, undefined];
 
 			function getXLowerBound(_pieceNum) {
 				const xWhereLeftCutIntersectsPreviousLayer =
@@ -194,6 +205,12 @@ export function getRadialCutAreas() {
 			}
 
 			piece.xRange = xRange;
+
+			// find piece's y-range
+			yRange[0] = undefined; // TODO
+			yRange[1] = undefined; // TODO
+
+			piece.yRange = yRange;
 
 			// calculate piece's area by adding/subtracting integrals
 			let area = getVerticalCutArea(
