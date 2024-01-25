@@ -3,6 +3,8 @@ import {
 	cutNumbers,
 	cutTargetDepth,
 	cutWidthScale,
+	horizontalCutNumbers,
+	horizontalCutScale,
 	layerRadii,
 	radius
 } from "../stores/onion.js";
@@ -42,7 +44,10 @@ export function getVerticalCutArea(radius, x1, x2) {
 export function getVerticalAreas() {
 	const $cutNumbers = get(cutNumbers);
 	const $cutWidthScale = get(cutWidthScale);
+	const $radius = get(radius);
 	const $layerRadii = get(layerRadii);
+	const $horizontalCutNumbers = get(horizontalCutNumbers);
+	const $horizontalCutScale = get(horizontalCutScale);
 
 	// with vertical cuts, pieceAreas is a 2D array whose major index corresponds to cutNumbers
 	// the minor index (for pieceColumn array) corresponds to piece index within a column of pieces,
@@ -73,7 +78,24 @@ export function getVerticalAreas() {
 					Math.sqrt(layerRadius ** 2 - cutX ** 2)
 				];
 
-				pieceColumn.push({ layerRadius, verticalCutArea, pieceArea, yRange });
+				// TODO subPieces should be an array of areas, not a number
+				let subPieces = 0;
+
+				$horizontalCutNumbers.reverse().forEach((horizontalCutNum) => {
+					const cutY = $horizontalCutScale(horizontalCutNum) * $radius;
+
+					if (cutY > yRange[0] && cutY < yRange[1]) {
+						subPieces = subPieces ? subPieces + 1 : 2;
+					}
+				});
+
+				pieceColumn.push({
+					layerRadius,
+					verticalCutArea,
+					pieceArea,
+					yRange,
+					subPieces
+				});
 			}
 		});
 	});

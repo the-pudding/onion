@@ -66,7 +66,7 @@
 			{pieceColumn.length}x
 		</text>
 
-		{#each pieceColumn as { layerRadius, pieceArea, yRange }, layerNum}
+		{#each pieceColumn as { layerRadius, pieceArea, yRange, subPieces }, layerNum}
 			<!-- {@debug pieceColumn} -->
 
 			{@const layerArcFunction = $layerArcs.filter(
@@ -79,11 +79,21 @@
 				{Math.round(pieceArea)}
 			</text> -->
 
-			<text x={cutX} y={cutY} font-size="x-small">
+			<!-- y-range is blue if piece is intersected by only one horizontal cut -->
+			<!-- y-range is cyan if piece is intersected by both horizontal cuts -->
+			{@const yRangeColor = ["black", undefined, "blue", "cyan"][subPieces]}
+
+			<text x={cutX} y={cutY} font-size="xx-small">
 				({Math.round(cutX)},{Math.round(y)})
 			</text>
 			<circle r="2" cx={cutX} cy={cutY} fill="red" />
-			<text x={cutX} y={cutY} font-size="xx-small" alignment-baseline="hanging">
+			<text
+				x={cutX}
+				y={cutY}
+				font-size="xx-small"
+				alignment-baseline="hanging"
+				fill={yRangeColor}
+			>
 				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
 			</text>
 		{/each}
