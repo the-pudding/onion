@@ -40,9 +40,11 @@
 			? // TODO account for subpieces from horizontal cuts
 			  verticalPieceAreas
 					.map(({ pieceColumn }) =>
-						pieceColumn.map(({ pieceArea }) => pieceArea)
+						pieceColumn.map(({ pieceArea, subPieces }) =>
+							subPieces.length ? subPieces : pieceArea
+						)
 					)
-					.flat()
+					.flat(2)
 			: // TODO account for subpieces from horizontal cuts
 			  flattenRadialAreas(radialPieceAreas);
 
