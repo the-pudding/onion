@@ -37,12 +37,14 @@
 
 	$: allAreas =
 		$cutType === "vertical"
-			? verticalPieceAreas
+			? // TODO account for subpieces from horizontal cuts
+			  verticalPieceAreas
 					.map(({ pieceColumn }) =>
 						pieceColumn.map(({ pieceArea }) => pieceArea)
 					)
 					.flat()
-			: flattenRadialAreas(radialPieceAreas);
+			: // TODO account for subpieces from horizontal cuts
+			  flattenRadialAreas(radialPieceAreas);
 
 	$: console.log({ allAreas });
 	$: standardDeviation = deviation(allAreas);
@@ -75,17 +77,19 @@
 			{@const y = layerArcFunction(cutX)}
 			{@const cutY = $yScale(y)}
 
-			<!-- <text x={cutX} y={cutY} font-size="x-small">
+			<text x={cutX} y={cutY} font-size="x-small">
 				{Math.round(pieceArea)}
-			</text> -->
+			</text>
 
 			<!-- y-range is blue if piece is intersected by only one horizontal cut -->
 			<!-- y-range is cyan if piece is intersected by both horizontal cuts -->
-			{@const yRangeColor = ["black", undefined, "blue", "cyan"][subPieces]}
+			{@const yRangeColor = ["black", undefined, "blue", "cyan"][
+				subPieces.length
+			]}
 
-			<text x={cutX} y={cutY} font-size="xx-small">
+			<!-- <text x={cutX} y={cutY} font-size="xx-small">
 				({Math.round(cutX)},{Math.round(y)})
-			</text>
+			</text> -->
 			<circle r="2" cx={cutX} cy={cutY} fill="red" />
 			<text
 				x={cutX}
@@ -94,7 +98,8 @@
 				alignment-baseline="hanging"
 				fill={yRangeColor}
 			>
-				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+				<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
+				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
 			</text>
 		{/each}
 	{/each}

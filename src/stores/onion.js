@@ -74,7 +74,9 @@ export const numHorizontalCuts = writable(2);
 export const horizontalCutNumbers = derived(
 	numHorizontalCuts,
 	($numHorizontalCuts) =>
-		Array.from({ length: $numHorizontalCuts }).map((_, i) => i)
+		Array.from({ length: $numHorizontalCuts })
+			.map((_, i) => i)
+			.reverse()
 );
 
 export const horizontalCutScale = derived(

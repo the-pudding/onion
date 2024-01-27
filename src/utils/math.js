@@ -41,6 +41,26 @@ export function getVerticalCutArea(radius, x1, x2) {
 	return getAntiderivative(getTheta(x2)) - getAntiderivative(getTheta(x1));
 }
 
+function getVerticalCutAreaAboveHorizontalLine({
+	layerRadius,
+	cutY,
+	cutX,
+	nextCutX
+}) {
+	const xWhereHorizontalCutIntersectsThisLayer = Math.sqrt(
+		layerRadius ** 2 - cutY ** 2
+	);
+	const xUpperBound = Math.min(
+		xWhereHorizontalCutIntersectsThisLayer,
+		nextCutX
+	);
+
+	return (
+		getVerticalCutArea(layerRadius, cutX, xUpperBound) -
+		(xUpperBound - cutX) * cutY
+	);
+}
+
 export function getVerticalAreas() {
 	const $cutNumbers = get(cutNumbers);
 	const $cutWidthScale = get(cutWidthScale);
@@ -62,6 +82,7 @@ export function getVerticalAreas() {
 
 		$layerRadii.forEach((layerRadius, layerNum) => {
 			const isFirstLayer = layerNum === 0;
+			const previousLayerRadius = $layerRadii[layerNum - 1];
 
 			if (layerRadius > cutX) {
 				const nextCutX = $cutWidthScale(cutNum + 1);
@@ -74,18 +95,52 @@ export function getVerticalAreas() {
 				const yRange = [
 					isFirstLayer
 						? 0
-						: Math.sqrt($layerRadii[layerNum - 1] ** 2 - nextCutX ** 2) || 0,
+						: Math.sqrt(previousLayerRadius ** 2 - nextCutX ** 2) || 0,
 					Math.sqrt(layerRadius ** 2 - cutX ** 2)
 				];
 
-				// TODO subPieces should be an array of areas, not a number
-				let subPieces = 0;
+				// horizontal cuts that intersect this piece will create subpieces
+				let subPieces = [];
 
-				$horizontalCutNumbers.reverse().forEach((horizontalCutNum) => {
+				$horizontalCutNumbers.forEach((horizontalCutNum) => {
 					const cutY = $horizontalCutScale(horizontalCutNum) * $radius;
 
+					// this horizontal cut intersects this piece
 					if (cutY > yRange[0] && cutY < yRange[1]) {
-						subPieces = subPieces ? subPieces + 1 : 2;
+						let upperPieceArea = getVerticalCutAreaAboveHorizontalLine({
+							layerRadius,
+							cutY,
+							cutX,
+							nextCutX
+						});
+						const yWhereLeftCutIntersectsPreviousLayer = Math.sqrt(
+							previousLayerRadius ** 2 - cutX ** 2
+						);
+
+						// this horizontal cut also intersects the piece below
+						if (cutY < yWhereLeftCutIntersectsPreviousLayer) {
+							upperPieceArea -= getVerticalCutAreaAboveHorizontalLine({
+								layerRadius: previousLayerRadius,
+								cutY,
+								cutX,
+								nextCutX
+							});
+						}
+
+						if (subPieces.length) {
+							// add the third piece on the bottom
+							// in this block, upperPieceArea is actually the top 2/3 pieces' area
+							const topPieceArea = subPieces[0];
+
+							subPieces = [
+								topPieceArea,
+								upperPieceArea - topPieceArea,
+								pieceArea - upperPieceArea
+							];
+						} else {
+							// add a top piece and a bottom piece
+							subPieces = [upperPieceArea, pieceArea - upperPieceArea];
+						}
 					}
 				});
 
