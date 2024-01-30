@@ -18,6 +18,10 @@
 
 	let verticalPieceAreas, radialPieceAreas;
 
+	// y-range is blue if piece is intersected by only one horizontal cut
+	// y-range is cyan if piece is intersected by both horizontal cuts
+	const yRangeColors = ["black", undefined, "blue", "cyan"];
+
 	$: readOrCalculateAreas = (areaFunction) => {
 		let areas = localStorage.get($storageKey);
 
@@ -83,12 +87,6 @@
 				{Math.round(pieceArea)}
 			</text>
 
-			<!-- y-range is blue if piece is intersected by only one horizontal cut -->
-			<!-- y-range is cyan if piece is intersected by both horizontal cuts -->
-			{@const yRangeColor = ["black", undefined, "blue", "cyan"][
-				subPieces.length
-			]}
-
 			<!-- <text x={cutX} y={cutY} font-size="xx-small">
 				({Math.round(cutX)},{Math.round(y)})
 			</text> -->
@@ -98,7 +96,7 @@
 				y={cutY}
 				font-size="xx-small"
 				alignment-baseline="hanging"
-				fill={yRangeColor}
+				fill={yRangeColors[subPieces.length]}
 			>
 				<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
 				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
@@ -118,7 +116,7 @@
 			{numPieces} piece{numPieces === 1 ? "" : "s"}
 		</text>
 
-		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange }}
+		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces }}
 			{@const x = xOfLeftCutIntersection}
 			{@const layerArcFunction = $layerArcs[layerNum]}
 			{@const y = layerArcFunction(x)}
@@ -138,6 +136,7 @@
 				y={yNormalized}
 				font-size="xx-small"
 				alignment-baseline="hanging"
+				fill={yRangeColors[subPieces]}
 			>
 				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
 			</text>

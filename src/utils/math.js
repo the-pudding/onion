@@ -197,6 +197,8 @@ export function getRadialCutAreas() {
 	const $radius = get(radius);
 	const $cutNumbers = get(cutNumbers);
 	const $cutTargetDepth = get(cutTargetDepth);
+	const $horizontalCutNumbers = get(horizontalCutNumbers);
+	const $horizontalCutScale = get(horizontalCutScale);
 
 	function getCutLineFunction(slope) {
 		return (x) => slope * x - $cutTargetDepth;
@@ -342,6 +344,19 @@ export function getRadialCutAreas() {
 			}
 
 			piece.area = area;
+
+			// TODO subPieces should be an array of areas, not a number
+			let subPieces = 0;
+
+			$horizontalCutNumbers.reverse().forEach((horizontalCutNum) => {
+				const cutY = $horizontalCutScale(horizontalCutNum) * $radius;
+
+				if (cutY > yRange[0] && cutY < yRange[1]) {
+					subPieces = subPieces ? subPieces + 1 : 2;
+				}
+			});
+
+			piece.subPieces = subPieces;
 		});
 	});
 
