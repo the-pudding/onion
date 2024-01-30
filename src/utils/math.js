@@ -248,16 +248,17 @@ export function getRadialCutAreas() {
 
 	// after each layer's pieces are counted,
 	// calculate areas for each piece
-	pieceAreas.forEach((layerWithPieces, layerNum, layers) => {
+	pieceAreas.forEach(({ pieces, layerRadius }, layerNum, layers) => {
 		const isFirstLayer = layerNum === 0;
 		const previousLayer = layers[layerNum - 1];
 
-		layerWithPieces.pieces.forEach((piece, pieceNum, pieces) => {
+		pieces.forEach((piece, pieceNum, pieces) => {
 			const isFirstPiece = pieceNum === 0;
 			const isLastPiece = pieceNum === pieces.length - 1;
 			const { leftCutLineSlope, xOfLeftCutIntersection } = piece;
 			const xRange = [undefined, undefined];
 			const yRange = [undefined, undefined];
+			const nextPiece = pieces[pieceNum + 1];
 
 			function getXLowerBound(_pieceNum) {
 				const xWhereLeftCutIntersectsPreviousLayer =
@@ -273,9 +274,7 @@ export function getRadialCutAreas() {
 
 			// find piece's x range
 			xRange[0] = xOfLeftCutIntersection;
-			xRange[1] = isLastPiece
-				? layerWithPieces.layerRadius
-				: pieces[pieceNum + 1].xOfLeftCutIntersection;
+			xRange[1] = isLastPiece ? layerRadius : nextPiece.xOfLeftCutIntersection;
 
 			if (!isFirstPiece) {
 				xRange[0] = getXLowerBound(pieceNum);
@@ -284,14 +283,22 @@ export function getRadialCutAreas() {
 			piece.xRange = xRange;
 
 			// find piece's y-range
-			yRange[0] = undefined; // TODO
-			yRange[1] = undefined; // TODO
+			yRange[0] =
+				isLastPiece || isFirstLayer
+					? 0
+					: Math.sqrt(
+							previousLayer.layerRadius ** 2 -
+								previousLayer.pieces[pieceNum + 1]?.xOfLeftCutIntersection ** 2
+					  ) || 0;
+			yRange[1] = Math.sqrt(layerRadius ** 2 - xOfLeftCutIntersection ** 2);
 
 			piece.yRange = yRange;
 
+			// TODO below addition/subtraction should be refactored into its own function, to help with finding areas for horizontally cut subpieces
+
 			// calculate piece's area by adding/subtracting integrals
 			let area = getVerticalCutArea(
-				layerWithPieces.layerRadius,
+				layerRadius,
 				piece.xOfLeftCutIntersection,
 				xRange[1]
 			);
@@ -313,7 +320,7 @@ export function getRadialCutAreas() {
 				);
 
 				area -= getAreaUnderLine({
-					slope: pieces[pieceNum + 1].leftCutLineSlope,
+					slope: nextPiece.leftCutLineSlope,
 					yIntercept: -$cutTargetDepth,
 					x1: xOfRightCutIntersectionWithPreviousLayer,
 					x2: xRange[1]

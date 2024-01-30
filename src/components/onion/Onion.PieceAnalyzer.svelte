@@ -118,20 +118,29 @@
 			{numPieces} piece{numPieces === 1 ? "" : "s"}
 		</text>
 
-		{#each pieces as { xOfLeftCutIntersection, xRange, area }}
+		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange }}
 			{@const x = xOfLeftCutIntersection}
 			{@const layerArcFunction = $layerArcs[layerNum]}
 			{@const y = layerArcFunction(x)}
 			{@const yNormalized = $yScale(y)}
 
-			<!-- <text {x} y={yNormalized} font-size="x-small">
-				({Math.round(x)}, {Math.round(y)})
-			</text> -->
 			<text {x} y={yNormalized} font-size="x-small">
-				{Math.round(area)}
+				({Math.round(x)}, {Math.round(y)})
 			</text>
+			<!-- <text {x} y={yNormalized} font-size="x-small">
+				{Math.round(area)}
+			</text> -->
 
 			<circle cx={x} cy={yNormalized} r="2" fill="red" />
+
+			<text
+				{x}
+				y={yNormalized}
+				font-size="xx-small"
+				alignment-baseline="hanging"
+			>
+				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+			</text>
 
 			<!-- {@const markerY = $yScale(layerArcFunction(xOfLeftCutIntersection))} -->
 			<!-- <text {x} y={markerY} font-size="x-small">
