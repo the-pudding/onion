@@ -296,12 +296,10 @@ export function getRadialCutAreas() {
 
 			piece.yRange = yRange;
 
-			// TODO below addition/subtraction should be refactored into its own function, to help with finding areas for horizontally cut subpieces
-
 			// calculate piece's area by adding/subtracting integrals
 			let area = getVerticalCutArea(
 				layerRadius,
-				piece.xOfLeftCutIntersection,
+				xOfLeftCutIntersection,
 				xRange[1]
 			);
 
@@ -345,14 +343,89 @@ export function getRadialCutAreas() {
 
 			piece.area = area;
 
-			// TODO subPieces should be an array of areas, not a number
-			let subPieces = 0;
+			// horizontal cuts that intersect this piece will create subpieces
+			let subPieces = [];
 
-			$horizontalCutNumbers.reverse().forEach((horizontalCutNum) => {
+			$horizontalCutNumbers.forEach((horizontalCutNum) => {
 				const cutY = $horizontalCutScale(horizontalCutNum) * $radius;
 
 				if (cutY > yRange[0] && cutY < yRange[1]) {
-					subPieces = subPieces ? subPieces + 1 : 2;
+					// TODO this addition/subtraction of areas is identical to `area`'s derivation
+					//   is there a way to reuse a function for this?
+					let upperPieceArea = getVerticalCutAreaAboveHorizontalLine({
+						layerRadius,
+						cutY,
+						cutX: xOfLeftCutIntersection,
+						nextCutX: xRange[1]
+					});
+
+					// add left cut's integral
+					if (!isFirstPiece) {
+						const x1 = Math.max(
+							(cutY + $cutTargetDepth) / leftCutLineSlope,
+							xRange[0]
+						);
+
+						// also need to subtract area of rectangle below cutY
+						upperPieceArea +=
+							getAreaUnderLine({
+								slope: leftCutLineSlope,
+								yIntercept: -$cutTargetDepth,
+								x1,
+								x2: xOfLeftCutIntersection
+							}) -
+							(xOfLeftCutIntersection - x1) * cutY;
+					}
+
+					// subtract previous layer's vertical cut
+					const hasPieceBelowInSlice =
+						!isFirstLayer &&
+						cutY < Math.sqrt(previousLayer.layerRadius ** 2 - xRange[0] ** 2);
+
+					if (hasPieceBelowInSlice) {
+						const xOfHorizontalCutIntersectionWithPreviousLayer = Math.sqrt(
+							previousLayer.layerRadius ** 2 - cutY ** 2
+						);
+
+						upperPieceArea -= getVerticalCutAreaAboveHorizontalLine({
+							layerRadius: previousLayer.layerRadius,
+							cutY,
+							cutX: xRange[0],
+							nextCutX: xOfHorizontalCutIntersectionWithPreviousLayer
+						});
+					}
+
+					// subtract right cut's integral
+					if (
+						!isLastPiece &&
+						cutY < Math.sqrt(layerRadius ** 2 - xRange[1] ** 2)
+					) {
+						const x1 = (cutY + $cutTargetDepth) / nextPiece.leftCutLineSlope;
+
+						// also need to subtract area of rectangle below cutY
+						upperPieceArea -=
+							getAreaUnderLine({
+								slope: nextPiece.leftCutLineSlope,
+								yIntercept: -$cutTargetDepth,
+								x1,
+								x2: xRange[1]
+							}) -
+							(xRange[1] - x1) * cutY;
+					}
+
+					if (subPieces.length) {
+						// in this block, upperPieceArea is actually the top 2/3 pieces' area
+						const topPieceArea = subPieces[0];
+
+						subPieces = [
+							topPieceArea,
+							upperPieceArea - topPieceArea,
+							area - upperPieceArea
+						];
+					} else {
+						// add a top piece and a bottom piece
+						subPieces = [upperPieceArea, area - upperPieceArea];
+					}
 				}
 			});
 

@@ -122,12 +122,12 @@
 			{@const y = layerArcFunction(x)}
 			{@const yNormalized = $yScale(y)}
 
-			<text {x} y={yNormalized} font-size="x-small">
-				({Math.round(x)}, {Math.round(y)})
-			</text>
 			<!-- <text {x} y={yNormalized} font-size="x-small">
-				{Math.round(area)}
+				({Math.round(x)}, {Math.round(y)})
 			</text> -->
+			<text {x} y={yNormalized} font-size="x-small">
+				{Math.round(area)}
+			</text>
 
 			<circle cx={x} cy={yNormalized} r="2" fill="red" />
 
@@ -136,9 +136,10 @@
 				y={yNormalized}
 				font-size="xx-small"
 				alignment-baseline="hanging"
-				fill={yRangeColors[subPieces]}
+				fill={yRangeColors[subPieces.length]}
 			>
-				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+				<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
+				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
 			</text>
 
 			<!-- {@const markerY = $yScale(layerArcFunction(xOfLeftCutIntersection))} -->
