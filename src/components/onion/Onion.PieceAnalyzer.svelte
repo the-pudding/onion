@@ -52,7 +52,6 @@
 			: // TODO account for subpieces from horizontal cuts
 			  flattenRadialAreas(radialPieceAreas);
 
-	$: console.log({ allAreas });
 	$: standardDeviation = deviation(allAreas);
 
 	// TODO generate graphs based on multiple parameters

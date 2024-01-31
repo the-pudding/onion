@@ -106,7 +106,7 @@ export function getVerticalAreas() {
 					const cutY = $horizontalCutScale(horizontalCutNum) * $radius;
 
 					// this horizontal cut intersects this piece
-					if (cutY > yRange[0] && cutY < yRange[1]) {
+					if (isInRange(cutY, yRange[0], yRange[1])) {
 						let upperPieceArea = getVerticalCutAreaAboveHorizontalLine({
 							layerRadius,
 							cutY,
@@ -187,6 +187,16 @@ export function doesLineIntersectCircleAboveXAxis({
 // getAreaUnderLine returns the area under a line defined by y = mx + b
 export function getAreaUnderLine({ slope, yIntercept, x1, x2 }) {
 	return (1 / 2) * slope * (x2 ** 2 - x1 ** 2) + yIntercept * (x2 - x1);
+}
+
+// calculating yRange with Math.sqrt is prone to rounding errors
+// e.g., yRange[1] may be evaluated as 80.00000000000003, for the last (rightmost) piece of
+//   the middle layer given { numLayers: 3, numCuts: 3, cutType: "radial", cutTargetDepth: 0 };
+//   without this function, 80 will be considered to be within yRange, which should be exclusive
+export function isInRange(n, min, max) {
+	const tolerance = 3e-14;
+
+	return n > min && n - min > tolerance && n < max && max - n > tolerance;
 }
 
 // cutTargetDepth store's value gets passed as an arg when getRadialCutAreas is called,
@@ -349,7 +359,7 @@ export function getRadialCutAreas() {
 			$horizontalCutNumbers.forEach((horizontalCutNum) => {
 				const cutY = $horizontalCutScale(horizontalCutNum) * $radius;
 
-				if (cutY > yRange[0] && cutY < yRange[1]) {
+				if (isInRange(cutY, yRange[0], yRange[1])) {
 					// TODO this addition/subtraction of areas is identical to `area`'s derivation
 					//   is there a way to reuse a function for this?
 					let upperPieceArea = getVerticalCutAreaAboveHorizontalLine({
