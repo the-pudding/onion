@@ -41,16 +41,14 @@
 
 	$: allAreas =
 		$cutType === "vertical"
-			? // TODO account for subpieces from horizontal cuts
-			  verticalPieceAreas
+			? verticalPieceAreas
 					.map(({ pieceColumn }) =>
 						pieceColumn.map(({ pieceArea, subPieces }) =>
 							subPieces.length ? subPieces : pieceArea
 						)
 					)
 					.flat(2)
-			: // TODO account for subpieces from horizontal cuts
-			  flattenRadialAreas(radialPieceAreas);
+			: flattenRadialAreas(radialPieceAreas);
 
 	$: standardDeviation = deviation(allAreas);
 

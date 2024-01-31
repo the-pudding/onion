@@ -448,5 +448,9 @@ export function getRadialCutAreas() {
 
 // radialAreas is returned by getRadialCutAreas
 export function flattenRadialAreas(radialAreas) {
-	return radialAreas.map(({ pieces }) => pieces.map(({ area }) => area)).flat();
+	return radialAreas
+		.map(({ pieces }) =>
+			pieces.map(({ area, subPieces }) => (subPieces.length ? subPieces : area))
+		)
+		.flat(2);
 }
