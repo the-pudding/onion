@@ -199,8 +199,6 @@ export function isInRange(n, min, max) {
 	return n > min && n - min > tolerance && n < max && max - n > tolerance;
 }
 
-// cutTargetDepth store's value gets passed as an arg when getRadialCutAreas is called,
-//   so that this function can rerun when cutTargetDepth store changes
 export function getRadialCutAreas() {
 	const $layerRadii = get(layerRadii);
 	const $cutAngleScale = get(cutAngleScale);
