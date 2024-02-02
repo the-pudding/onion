@@ -6,7 +6,10 @@
 		yScale,
 		cutNumbers,
 		cutTargetDepth,
-		cutType
+		cutType,
+		horizontalCutScale,
+		width,
+		horizontalCutNumbers
 	} from "$stores/onion";
 
 	export let height;
@@ -31,6 +34,21 @@
 				y2={$yScale(-$cutTargetDepth)}
 			/>
 		{/if}
+	{/each}
+
+	{#each $horizontalCutNumbers as i}
+		{@const y = $horizontalCutScale(i) * radius}
+		{@const yNormalized = $yScale(y)}
+		<line x1="0" y1={yNormalized} x2={$width / 2} y2={yNormalized} />
+		<text
+			x="0"
+			y={yNormalized}
+			alignment-baseline="central"
+			text-anchor="end"
+			font-size="x-small"
+		>
+			horizontal cut at {y}
+		</text>
 	{/each}
 </g>
 

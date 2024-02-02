@@ -18,6 +18,10 @@
 
 	let verticalPieceAreas, radialPieceAreas;
 
+	// y-range is blue if piece is intersected by only one horizontal cut
+	// y-range is cyan if piece is intersected by both horizontal cuts
+	const yRangeColors = ["black", undefined, "blue", "cyan"];
+
 	$: readOrCalculateAreas = (areaFunction) => {
 		let areas = localStorage.get($storageKey);
 
@@ -39,12 +43,13 @@
 		$cutType === "vertical"
 			? verticalPieceAreas
 					.map(({ pieceColumn }) =>
-						pieceColumn.map(({ pieceArea }) => pieceArea)
+						pieceColumn.map(({ pieceArea, subPieces }) =>
+							subPieces.length ? subPieces : pieceArea
+						)
 					)
-					.flat()
+					.flat(2)
 			: flattenRadialAreas(radialPieceAreas);
 
-	$: console.log({ allAreas });
 	$: standardDeviation = deviation(allAreas);
 
 	// TODO generate graphs based on multiple parameters
@@ -66,17 +71,33 @@
 			{pieceColumn.length}x
 		</text>
 
-		{#each pieceColumn as { layerRadius, pieceArea }, layerNum}
+		{#each pieceColumn as { layerRadius, pieceArea, yRange, subPieces }, layerNum}
+			<!-- {@debug pieceColumn} -->
+
 			{@const layerArcFunction = $layerArcs.filter(
 				(_, arcNum) => $layerRadii[arcNum] > cutX
 			)[layerNum]}
-			{@const cutY = $yScale(layerArcFunction(cutX))}
+			{@const y = layerArcFunction(cutX)}
+			{@const cutY = $yScale(y)}
 
 			<text x={cutX} y={cutY} font-size="x-small">
 				{Math.round(pieceArea)}
 			</text>
 
-			<circle r="2" cx={cutX} cy={cutY} />
+			<!-- <text x={cutX} y={cutY} font-size="xx-small">
+				({Math.round(cutX)},{Math.round(y)})
+			</text> -->
+			<circle r="2" cx={cutX} cy={cutY} fill="red" />
+			<text
+				x={cutX}
+				y={cutY}
+				font-size="xx-small"
+				alignment-baseline="hanging"
+				fill={yRangeColors[subPieces.length]}
+			>
+				<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
+				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
+			</text>
 		{/each}
 	{/each}
 {:else if $cutType === "radial"}
@@ -92,7 +113,7 @@
 			{numPieces} piece{numPieces === 1 ? "" : "s"}
 		</text>
 
-		{#each pieces as { xOfLeftCutIntersection, xRange, area }}
+		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces }}
 			{@const x = xOfLeftCutIntersection}
 			{@const layerArcFunction = $layerArcs[layerNum]}
 			{@const y = layerArcFunction(x)}
@@ -105,7 +126,18 @@
 				{Math.round(area)}
 			</text>
 
-			<circle cx={x} cy={yNormalized} r="2" />
+			<circle cx={x} cy={yNormalized} r="2" fill="red" />
+
+			<text
+				{x}
+				y={yNormalized}
+				font-size="xx-small"
+				alignment-baseline="hanging"
+				fill={yRangeColors[subPieces.length]}
+			>
+				<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
+				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
+			</text>
 
 			<!-- {@const markerY = $yScale(layerArcFunction(xOfLeftCutIntersection))} -->
 			<!-- <text {x} y={markerY} font-size="x-small">

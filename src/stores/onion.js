@@ -26,7 +26,7 @@ export const layerRadii = derived(
 		Array.from({ length: $numLayers }).map((_, i) => $rScale(i + 1))
 );
 
-export const numCuts = writable(10);
+export const numCuts = writable(3);
 
 export const cutNumbers = derived(numCuts, ($numCuts) =>
 	Array.from({ length: $numCuts }).map((_, i) => i)
@@ -55,9 +55,33 @@ export const cutTargetDepth = derived(
 
 export const cutType = writable("vertical");
 
+export const numHorizontalCuts = writable(2);
+
+export const horizontalCutNumbers = derived(
+	numHorizontalCuts,
+	($numHorizontalCuts) =>
+		Array.from({ length: $numHorizontalCuts })
+			.map((_, i) => i)
+			.reverse()
+);
+
+export const horizontalCutScale = derived(
+	numHorizontalCuts,
+	($numHorizontalCuts) =>
+		scaleLinear()
+			.domain([0, $numHorizontalCuts])
+			.range([1 / ($numHorizontalCuts + 1), 1])
+);
+
 export const storageKey = derived(
-	[numLayers, numCuts, cutType, cutTargetDepthPercentage],
-	([$numLayers, $numCuts, $cutType, $cutTargetDepthPercentage]) =>
+	[numLayers, numCuts, cutType, cutTargetDepthPercentage, numHorizontalCuts],
+	([
+		$numLayers,
+		$numCuts,
+		$cutType,
+		$cutTargetDepthPercentage,
+		$numHorizontalCuts
+	]) =>
 		[
 			"areas",
 			`${$numLayers}layers`,
@@ -65,6 +89,7 @@ export const storageKey = derived(
 			$cutType,
 			...($cutType === "radial"
 				? [`${formatPercentage($cutTargetDepthPercentage)}below`]
-				: [])
+				: []),
+			`${$numHorizontalCuts}horizontalCuts`
 		].join(":")
 );

@@ -3,7 +3,8 @@ import {
 	getAreaUnderLine,
 	getRadialCutAreaPolar,
 	getRadialCutAreas,
-	getVerticalCutArea
+	getVerticalCutArea,
+	isInRange
 } from "$utils/math";
 import {
 	cutTargetDepth,
@@ -164,6 +165,20 @@ describe("getAreaUnderLine", () => {
 
 		expect(getAreaUnderLine({ slope, yIntercept, x1: 0, x2: 1 })).toBe(-1 / 2);
 		expect(getAreaUnderLine({ slope, yIntercept, x1: 1, x2: 2 })).toBe(1 / 2);
+	});
+});
+
+describe("isInRange", () => {
+	test("doubly out of range", () => {
+		expect(isInRange(160, 0, 80)).toBe(false);
+	});
+
+	test("in middle of range", () => {
+		expect(isInRange(40, 0, 80)).toBe(true);
+	});
+
+	test("80 + 3e-14", () => {
+		expect(isInRange(80 + 3e-14, 0, 80)).toBe(false);
 	});
 });
 

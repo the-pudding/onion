@@ -3,6 +3,8 @@ import {
 	cutNumbers,
 	cutTargetDepth,
 	cutWidthScale,
+	horizontalCutNumbers,
+	horizontalCutScale,
 	layerRadii,
 	radius
 } from "../stores/onion.js";
@@ -39,10 +41,33 @@ export function getVerticalCutArea(radius, x1, x2) {
 	return getAntiderivative(getTheta(x2)) - getAntiderivative(getTheta(x1));
 }
 
+function getVerticalCutAreaAboveHorizontalLine({
+	layerRadius,
+	cutY,
+	cutX,
+	nextCutX
+}) {
+	const xWhereHorizontalCutIntersectsThisLayer = Math.sqrt(
+		layerRadius ** 2 - cutY ** 2
+	);
+	const xUpperBound = Math.min(
+		xWhereHorizontalCutIntersectsThisLayer,
+		nextCutX
+	);
+
+	return (
+		getVerticalCutArea(layerRadius, cutX, xUpperBound) -
+		(xUpperBound - cutX) * cutY
+	);
+}
+
 export function getVerticalAreas() {
 	const $cutNumbers = get(cutNumbers);
 	const $cutWidthScale = get(cutWidthScale);
+	const $radius = get(radius);
 	const $layerRadii = get(layerRadii);
+	const $horizontalCutNumbers = get(horizontalCutNumbers);
+	const $horizontalCutScale = get(horizontalCutScale);
 
 	// with vertical cuts, pieceAreas is a 2D array whose major index corresponds to cutNumbers
 	// the minor index (for pieceColumn array) corresponds to piece index within a column of pieces,
@@ -52,18 +77,80 @@ export function getVerticalAreas() {
 		pieceColumn: []
 	}));
 
-	$cutNumbers.forEach((i) => {
-		const { cutX, pieceColumn } = pieceAreas[i];
+	$cutNumbers.forEach((cutNum) => {
+		const { cutX, pieceColumn } = pieceAreas[cutNum];
 
-		$layerRadii.forEach((layerRadius) => {
+		$layerRadii.forEach((layerRadius, layerNum) => {
+			const isFirstLayer = layerNum === 0;
+			const previousLayerRadius = $layerRadii[layerNum - 1];
+
 			if (layerRadius > cutX) {
-				const nextCutX = $cutWidthScale(i + 1);
+				const nextCutX = $cutWidthScale(cutNum + 1);
 				const verticalCutArea = getVerticalCutArea(layerRadius, cutX, nextCutX);
 				const pieceArea = pieceColumn.length
 					? verticalCutArea - pieceColumn.at(-1).verticalCutArea
 					: verticalCutArea;
 
-				pieceColumn.push({ layerRadius, verticalCutArea, pieceArea });
+				// y-range is necessary for finding piece areas created by horizontal cuts
+				const yRange = [
+					isFirstLayer
+						? 0
+						: Math.sqrt(previousLayerRadius ** 2 - nextCutX ** 2) || 0,
+					Math.sqrt(layerRadius ** 2 - cutX ** 2)
+				];
+
+				// horizontal cuts that intersect this piece will create subpieces
+				let subPieces = [];
+
+				$horizontalCutNumbers.forEach((horizontalCutNum) => {
+					const cutY = $horizontalCutScale(horizontalCutNum) * $radius;
+
+					// this horizontal cut intersects this piece
+					if (isInRange(cutY, yRange[0], yRange[1])) {
+						let upperPieceArea = getVerticalCutAreaAboveHorizontalLine({
+							layerRadius,
+							cutY,
+							cutX,
+							nextCutX
+						});
+						const yWhereLeftCutIntersectsPreviousLayer = Math.sqrt(
+							previousLayerRadius ** 2 - cutX ** 2
+						);
+
+						// this horizontal cut also intersects the piece below
+						if (cutY < yWhereLeftCutIntersectsPreviousLayer) {
+							upperPieceArea -= getVerticalCutAreaAboveHorizontalLine({
+								layerRadius: previousLayerRadius,
+								cutY,
+								cutX,
+								nextCutX
+							});
+						}
+
+						if (subPieces.length) {
+							// add the third piece on the bottom
+							// in this block, upperPieceArea is actually the top 2/3 pieces' area
+							const topPieceArea = subPieces[0];
+
+							subPieces = [
+								topPieceArea,
+								upperPieceArea - topPieceArea,
+								pieceArea - upperPieceArea
+							];
+						} else {
+							// add a top piece and a bottom piece
+							subPieces = [upperPieceArea, pieceArea - upperPieceArea];
+						}
+					}
+				});
+
+				pieceColumn.push({
+					layerRadius,
+					verticalCutArea,
+					pieceArea,
+					yRange,
+					subPieces
+				});
 			}
 		});
 	});
@@ -102,14 +189,24 @@ export function getAreaUnderLine({ slope, yIntercept, x1, x2 }) {
 	return (1 / 2) * slope * (x2 ** 2 - x1 ** 2) + yIntercept * (x2 - x1);
 }
 
-// cutTargetDepth store's value gets passed as an arg when getRadialCutAreas is called,
-//   so that this function can rerun when cutTargetDepth store changes
+// calculating yRange with Math.sqrt is prone to rounding errors
+// e.g., yRange[1] may be evaluated as 80.00000000000003, for the last (rightmost) piece of
+//   the middle layer given { numLayers: 3, numCuts: 3, cutType: "radial", cutTargetDepth: 0 };
+//   without this function, 80 will be considered to be within yRange, which should be exclusive
+export function isInRange(n, min, max) {
+	const tolerance = 3e-14;
+
+	return n > min && n - min > tolerance && n < max && max - n > tolerance;
+}
+
 export function getRadialCutAreas() {
 	const $layerRadii = get(layerRadii);
 	const $cutAngleScale = get(cutAngleScale);
 	const $radius = get(radius);
 	const $cutNumbers = get(cutNumbers);
 	const $cutTargetDepth = get(cutTargetDepth);
+	const $horizontalCutNumbers = get(horizontalCutNumbers);
+	const $horizontalCutScale = get(horizontalCutScale);
 
 	function getCutLineFunction(slope) {
 		return (x) => slope * x - $cutTargetDepth;
@@ -161,15 +258,17 @@ export function getRadialCutAreas() {
 
 	// after each layer's pieces are counted,
 	// calculate areas for each piece
-	pieceAreas.forEach((layerWithPieces, layerNum, layers) => {
+	pieceAreas.forEach(({ pieces, layerRadius }, layerNum, layers) => {
 		const isFirstLayer = layerNum === 0;
 		const previousLayer = layers[layerNum - 1];
 
-		layerWithPieces.pieces.forEach((piece, pieceNum, pieces) => {
+		pieces.forEach((piece, pieceNum, pieces) => {
 			const isFirstPiece = pieceNum === 0;
 			const isLastPiece = pieceNum === pieces.length - 1;
 			const { leftCutLineSlope, xOfLeftCutIntersection } = piece;
 			const xRange = [undefined, undefined];
+			const yRange = [undefined, undefined];
+			const nextPiece = pieces[pieceNum + 1];
 
 			function getXLowerBound(_pieceNum) {
 				const xWhereLeftCutIntersectsPreviousLayer =
@@ -185,9 +284,7 @@ export function getRadialCutAreas() {
 
 			// find piece's x range
 			xRange[0] = xOfLeftCutIntersection;
-			xRange[1] = isLastPiece
-				? layerWithPieces.layerRadius
-				: pieces[pieceNum + 1].xOfLeftCutIntersection;
+			xRange[1] = isLastPiece ? layerRadius : nextPiece.xOfLeftCutIntersection;
 
 			if (!isFirstPiece) {
 				xRange[0] = getXLowerBound(pieceNum);
@@ -195,10 +292,22 @@ export function getRadialCutAreas() {
 
 			piece.xRange = xRange;
 
+			// find piece's y-range
+			yRange[0] =
+				isLastPiece || isFirstLayer
+					? 0
+					: Math.sqrt(
+							previousLayer.layerRadius ** 2 -
+								previousLayer.pieces[pieceNum + 1]?.xOfLeftCutIntersection ** 2
+					  ) || 0;
+			yRange[1] = Math.sqrt(layerRadius ** 2 - xOfLeftCutIntersection ** 2);
+
+			piece.yRange = yRange;
+
 			// calculate piece's area by adding/subtracting integrals
 			let area = getVerticalCutArea(
-				layerWithPieces.layerRadius,
-				piece.xOfLeftCutIntersection,
+				layerRadius,
+				xOfLeftCutIntersection,
 				xRange[1]
 			);
 
@@ -219,7 +328,7 @@ export function getRadialCutAreas() {
 				);
 
 				area -= getAreaUnderLine({
-					slope: pieces[pieceNum + 1].leftCutLineSlope,
+					slope: nextPiece.leftCutLineSlope,
 					yIntercept: -$cutTargetDepth,
 					x1: xOfRightCutIntersectionWithPreviousLayer,
 					x2: xRange[1]
@@ -241,6 +350,94 @@ export function getRadialCutAreas() {
 			}
 
 			piece.area = area;
+
+			// horizontal cuts that intersect this piece will create subpieces
+			let subPieces = [];
+
+			$horizontalCutNumbers.forEach((horizontalCutNum) => {
+				const cutY = $horizontalCutScale(horizontalCutNum) * $radius;
+
+				if (isInRange(cutY, yRange[0], yRange[1])) {
+					// TODO this addition/subtraction of areas is identical to `area`'s derivation
+					//   is there a way to reuse a function for this?
+					let upperPieceArea = getVerticalCutAreaAboveHorizontalLine({
+						layerRadius,
+						cutY,
+						cutX: xOfLeftCutIntersection,
+						nextCutX: xRange[1]
+					});
+
+					// add left cut's integral
+					if (!isFirstPiece) {
+						const x1 = Math.max(
+							(cutY + $cutTargetDepth) / leftCutLineSlope,
+							xRange[0]
+						);
+
+						// also need to subtract area of rectangle below cutY
+						upperPieceArea +=
+							getAreaUnderLine({
+								slope: leftCutLineSlope,
+								yIntercept: -$cutTargetDepth,
+								x1,
+								x2: xOfLeftCutIntersection
+							}) -
+							(xOfLeftCutIntersection - x1) * cutY;
+					}
+
+					// subtract previous layer's vertical cut
+					const hasPieceBelowInSlice =
+						!isFirstLayer &&
+						cutY < Math.sqrt(previousLayer.layerRadius ** 2 - xRange[0] ** 2);
+
+					if (hasPieceBelowInSlice) {
+						const xOfHorizontalCutIntersectionWithPreviousLayer = Math.sqrt(
+							previousLayer.layerRadius ** 2 - cutY ** 2
+						);
+
+						upperPieceArea -= getVerticalCutAreaAboveHorizontalLine({
+							layerRadius: previousLayer.layerRadius,
+							cutY,
+							cutX: xRange[0],
+							nextCutX: xOfHorizontalCutIntersectionWithPreviousLayer
+						});
+					}
+
+					// subtract right cut's integral
+					if (
+						!isLastPiece &&
+						cutY < Math.sqrt(layerRadius ** 2 - xRange[1] ** 2)
+					) {
+						const x1 = (cutY + $cutTargetDepth) / nextPiece.leftCutLineSlope;
+
+						// also need to subtract area of rectangle below cutY
+						upperPieceArea -=
+							getAreaUnderLine({
+								slope: nextPiece.leftCutLineSlope,
+								yIntercept: -$cutTargetDepth,
+								x1,
+								x2: xRange[1]
+							}) -
+							(xRange[1] - x1) * cutY;
+					}
+
+					if (subPieces.length) {
+						// in this block, upperPieceArea is actually the top 2/3 pieces' area
+						const topPieceArea = subPieces[0];
+
+						subPieces = [
+							topPieceArea,
+							upperPieceArea - topPieceArea,
+							area - upperPieceArea
+						];
+					} else {
+						// add a top piece and a bottom piece
+						subPieces = [upperPieceArea, area - upperPieceArea];
+					}
+				}
+			});
+
+			piece.subPieces = subPieces;
 		});
 	});
 
@@ -249,5 +446,9 @@ export function getRadialCutAreas() {
 
 // radialAreas is returned by getRadialCutAreas
 export function flattenRadialAreas(radialAreas) {
-	return radialAreas.map(({ pieces }) => pieces.map(({ area }) => area)).flat();
+	return radialAreas
+		.map(({ pieces }) =>
+			pieces.map(({ area, subPieces }) => (subPieces.length ? subPieces : area))
+		)
+		.flat(2);
 }
