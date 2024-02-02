@@ -14,7 +14,6 @@
 		getRadialCutAreas,
 		getVerticalAreas
 	} from "$utils/math";
-	import localStorage from "$utils/localStorage";
 
 	let verticalPieceAreas, radialPieceAreas;
 
@@ -22,22 +21,17 @@
 	// y-range is cyan if piece is intersected by both horizontal cuts
 	const yRangeColors = ["black", undefined, "blue", "cyan"];
 
-	$: readOrCalculateAreas = (areaFunction) => {
-		let areas = localStorage.get($storageKey);
-
-		if (!areas) {
-			areas = areaFunction();
-			localStorage.set($storageKey, areas);
+	function calculateAreas() {
+		if ($cutType === "vertical") {
+			verticalPieceAreas = getVerticalAreas();
+		} else if ($cutType === "radial") {
+			radialPieceAreas = getRadialCutAreas();
 		}
-
-		return areas;
-	};
-
-	$: if ($cutType === "vertical") {
-		verticalPieceAreas = readOrCalculateAreas(getVerticalAreas);
-	} else if ($cutType === "radial") {
-		radialPieceAreas = readOrCalculateAreas(getRadialCutAreas);
 	}
+
+	// re-calculate areas when controls change
+	// ($storageKey is derived from control settings)
+	$: $storageKey, calculateAreas();
 
 	$: allAreas =
 		$cutType === "vertical"
