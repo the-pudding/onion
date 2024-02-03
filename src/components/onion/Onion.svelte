@@ -6,13 +6,12 @@
 
 <g class="onion">
 	{#each $layerRadii as r}
-		<circle cx="0" cy={height} {r} />
+		<path d="M {r} {height} A {r} {r} 0 0 0 {-r} {height}" />
 	{/each}
 </g>
 
 <style>
-	circle {
+	path {
 		fill: none;
-		stroke: black;
 	}
 </style>

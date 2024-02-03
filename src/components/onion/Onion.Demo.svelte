@@ -89,7 +89,7 @@
 		margin-bottom: 2rem;
 	}
 
-	:global(line) {
+	:global(line, path) {
 		stroke: black;
 	}
 

@@ -20,18 +20,17 @@
 	{#each $cutNumbers as i}
 		{#if $cutType === "vertical"}
 			{@const x = $cutWidthScale(i)}
-			<line x1={x} y1="0" x2={x} y2={height} />
+			<path d="M {x} 0 v {height}" />
 		{:else if $cutType === "radial"}
 			{@const theta = $cutAngleScale(i + 1)}
 
 			<!-- where cut intercepts onion's outermost layer -->
 			{@const [xIntercept, yIntercept] = polarToCartesian(radius, theta)}
 
-			<line
-				x1={xIntercept * 2}
-				y1={$yScale(yIntercept * 2 + $cutTargetDepth)}
-				x2="0"
-				y2={$yScale(-$cutTargetDepth)}
+			<path
+				d="M {xIntercept * 2} {$yScale(
+					yIntercept * 2 + $cutTargetDepth
+				)} L 0 {$yScale(-$cutTargetDepth)}"
 			/>
 		{/if}
 	{/each}
@@ -39,7 +38,7 @@
 	{#each $horizontalCutNumbers as i}
 		{@const y = $horizontalCutScale(i) * radius}
 		{@const yNormalized = $yScale(y)}
-		<line x1="0" y1={yNormalized} x2={$width / 2} y2={yNormalized} />
+		<path d="M 0 {yNormalized} h {$width / 2}" />
 		<text
 			x="0"
 			y={yNormalized}
@@ -53,7 +52,7 @@
 </g>
 
 <style>
-	line {
+	path {
 		stroke-dasharray: 5;
 	}
 </style>
