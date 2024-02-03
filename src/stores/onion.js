@@ -8,7 +8,7 @@ export const height = derived(width, ($width) => $width / 2);
 const radiusPercentage = 0.8; // proportional to graph height
 export const radius = derived(height, ($height) => $height * radiusPercentage);
 
-export const numLayers = writable(10);
+export const numLayers = writable(3);
 
 // SVG drawing is flipped upside down
 // need to use this function to normalize every linear (y = f(x)) function's output
@@ -55,7 +55,7 @@ export const cutTargetDepth = derived(
 
 export const cutType = writable("vertical");
 
-export const numHorizontalCuts = writable(2);
+export const numHorizontalCuts = writable(0);
 
 export const horizontalCutNumbers = derived(
 	numHorizontalCuts,
