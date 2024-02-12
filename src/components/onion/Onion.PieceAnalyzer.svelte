@@ -6,6 +6,7 @@
 		layerArcs,
 		layerRadii,
 		numCuts,
+		radius,
 		storageKey,
 		yScale
 	} from "$stores/onion";
@@ -60,11 +61,15 @@
 </script>
 
 {#if $cutType === "vertical"}
-	{#each verticalPieceAreas as { cutX, pieceColumn }}
+	{#each verticalPieceAreas as { cutX, pieceColumn }, cutNum}
+		{@const nextCutX = verticalPieceAreas[cutNum + 1]?.cutX || $radius}
+
 		<text x={cutX} y={$yScale(0)} font-size="x-small">
 			{pieceColumn.length}x
 		</text>
 
+		<!-- TODO layerNum in this #each block is a misnomer -->
+		<!--   it's really the index of the lowest piece in the column -->
 		{#each pieceColumn as { layerRadius, pieceArea, yRange, subPieces }, layerNum}
 			<!-- {@debug pieceColumn} -->
 
@@ -92,6 +97,29 @@
 				<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
 				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
 			</text>
+
+			{@const previousLayerRadius =
+				$layerRadii[$layerRadii.indexOf(layerRadius) - 1]}
+			{@const previousLayerArcFunction = $layerArcs.filter(
+				(_, arcNum) => $layerRadii[arcNum] > cutX
+			)[layerNum - 1]}
+			{@const has4Sides = !(layerNum === 0 || cutNum === $numCuts - 1)}
+			{@const yInitial = has4Sides
+				? $yScale(previousLayerArcFunction(cutX))
+				: $yScale(0)}
+
+			<!-- draw piece clockwise from lower left corner -->
+			<!-- TODO this d doesn't account for inner pieces where layerRadius < cutX -->
+			<path
+				d="M {cutX} {yInitial} V {cutY} A {layerRadius} {layerRadius} 0 0 1 {nextCutX} {$yScale(
+					layerArcFunction(nextCutX)
+				)} {has4Sides
+					? `V ${$yScale(
+							previousLayerArcFunction(nextCutX)
+					  )} A ${previousLayerRadius} ${previousLayerRadius} 0 0 0 ${cutX} ${yInitial}`
+					: ''} z"
+				class="silhouette"
+			/>
 		{/each}
 	{/each}
 {:else if $cutType === "radial"}
@@ -149,3 +177,11 @@
 		{/each}
 	{/each}
 {/if}
+
+<style>
+	.silhouette {
+		stroke: mediumpurple;
+		stroke-width: 4px;
+		fill: none;
+	}
+</style>
