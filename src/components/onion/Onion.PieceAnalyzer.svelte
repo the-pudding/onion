@@ -3,6 +3,7 @@
 	import {
 		cutTargetDepthPercentage,
 		cutType,
+		cutWidthScale,
 		layerArcs,
 		layerRadii,
 		numCuts,
@@ -15,6 +16,7 @@
 		getRadialCutAreas,
 		getVerticalAreas
 	} from "$utils/math";
+	import OnionPiece from "$components/onion/Onion.Piece.svelte";
 
 	let verticalPieceAreas, radialPieceAreas;
 
@@ -62,8 +64,6 @@
 
 {#if $cutType === "vertical"}
 	{#each verticalPieceAreas as { cutX, pieceColumn }, cutNum}
-		{@const nextCutX = verticalPieceAreas[cutNum + 1]?.cutX || $radius}
-
 		<text x={cutX} y={$yScale(0)} font-size="x-small">
 			{pieceColumn.length}x
 		</text>
@@ -98,27 +98,14 @@
 				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
 			</text>
 
-			{@const previousLayerRadius =
-				$layerRadii[$layerRadii.indexOf(layerRadius) - 1]}
-			{@const previousLayerArcFunction = $layerArcs.filter(
-				(_, arcNum) => $layerRadii[arcNum] > cutX
-			)[layerNum - 1]}
-			{@const has4Sides = !(layerNum === 0 || cutNum === $numCuts - 1)}
-			{@const yInitial = has4Sides
-				? $yScale(previousLayerArcFunction(cutX))
-				: $yScale(0)}
+			{@const cutWidth = $cutWidthScale(1)}
+			{@const cutSectionPath = `M ${cutX} ${$yScale(0)} V ${$yScale(
+				$radius
+			)} h ${cutWidth} v ${$yScale(0)} z`}
 
-			<!-- draw piece clockwise from lower left corner -->
-			<!-- TODO this d doesn't account for inner pieces where layerRadius < cutX -->
-			<path
-				d="M {cutX} {yInitial} V {cutY} A {layerRadius} {layerRadius} 0 0 1 {nextCutX} {$yScale(
-					layerArcFunction(nextCutX)
-				)} {has4Sides
-					? `V ${$yScale(
-							previousLayerArcFunction(nextCutX)
-					  )} A ${previousLayerRadius} ${previousLayerRadius} 0 0 0 ${cutX} ${yInitial}`
-					: ''} z"
-				class="silhouette"
+			<OnionPiece
+				layerNum={$layerRadii.indexOf(layerRadius)}
+				{cutSectionPath}
 			/>
 		{/each}
 	{/each}
@@ -174,14 +161,8 @@
 				stroke-width="2"
 				style="stroke: red"
 			/> -->
+
+			<!-- TODO add Onion.Piece -->
 		{/each}
 	{/each}
 {/if}
-
-<style>
-	.silhouette {
-		stroke: mediumpurple;
-		stroke-width: 4px;
-		fill: none;
-	}
-</style>
