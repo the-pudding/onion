@@ -444,6 +444,17 @@ export function getRadialCutAreas() {
 	return pieceAreas;
 }
 
+// verticalAreas is returned by getVerticalAreas
+export function flattenVerticalAreas(verticalAreas) {
+	return verticalAreas
+		.map(({ pieceColumn }) =>
+			pieceColumn.map(({ pieceArea, subPieces }) =>
+				subPieces.length ? subPieces : pieceArea
+			)
+		)
+		.flat(2);
+}
+
 // radialAreas is returned by getRadialCutAreas
 export function flattenRadialAreas(radialAreas) {
 	return radialAreas

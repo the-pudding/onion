@@ -11,6 +11,7 @@
 	} from "$stores/onion";
 	import {
 		flattenRadialAreas,
+		flattenVerticalAreas,
 		getRadialCutAreas,
 		getVerticalAreas
 	} from "$utils/math";
@@ -35,13 +36,7 @@
 
 	$: allAreas =
 		$cutType === "vertical"
-			? verticalPieceAreas
-					.map(({ pieceColumn }) =>
-						pieceColumn.map(({ pieceArea, subPieces }) =>
-							subPieces.length ? subPieces : pieceArea
-						)
-					)
-					.flat(2)
+			? flattenVerticalAreas(verticalPieceAreas)
 			: flattenRadialAreas(radialPieceAreas);
 
 	$: standardDeviation = deviation(allAreas);

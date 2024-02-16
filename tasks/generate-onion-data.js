@@ -3,13 +3,17 @@ import { writeFile } from "fs/promises";
 import { get } from "svelte/store";
 import {
 	flattenRadialAreas,
+	flattenVerticalAreas,
 	getRadialCutAreas,
 	getVerticalAreas
 } from "../src/utils/math.js";
 import {
 	cutTargetDepthPercentage,
 	cutType,
-	numCuts
+	numCuts,
+	numHorizontalCuts,
+	numLayers,
+	storageKey
 } from "../src/stores/onion.js";
 import { deviation, mean } from "d3";
 
@@ -24,18 +28,41 @@ const DATA_FILE_RADIAL_RELATIVE = path.join(
 	"onion-standard-deviation-radial.json"
 );
 const DATA_FILE_RADIAL = path.join(CWD, DATA_FILE_RADIAL_RELATIVE);
-const MAX_CUTS = get(numCuts);
+const MAX_CUTS = 10;
 
 async function writeAllVerticalAreasToFile() {
+	// TODO also test horizontal cuts
+	numHorizontalCuts.set(0);
+
 	// mapping from $numCuts to pieceAreas objects
 	const allVerticalAreas = {};
 
-	for (let i = 1; i <= MAX_CUTS; i++) {
-		numCuts.set(i);
-		const pieceAreas = getVerticalAreas();
-		allVerticalAreas[i] = pieceAreas;
+	for (let i = 7; i <= 13; i++) {
+		numLayers.set(i);
+		let minRSD = Infinity;
+		let idealNumCuts = undefined;
+		console.log(`\tnumLayers = ${i}`);
 
-		console.log(`\tFound vertical areas with numCuts = ${i}`);
+		for (let j = 1; j <= MAX_CUTS; j++) {
+			numCuts.set(j);
+			const $storageKey = get(storageKey);
+			const pieceAreas = getVerticalAreas();
+			const flattenedVerticalAreas = flattenVerticalAreas(pieceAreas);
+			const meanArea = mean(flattenedVerticalAreas);
+			const standardDeviation = deviation(flattenedVerticalAreas);
+			const rsd = (standardDeviation / meanArea) * 100;
+
+			allVerticalAreas[$storageKey] = { pieceAreas, meanArea, rsd };
+
+			console.log(`\t\tFound vertical areas with numCuts = ${j}`);
+
+			if (rsd < minRSD) {
+				minRSD = rsd;
+				idealNumCuts = j;
+			}
+		}
+
+		console.log(`\t\tIdeal number of cuts: ${idealNumCuts}`);
 	}
 
 	try {
@@ -83,7 +110,6 @@ function getAllRadialAreas() {}
 function getRadialAreas() {}
 
 (async () => {
-	// TODO do we still need this function?
-	// await writeAllVerticalAreasToFile();
-	await writeAllRadialAreasToFile();
+	await writeAllVerticalAreasToFile();
+	// await writeAllRadialAreasToFile();
 })();
