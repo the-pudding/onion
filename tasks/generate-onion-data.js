@@ -78,9 +78,12 @@ async function writeAllVerticalAreasToFile() {
 async function writeAllRadialAreasToFile() {
 	const allRadialAreas = [];
 	cutType.set("radial");
+	numCuts.set(10);
+	numHorizontalCuts.set(0);
 
-	for (let i = 0; i <= 1; i += 0.01) {
-		cutTargetDepthPercentage.set(i);
+	for (let i = 0; i <= 100; i++) {
+		const percentage = i / 100;
+		cutTargetDepthPercentage.set(percentage);
 
 		const radialAreas = getRadialCutAreas();
 		const flattenedRadialAreas = flattenRadialAreas(radialAreas);
@@ -89,11 +92,11 @@ async function writeAllRadialAreasToFile() {
 		const rsd = (standardDeviation / meanArea) * 100;
 
 		allRadialAreas.push({
-			cutTargetDepthPercentage: i,
+			cutTargetDepthPercentage: percentage,
 			rsd
 		});
 
-		console.log(`\tFound radial areas with cutTargetDepth = ${i}`);
+		console.log(`\tFound radial areas with cutTargetDepth = ${percentage}`);
 	}
 
 	try {
@@ -110,6 +113,6 @@ function getAllRadialAreas() {}
 function getRadialAreas() {}
 
 (async () => {
-	await writeAllVerticalAreasToFile();
-	// await writeAllRadialAreasToFile();
+	// await writeAllVerticalAreasToFile();
+	await writeAllRadialAreasToFile();
 })();
