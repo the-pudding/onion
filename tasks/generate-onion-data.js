@@ -28,16 +28,28 @@ const DATA_FILE_RADIAL_RELATIVE = path.join(
 	"onion-standard-deviation-radial.json"
 );
 const DATA_FILE_RADIAL = path.join(CWD, DATA_FILE_RADIAL_RELATIVE);
+const DATA_FILE_STANDARD_DEVIATION_RELATIVE = path.join(
+	"src/data",
+	"onion-standard-deviation.json"
+);
+const DATA_FILE_STANDARD_DEVIATION = path.join(
+	CWD,
+	DATA_FILE_STANDARD_DEVIATION_RELATIVE
+);
+const MIN_LAYERS = 7;
+const MAX_LAYERS = 13;
+const MIN_CUTS = 1;
 const MAX_CUTS = 10;
+const MIN_HORIZONTAL_CUTS = 0;
+const MAX_HORIZONTAL_CUTS = 2;
 
 async function writeAllVerticalAreasToFile() {
-	// TODO also test horizontal cuts
 	numHorizontalCuts.set(0);
 
 	// mapping from $numCuts to pieceAreas objects
 	const allVerticalAreas = {};
 
-	for (let i = 7; i <= 13; i++) {
+	for (let i = MIN_LAYERS; i <= MAX_LAYERS; i++) {
 		numLayers.set(i);
 		let minRSD = Infinity;
 		let idealNumCuts = undefined;
@@ -108,11 +120,74 @@ async function writeAllRadialAreasToFile() {
 	}
 }
 
-// TODO getAllRadialAreas will have to loop through both cutNumbers and cutTargetDepths
-function getAllRadialAreas() {}
-function getRadialAreas() {}
+async function writeAllStandardDeviationsToFile() {
+	let standardDeviations = {};
+
+	function addRSDData() {
+		standardDeviations = {
+			...standardDeviations,
+			...getRelativeStandardDeviation()
+		};
+	}
+
+	for (let l = MIN_LAYERS; l <= MAX_LAYERS; l++) {
+		numLayers.set(l);
+
+		for (let c = MIN_CUTS; c <= MAX_CUTS; c++) {
+			numCuts.set(c);
+
+			for (let h = MIN_HORIZONTAL_CUTS; h <= MAX_HORIZONTAL_CUTS; h++) {
+				numHorizontalCuts.set(h);
+
+				// get standard deviation data for vertical cuts
+				cutType.set("vertical");
+				addRSDData();
+
+				// get standard deviation data for radial cuts
+				cutType.set("radial");
+				const depthMax = c > 1 ? 100 : 0;
+
+				for (let d = 0; d <= depthMax; d++) {
+					cutTargetDepthPercentage.set(d / 100);
+					const $storageKey = get(storageKey);
+					console.log({ $storageKey });
+					addRSDData();
+				}
+			}
+		}
+
+		// TODO for this number of layers, where does the minimum standard deviation occur?
+	}
+
+	try {
+		await writeFile(
+			DATA_FILE_STANDARD_DEVIATION,
+			JSON.stringify(standardDeviations)
+		);
+
+		console.log(`Wrote standard deviations to ${DATA_FILE_STANDARD_DEVIATION}`);
+	} catch (error) {
+		console.error(error);
+	}
+}
+
+function getRelativeStandardDeviation() {
+	const $storageKey = get(storageKey);
+	const $cutType = get(cutType);
+	const pieceAreas =
+		$cutType === "vertical" ? getVerticalAreas() : getRadialCutAreas();
+	const flattenedAreas =
+		$cutType === "vertical"
+			? flattenVerticalAreas(pieceAreas)
+			: flattenRadialAreas(pieceAreas);
+	const meanArea = mean(flattenedAreas);
+	const standardDeviation = deviation(flattenedAreas);
+
+	return { [$storageKey]: (standardDeviation / meanArea) * 100 };
+}
 
 (async () => {
 	// await writeAllVerticalAreasToFile();
-	await writeAllRadialAreasToFile();
+	// await writeAllRadialAreasToFile();
+	await writeAllStandardDeviationsToFile();
 })();
