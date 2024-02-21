@@ -5,6 +5,7 @@
 		"gdoc": "node tasks/fetch-google.js",
 		"style": "node tasks/style-dictionary.js",
 		"generate-onion-data": "node tasks/generate-onion-data.js",
+		"onion-report": "node tasks/onion-report.js",
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
