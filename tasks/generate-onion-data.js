@@ -5,7 +5,8 @@ import {
 	flattenRadialAreas,
 	flattenVerticalAreas,
 	getRadialCutAreas,
-	getVerticalAreas
+	getVerticalAreas,
+	roundToDecimalPlaces
 } from "../src/utils/math.js";
 import {
 	cutTargetDepthPercentage,
@@ -15,7 +16,7 @@ import {
 	numLayers,
 	storageKey
 } from "../src/stores/onion.js";
-import { deviation, mean } from "d3";
+import { deviation, format, mean } from "d3";
 
 const CWD = process.cwd();
 const DATA_FILE_VERTICAL_RELATIVE = path.join(
@@ -36,10 +37,10 @@ const DATA_FILE_STANDARD_DEVIATION = path.join(
 	CWD,
 	DATA_FILE_STANDARD_DEVIATION_RELATIVE
 );
-const MIN_LAYERS = 7;
-const MAX_LAYERS = 13;
-const MIN_CUTS = 1;
-const MAX_CUTS = 10;
+export const MIN_LAYERS = 7;
+export const MAX_LAYERS = 13;
+export const MIN_CUTS = 1;
+export const MAX_CUTS = 10;
 const MIN_HORIZONTAL_CUTS = 0;
 const MAX_HORIZONTAL_CUTS = 2;
 
@@ -182,8 +183,9 @@ function getRelativeStandardDeviation() {
 			: flattenRadialAreas(pieceAreas);
 	const meanArea = mean(flattenedAreas);
 	const standardDeviation = deviation(flattenedAreas);
+	const rsd = (standardDeviation / meanArea) * 100;
 
-	return { [$storageKey]: ((standardDeviation / meanArea) * 100).toFixed(3) };
+	return { [$storageKey]: +format(".3f")(rsd) };
 }
 
 (async () => {

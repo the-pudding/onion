@@ -19,6 +19,10 @@ export function polarToCartesian(r, theta) {
 	return [r * Math.sin(theta), r * Math.cos(theta)];
 }
 
+export function roundToDecimalPlaces(n, places) {
+	return +n.toFixed(places);
+}
+
 // https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/28c569c5d8e79b7e1a2be1755de42d25_MIT18_01SCF10_Ses70a.pdf
 // following a similar derivation to the paper above,
 // getVerticalCutArea returns the area of a vertical slice of a quarter circle in the first quadrant,
