@@ -183,7 +183,7 @@ function getRelativeStandardDeviation() {
 	const meanArea = mean(flattenedAreas);
 	const standardDeviation = deviation(flattenedAreas);
 
-	return { [$storageKey]: (standardDeviation / meanArea) * 100 };
+	return { [$storageKey]: ((standardDeviation / meanArea) * 100).toFixed(3) };
 }
 
 (async () => {

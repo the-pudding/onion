@@ -83,13 +83,12 @@ export const storageKey = derived(
 		$numHorizontalCuts
 	]) =>
 		[
-			"areas",
-			`${$numLayers}layers`,
-			`${$numCuts}cuts`,
-			$cutType,
+			`${$numLayers}l`,
+			`${$numCuts}c`,
+			$cutType === "radial" ? "r" : "v",
 			...($cutType === "radial"
-				? [`${formatPercentage($cutTargetDepthPercentage)}below`]
+				? [`${formatPercentage($cutTargetDepthPercentage)}d`]
 				: []),
-			`${$numHorizontalCuts}horizontalCuts`
+			`${$numHorizontalCuts}h`
 		].join(":")
 );
