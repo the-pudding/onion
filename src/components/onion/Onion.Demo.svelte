@@ -38,7 +38,9 @@
 
 	<OnionCuts {height} {radius} />
 
-	<OnionPieceAnalyzer />
+	<!-- TODO will need to adjust OnionPieceAnalyzer implementation to highlight pieces -->
+	<!--   e.g., exploded view, small vs large pieces in vertical / 0-depth radial -->
+	<!-- <OnionPieceAnalyzer /> -->
 </svg>
 
 <div class="controls">
