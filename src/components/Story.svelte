@@ -16,7 +16,7 @@
 	{#if type === "text"}
 		<p class={type}>{@html value}</p>
 	{:else if type === "Component"}
-		<OnionDemo />
+		<OnionDemo {...value} />
 	{/if}
 {/each}
 
@@ -33,5 +33,13 @@
 		& > :last-child {
 			font-size: var(--16px);
 		}
+	}
+
+	:global(.primary) {
+		color: var(--color-purple);
+	}
+
+	:global(.secondary) {
+		color: var(--color-green);
 	}
 </style>

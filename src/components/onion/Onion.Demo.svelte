@@ -19,6 +19,9 @@
 		numHorizontalCuts
 	} from "$stores/onion";
 
+	export let showControls = true;
+	export let showCuts = true;
+
 	// TODO move these gets to each component
 	const width = get(widthStore);
 	const height = get(heightStore);
@@ -36,45 +39,51 @@
 
 	<Onion {height} />
 
-	<OnionCuts {height} {radius} />
+	{#if showCuts !== "false"}
+		<OnionCuts {height} {radius} />
+	{/if}
 
 	<!-- TODO will need to adjust OnionPieceAnalyzer implementation to highlight pieces -->
 	<!--   e.g., exploded view, small vs large pieces in vertical / 0-depth radial -->
 	<!-- <OnionPieceAnalyzer /> -->
 </svg>
 
-<div class="controls">
-	<p>number of layers: {$numLayers}</p>
-	<Range min={7} max={13} label="number of layers" bind:value={$numLayers} />
+<!-- TODO is there a less brittle way to do this? -->
+<!--   (ArchieML doesn't support booleans) -->
+{#if showControls !== "false"}
+	<div class="controls">
+		<p>number of layers: {$numLayers}</p>
+		<Range min={7} max={13} label="number of layers" bind:value={$numLayers} />
 
-	<p>number of cuts: {$numCuts}</p>
-	<Range min={1} max={10} label="number of cuts" bind:value={$numCuts} />
+		<p>number of cuts: {$numCuts}</p>
+		<Range min={1} max={10} label="number of cuts" bind:value={$numCuts} />
 
-	<ButtonSet legend="cut type" {options} bind:value={$cutType} />
+		<ButtonSet legend="cut type" {options} bind:value={$cutType} />
 
-	<div class:hidden={$cutType !== "radial"}>
-		<p>
-			cut target height:
-			{formatPercentage(-$cutTargetDepthPercentage)} of outer radius
-		</p>
+		<div class:hidden={$cutType !== "radial"}>
+			<p>
+				cut target height:
+				{formatPercentage(-$cutTargetDepthPercentage)} of outer radius
+			</p>
 
+			<Range
+				min={0}
+				max={1}
+				step={0.01}
+				bind:value={$cutTargetDepthPercentage}
+				label="cut target depth percentage"
+			/>
+		</div>
+
+		<p>horizontal cuts: {$numHorizontalCuts}</p>
 		<Range
 			min={0}
-			max={1}
-			step={0.01}
-			bind:value={$cutTargetDepthPercentage}
-			label="cut target depth percentage"
+			max={2}
+			label="horizontal cuts"
+			bind:value={$numHorizontalCuts}
 		/>
 	</div>
-
-	<p>horizontal cuts: {$numHorizontalCuts}</p>
-	<Range
-		min={0}
-		max={2}
-		label="horizontal cuts"
-		bind:value={$numHorizontalCuts}
-	/>
-</div>
+{/if}
 
 <style>
 	svg {
