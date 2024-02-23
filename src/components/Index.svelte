@@ -1,16 +1,20 @@
 <script>
+	import { getContext } from "svelte";
 	import WIP from "$components/helpers/WIP.svelte";
+	import Intro from "./onion/Intro.svelte";
 	import OnionDemo from "$components/onion/Onion.Demo.svelte";
 	import OnionRadialStandardDeviationGraph from "$components/onion/Onion.RadialStandardDeviationGraph.svelte";
 	import OnionStandardDeviationGraph from "$components/onion/Onion.StandardDeviationGraph.svelte";
 	// import Footer from "$components/Footer.svelte";
 
-	// const copy = getContext("copy");
+	const copy = getContext("copy");
 	// const data = getContext("data");
+
+	console.log({ copy });
 </script>
 
 <WIP />
-
+<Intro />
 <OnionDemo />
 
 <!-- TODO will we show these misc graphs? -->
@@ -23,3 +27,15 @@
 <OnionStandardDeviationGraph /> -->
 
 <!-- <Footer /> -->
+
+<style global>
+	/* TODO Inter font */
+
+	.text {
+		font-size: var(--24px);
+	}
+
+	.small {
+		font-size: var(--14px);
+	}
+</style>
