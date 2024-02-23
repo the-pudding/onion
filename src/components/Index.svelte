@@ -1,7 +1,7 @@
 <script>
 	import { getContext } from "svelte";
 	import WIP from "$components/helpers/WIP.svelte";
-	import Intro from "./onion/Intro.svelte";
+	import Intro from "./Intro.svelte";
 	import OnionDemo from "$components/onion/Onion.Demo.svelte";
 	import OnionRadialStandardDeviationGraph from "$components/onion/Onion.RadialStandardDeviationGraph.svelte";
 	import OnionStandardDeviationGraph from "$components/onion/Onion.StandardDeviationGraph.svelte";
