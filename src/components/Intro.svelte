@@ -26,7 +26,11 @@
 		text-transform: capitalize;
 	}
 
-	:global(.intro blockquote em),
+	blockquote {
+		font-size: var(--text-size);
+	}
+
+	blockquote :global(em),
 	.note {
 		color: var(--color-purple);
 	}

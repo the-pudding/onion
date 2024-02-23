@@ -2,6 +2,7 @@
 	import { getContext } from "svelte";
 	import WIP from "$components/helpers/WIP.svelte";
 	import Intro from "./Intro.svelte";
+	import Story from "./Story.svelte";
 	import OnionDemo from "$components/onion/Onion.Demo.svelte";
 	import OnionRadialStandardDeviationGraph from "$components/onion/Onion.RadialStandardDeviationGraph.svelte";
 	import OnionStandardDeviationGraph from "$components/onion/Onion.StandardDeviationGraph.svelte";
@@ -15,7 +16,9 @@
 
 <WIP />
 <Intro />
-<OnionDemo />
+<Story />
+
+<!-- <OnionDemo /> -->
 
 <!-- TODO will we show these misc graphs? -->
 <!-- <h2>standard deviation in piece size</h2>
@@ -29,10 +32,14 @@
 <!-- <Footer /> -->
 
 <style global>
+	:root {
+		--text-size: var(--24px);
+	}
+
 	/* TODO Inter font */
 
 	.text {
-		font-size: var(--24px);
+		font-size: var(--text-size);
 	}
 
 	.small {
