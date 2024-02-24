@@ -36,12 +36,12 @@
 	}
 
 	:global(.primary) {
-		color: var(--color-purple);
-		stroke: var(--color-purple);
+		color: var(--color-primary);
+		stroke: var(--color-primary);
 	}
 
 	:global(.secondary:not(.primary)) {
-		color: var(--color-green);
-		stroke: var(--color-green);
+		color: var(--color-secondary);
+		stroke: var(--color-secondary);
 	}
 </style>

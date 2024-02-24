@@ -34,6 +34,8 @@
 <style global>
 	:root {
 		--text-size: var(--24px);
+		--color-primary: var(--color-purple);
+		--color-secondary: var(--color-green);
 	}
 
 	/* TODO Inter font */

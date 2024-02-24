@@ -32,7 +32,7 @@
 
 	blockquote :global(em),
 	.note {
-		color: var(--color-purple);
+		color: var(--color-primary);
 	}
 
 	.note {
