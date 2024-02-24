@@ -37,9 +37,11 @@
 
 	:global(.primary) {
 		color: var(--color-purple);
+		stroke: var(--color-purple);
 	}
 
-	:global(.secondary) {
+	:global(.secondary:not(.primary)) {
 		color: var(--color-green);
+		stroke: var(--color-green);
 	}
 </style>

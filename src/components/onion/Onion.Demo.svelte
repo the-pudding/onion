@@ -21,6 +21,7 @@
 
 	export let showControls = true;
 	export let showCuts = true;
+	export let highlightExtremes = false;
 
 	// TODO move these gets to each component
 	const width = get(widthStore);
@@ -45,7 +46,7 @@
 
 	<!-- TODO will need to adjust OnionPieceAnalyzer implementation to highlight pieces -->
 	<!--   e.g., exploded view, small vs large pieces in vertical / 0-depth radial -->
-	<!-- <OnionPieceAnalyzer /> -->
+	<OnionPieceAnalyzer {highlightExtremes} />
 </svg>
 
 <!-- TODO is there a less brittle way to do this? -->

@@ -16,6 +16,8 @@
 		getVerticalAreas
 	} from "$utils/math";
 
+	export let highlightExtremes = false;
+
 	let verticalPieceAreas, radialPieceAreas;
 
 	// y-range is blue if piece is intersected by only one horizontal cut
@@ -55,10 +57,10 @@
 </script>
 
 {#if $cutType === "vertical"}
-	{#each verticalPieceAreas as { cutX, pieceColumn }}
-		<text x={cutX} y={$yScale(0)} font-size="x-small">
+	{#each verticalPieceAreas as { cutX, pieceColumn }, cutNum}
+		<!-- <text x={cutX} y={$yScale(0)} font-size="x-small">
 			{pieceColumn.length}x
-		</text>
+		</text> -->
 
 		{#each pieceColumn as { layerRadius, pieceArea, yRange, subPieces }, layerNum}
 			<!-- {@debug pieceColumn} -->
@@ -69,14 +71,10 @@
 			{@const y = layerArcFunction(cutX)}
 			{@const cutY = $yScale(y)}
 
-			<text x={cutX} y={cutY} font-size="x-small">
-				{Math.round(pieceArea)}
-			</text>
-
 			<!-- <text x={cutX} y={cutY} font-size="xx-small">
 				({Math.round(cutX)},{Math.round(y)})
 			</text> -->
-			<circle r="2" cx={cutX} cy={cutY} fill="red" />
+			<!-- <circle r="2" cx={cutX} cy={cutY} fill="red" />
 			<text
 				x={cutX}
 				y={cutY}
@@ -84,9 +82,27 @@
 				alignment-baseline="hanging"
 				fill={yRangeColors[subPieces.length]}
 			>
-				<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
+				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
 				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
-			</text>
+			</text> -->
+
+			{#if highlightExtremes}
+				{@const isInCenterColumn = cutNum === 0}
+				{@const isBottomPiece = layerNum === 0}
+
+				{#if isInCenterColumn || isBottomPiece}
+					<!-- TODO highlight piece outline instead of displaying area -->
+					<text
+						x={cutX}
+						y={cutY}
+						font-size="x-small"
+						class:primary={isInCenterColumn}
+						class:secondary={isBottomPiece}
+					>
+						{Math.round(pieceArea)}
+					</text>
+				{/if}
+			{/if}
 		{/each}
 	{/each}
 {:else if $cutType === "radial"}
