@@ -13,10 +13,10 @@
 </div>
 
 {#each copy.story as { type, value }}
-	{#if type === "text"}
-		<p class={type}>{@html value}</p>
-	{:else if type === "Component"}
+	{#if type === "Component"}
 		<OnionDemo {...value} />
+	{:else}
+		<p class={type}>{@html value}</p>
 	{/if}
 {/each}
 
