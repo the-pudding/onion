@@ -16,7 +16,7 @@
 		getVerticalAreas
 	} from "$utils/math";
 
-	export let highlightExtremes = false;
+	export let highlightExtremes;
 
 	let verticalPieceAreas, radialPieceAreas;
 

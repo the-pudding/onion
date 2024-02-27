@@ -19,9 +19,13 @@
 		numHorizontalCuts
 	} from "$stores/onion";
 
-	export let showControls = true;
 	export let showCuts = true;
 	export let highlightExtremes = false;
+	export let showControls = true;
+	export let controlLayers = false;
+	export let controlCutType = false;
+	export let controlHorizontalCuts = false;
+	export let captionId = undefined;
 
 	// TODO move these gets to each component
 	const width = get(widthStore);
@@ -31,60 +35,73 @@
 	const options = [{ value: "vertical" }, { value: "radial" }];
 </script>
 
-<svg {width} {height} viewBox="{-width / 2} 0 {width} {height}">
-	<!-- TODO should axes be rewritten w/layercake? -->
-	<OnionAxisX {width} {height} />
-	<OnionAxisX {width} {height} isBottom />
-	<!-- TODO responsive sizing: move y axis when screen resizes -->
-	<OnionAxisY {height} />
+<figure aria-describedby={captionId}>
+	<svg {width} {height} viewBox="{-width / 2} 0 {width} {height}">
+		<!-- TODO should axes be rewritten w/layercake? -->
+		<OnionAxisX {width} {height} />
+		<OnionAxisX {width} {height} isBottom />
+		<!-- TODO responsive sizing: move y axis when screen resizes -->
+		<OnionAxisY {height} />
 
-	<Onion {height} />
+		<Onion {height} />
 
-	{#if showCuts !== "false"}
-		<OnionCuts {height} {radius} />
-	{/if}
+		{#if showCuts !== "false"}
+			<OnionCuts {height} {radius} />
+		{/if}
 
-	<!-- TODO will need to adjust OnionPieceAnalyzer implementation to highlight pieces -->
-	<!--   e.g., exploded view, small vs large pieces in vertical / 0-depth radial -->
-	<OnionPieceAnalyzer {highlightExtremes} />
-</svg>
+		<!-- TODO will need to adjust OnionPieceAnalyzer implementation to highlight pieces -->
+		<!--   e.g., exploded view, small vs large pieces in vertical / 0-depth radial -->
+		<OnionPieceAnalyzer {highlightExtremes} />
+	</svg>
 
-<!-- TODO is there a less brittle way to do this? -->
-<!--   (ArchieML doesn't support booleans) -->
-{#if showControls !== "false"}
-	<div class="controls">
-		<p>number of layers: {$numLayers}</p>
-		<Range min={7} max={13} label="number of layers" bind:value={$numLayers} />
+	<!-- TODO is there a less brittle way to do this? -->
+	<!--   (ArchieML doesn't support booleans) -->
+	{#if showControls !== "false"}
+		<div class="controls">
+			{#if controlLayers}
+				<p>number of layers: {$numLayers}</p>
+				<Range
+					min={7}
+					max={13}
+					label="number of layers"
+					bind:value={$numLayers}
+				/>
+			{/if}
 
-		<p>number of cuts: {$numCuts}</p>
-		<Range min={1} max={10} label="number of cuts" bind:value={$numCuts} />
+			<p>number of cuts: {$numCuts}</p>
+			<Range min={1} max={10} label="number of cuts" bind:value={$numCuts} />
 
-		<ButtonSet legend="cut type" {options} bind:value={$cutType} />
+			{#if controlCutType}
+				<ButtonSet legend="cut type" {options} bind:value={$cutType} />
 
-		<div class:hidden={$cutType !== "radial"}>
-			<p>
-				cut target height:
-				{formatPercentage(-$cutTargetDepthPercentage)} of outer radius
-			</p>
+				<div class:hidden={$cutType !== "radial"}>
+					<p>
+						cut target height:
+						{formatPercentage(-$cutTargetDepthPercentage)} of outer radius
+					</p>
 
-			<Range
-				min={0}
-				max={1}
-				step={0.01}
-				bind:value={$cutTargetDepthPercentage}
-				label="cut target depth percentage"
-			/>
+					<Range
+						min={0}
+						max={1}
+						step={0.01}
+						bind:value={$cutTargetDepthPercentage}
+						label="cut target depth percentage"
+					/>
+				</div>
+			{/if}
+
+			{#if controlHorizontalCuts}
+				<p>horizontal cuts: {$numHorizontalCuts}</p>
+				<Range
+					min={0}
+					max={2}
+					label="horizontal cuts"
+					bind:value={$numHorizontalCuts}
+				/>
+			{/if}
 		</div>
-
-		<p>horizontal cuts: {$numHorizontalCuts}</p>
-		<Range
-			min={0}
-			max={2}
-			label="horizontal cuts"
-			bind:value={$numHorizontalCuts}
-		/>
-	</div>
-{/if}
+	{/if}
+</figure>
 
 <style>
 	svg {

@@ -12,11 +12,13 @@
 	<span>With {@html copy.author2}</span>
 </div>
 
-{#each copy.story as { type, value }}
+{#each copy.story as { type, value }, i}
 	{#if type === "Component"}
 		<OnionDemo {...value} />
 	{:else}
-		<p class={type}>{@html value}</p>
+		{@const id = copy.story[i - 1]?.value.captionId}
+
+		<p class={type} {id}>{@html value}</p>
 	{/if}
 {/each}
 
