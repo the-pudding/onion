@@ -45,7 +45,7 @@
 
 		<Onion {height} />
 
-		{#if showCuts !== "false"}
+		{#if showCuts}
 			<OnionCuts {height} {radius} />
 		{/if}
 
@@ -54,9 +54,7 @@
 		<OnionPieceAnalyzer {highlightExtremes} />
 	</svg>
 
-	<!-- TODO is there a less brittle way to do this? -->
-	<!--   (ArchieML doesn't support booleans) -->
-	{#if showControls !== "false"}
+	{#if showControls}
 		<div class="controls">
 			{#if controlLayers}
 				<p>number of layers: {$numLayers}</p>

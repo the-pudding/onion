@@ -1,5 +1,6 @@
 <script>
 	import { getContext } from "svelte";
+	import getCopyObjectWithBooleans from "$utils/getCopyObjectWithBooleans";
 	import OnionDemo from "$components/onion/Onion.Demo.svelte";
 
 	const copy = getContext("copy");
@@ -14,7 +15,7 @@
 
 {#each copy.story as { type, value }, i}
 	{#if type === "Component"}
-		<OnionDemo {...value} />
+		<OnionDemo {...getCopyObjectWithBooleans(value)} />
 	{:else}
 		{@const id = copy.story[i - 1]?.value.captionId}
 
