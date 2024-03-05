@@ -1,11 +1,15 @@
 <script>
-	import { layerRadii } from "$stores/onion";
+	import { getContext } from "svelte";
 
 	export let height;
+
+	const onionStore = getContext("onionStore");
+
+	$: ({ layerRadii } = $onionStore);
 </script>
 
 <g class="onion">
-	{#each $layerRadii as r}
+	{#each layerRadii as r}
 		<circle cx="0" cy={height} {r} />
 	{/each}
 </g>

@@ -1,21 +1,7 @@
 import path from "path";
 import { writeFile } from "fs/promises";
-import { get } from "svelte/store";
-import {
-	flattenRadialAreas,
-	flattenVerticalAreas,
-	getRadialCutAreas,
-	getVerticalAreas,
-	roundToDecimalPlaces
-} from "../src/utils/math.js";
-import {
-	cutTargetDepthPercentage,
-	cutType,
-	numCuts,
-	numHorizontalCuts,
-	numLayers,
-	storageKey
-} from "../src/stores/onion.js";
+import { flattenRadialAreas, flattenVerticalAreas } from "../src/utils/math.js";
+import Onion from "../src/utils/onion.js";
 import { deviation, format, mean } from "d3";
 
 const CWD = process.cwd();
@@ -44,120 +30,124 @@ export const MAX_CUTS = 10;
 const MIN_HORIZONTAL_CUTS = 0;
 const MAX_HORIZONTAL_CUTS = 2;
 
-async function writeAllVerticalAreasToFile() {
-	numHorizontalCuts.set(0);
+// async function writeAllVerticalAreasToFile() {
+// 	numHorizontalCuts.set(0);
 
-	// mapping from $numCuts to pieceAreas objects
-	const allVerticalAreas = {};
+// 	// mapping from $numCuts to pieceAreas objects
+// 	const allVerticalAreas = {};
 
-	for (let i = MIN_LAYERS; i <= MAX_LAYERS; i++) {
-		numLayers.set(i);
-		let minRSD = Infinity;
-		let idealNumCuts = undefined;
-		console.log(`\tnumLayers = ${i}`);
+// 	for (let i = MIN_LAYERS; i <= MAX_LAYERS; i++) {
+// 		numLayers.set(i);
+// 		let minRSD = Infinity;
+// 		let idealNumCuts = undefined;
+// 		console.log(`\tnumLayers = ${i}`);
 
-		for (let j = 1; j <= MAX_CUTS; j++) {
-			numCuts.set(j);
-			const $storageKey = get(storageKey);
-			const pieceAreas = getVerticalAreas();
-			const flattenedVerticalAreas = flattenVerticalAreas(pieceAreas);
-			const meanArea = mean(flattenedVerticalAreas);
-			const standardDeviation = deviation(flattenedVerticalAreas);
-			const rsd = (standardDeviation / meanArea) * 100;
+// 		for (let j = 1; j <= MAX_CUTS; j++) {
+// 			numCuts.set(j);
+// 			const $storageKey = get(storageKey);
+// 			const pieceAreas = getVerticalAreas();
+// 			const flattenedVerticalAreas = flattenVerticalAreas(pieceAreas);
+// 			const meanArea = mean(flattenedVerticalAreas);
+// 			const standardDeviation = deviation(flattenedVerticalAreas);
+// 			const rsd = (standardDeviation / meanArea) * 100;
 
-			allVerticalAreas[$storageKey] = { pieceAreas, meanArea, rsd };
+// 			allVerticalAreas[$storageKey] = { pieceAreas, meanArea, rsd };
 
-			console.log(`\t\tFound vertical areas with numCuts = ${j}`);
+// 			console.log(`\t\tFound vertical areas with numCuts = ${j}`);
 
-			if (rsd < minRSD) {
-				minRSD = rsd;
-				idealNumCuts = j;
-			}
-		}
+// 			if (rsd < minRSD) {
+// 				minRSD = rsd;
+// 				idealNumCuts = j;
+// 			}
+// 		}
 
-		console.log(`\t\tIdeal number of cuts: ${idealNumCuts}`);
-	}
+// 		console.log(`\t\tIdeal number of cuts: ${idealNumCuts}`);
+// 	}
 
-	try {
-		await writeFile(DATA_FILE_VERTICAL, JSON.stringify(allVerticalAreas));
+// 	try {
+// 		await writeFile(DATA_FILE_VERTICAL, JSON.stringify(allVerticalAreas));
 
-		console.log(`Wrote vertical areas to ${DATA_FILE_VERTICAL_RELATIVE}`);
-	} catch (error) {
-		console.error(error);
-	}
-}
+// 		console.log(`Wrote vertical areas to ${DATA_FILE_VERTICAL_RELATIVE}`);
+// 	} catch (error) {
+// 		console.error(error);
+// 	}
+// }
 
-// generate areas across all cut target depths
-async function writeAllRadialAreasToFile() {
-	const allRadialAreas = [];
-	cutType.set("radial");
-	numCuts.set(10);
-	numHorizontalCuts.set(0);
+// // generate areas across all cut target depths
+// async function writeAllRadialAreasToFile() {
+// 	const allRadialAreas = [];
+// 	cutType.set("radial");
+// 	numCuts.set(10);
+// 	numHorizontalCuts.set(0);
 
-	for (let i = 0; i <= 100; i++) {
-		const percentage = i / 100;
-		cutTargetDepthPercentage.set(percentage);
+// 	for (let i = 0; i <= 100; i++) {
+// 		const percentage = i / 100;
+// 		cutTargetDepthPercentage.set(percentage);
 
-		const radialAreas = getRadialCutAreas();
-		const flattenedRadialAreas = flattenRadialAreas(radialAreas);
-		const meanArea = mean(flattenedRadialAreas);
-		const standardDeviation = deviation(flattenedRadialAreas);
-		const rsd = (standardDeviation / meanArea) * 100;
+// 		const radialAreas = getRadialCutAreas();
+// 		const flattenedRadialAreas = flattenRadialAreas(radialAreas);
+// 		const meanArea = mean(flattenedRadialAreas);
+// 		const standardDeviation = deviation(flattenedRadialAreas);
+// 		const rsd = (standardDeviation / meanArea) * 100;
 
-		allRadialAreas.push({
-			cutTargetDepthPercentage: percentage,
-			rsd
-		});
+// 		allRadialAreas.push({
+// 			cutTargetDepthPercentage: percentage,
+// 			rsd
+// 		});
 
-		console.log(`\tFound radial areas with cutTargetDepth = ${percentage}`);
-	}
+// 		console.log(`\tFound radial areas with cutTargetDepth = ${percentage}`);
+// 	}
 
-	try {
-		await writeFile(DATA_FILE_RADIAL, JSON.stringify(allRadialAreas));
+// 	try {
+// 		await writeFile(DATA_FILE_RADIAL, JSON.stringify(allRadialAreas));
 
-		console.log(`Wrote vertical areas to ${DATA_FILE_RADIAL_RELATIVE}`);
-	} catch (error) {
-		console.error(error);
-	}
-}
+// 		console.log(`Wrote vertical areas to ${DATA_FILE_RADIAL_RELATIVE}`);
+// 	} catch (error) {
+// 		console.error(error);
+// 	}
+// }
 
 async function writeAllStandardDeviationsToFile() {
 	let standardDeviations = {};
 
-	function addRSDData() {
+	function addRSDData(onion) {
 		standardDeviations = {
 			...standardDeviations,
-			...getRelativeStandardDeviation()
+			...getRelativeStandardDeviation(onion)
 		};
 	}
 
 	for (let l = MIN_LAYERS; l <= MAX_LAYERS; l++) {
-		numLayers.set(l);
-
 		for (let c = MIN_CUTS; c <= MAX_CUTS; c++) {
-			numCuts.set(c);
-
 			for (let h = MIN_HORIZONTAL_CUTS; h <= MAX_HORIZONTAL_CUTS; h++) {
-				numHorizontalCuts.set(h);
+				let onionConfig = {
+					// 240 is arbitrary
+					//   based on 600w canvas -> 300h -> 240 is 80% of 300
+					radius: 240,
+					numLayers: l,
+					numCuts: c,
+					numHorizontalCuts: h
+				};
 
 				// get standard deviation data for vertical cuts
-				cutType.set("vertical");
-				addRSDData();
+				let onion = new Onion({ ...onionConfig, cutType: "vertical" });
+				addRSDData(onion);
 
 				// get standard deviation data for radial cuts
-				cutType.set("radial");
 				const depthMax = c > 1 ? 100 : 0;
 
 				for (let d = 0; d <= depthMax; d++) {
-					cutTargetDepthPercentage.set(d / 100);
-					const $storageKey = get(storageKey);
-					console.log({ $storageKey });
-					addRSDData();
+					onion = new Onion({
+						...onionConfig,
+						cutType: "radial",
+						cutTargetDepthPercentage: d / 100
+					});
+					const { storageKey } = onion;
+					console.log({ storageKey });
+					addRSDData(onion);
 				}
 			}
 		}
-
-		// TODO for this number of layers, where does the minimum standard deviation occur?
 	}
 
 	try {
@@ -172,20 +162,19 @@ async function writeAllStandardDeviationsToFile() {
 	}
 }
 
-function getRelativeStandardDeviation() {
-	const $storageKey = get(storageKey);
-	const $cutType = get(cutType);
-	const pieceAreas =
-		$cutType === "vertical" ? getVerticalAreas() : getRadialCutAreas();
+function getRelativeStandardDeviation(onion) {
+	const { storageKey, cutType, verticalAreas, radialAreas } = onion;
+
+	const pieceAreas = cutType === "vertical" ? verticalAreas : radialAreas;
 	const flattenedAreas =
-		$cutType === "vertical"
+		cutType === "vertical"
 			? flattenVerticalAreas(pieceAreas)
 			: flattenRadialAreas(pieceAreas);
 	const meanArea = mean(flattenedAreas);
 	const standardDeviation = deviation(flattenedAreas);
 	const rsd = (standardDeviation / meanArea) * 100;
 
-	return { [$storageKey]: +format(".3f")(rsd) };
+	return { [storageKey]: +format(".3f")(rsd) };
 }
 
 (async () => {

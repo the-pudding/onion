@@ -2,28 +2,14 @@ import { describe, expect, test } from "vitest";
 import {
 	getAreaUnderLine,
 	getRadialCutAreaPolar,
-	getRadialCutAreas,
 	getVerticalCutArea,
 	isInRange
 } from "$utils/math";
-import {
-	cutTargetDepth,
-	cutTargetDepthPercentage,
-	numCuts,
-	numLayers,
-	width
-} from "$stores/onion";
-import { get } from "svelte/store";
+import Onion from "./onion";
 
 const radius = 1;
 const quarterCircleArea = (Math.PI * radius ** 2) / 4;
 const areaScaleFactorWhenRadiusIsDoubled = 4;
-
-function setTestRadius(testRadius) {
-	// height is 50% of width
-	// radius is 80% of height
-	width.set(testRadius / 0.8 / 0.5);
-}
 
 describe("vertical cuts", () => {
 	test("calculates 0-width cut area", () => {
@@ -114,8 +100,6 @@ describe("radial cuts aimed at center", () => {
 		expect(rightArea).toBe(leftArea);
 	});
 
-	// $numLayers = 2
-	// $numCuts = 2
 	// proportions between areas scaled up by doubling radius should be 4x
 	test("geometric similarity with 2 layers and 2 cuts", () => {
 		const innerRadius = radius / 2;
@@ -184,25 +168,28 @@ describe("isInRange", () => {
 
 describe("radial cuts aimed below center", () => {
 	describe("aimed at center, but calculated with piecewise integrals", () => {
-		const testLayerRadii = [3, 6, 9];
-		setTestRadius(9);
-		const testLayers = testLayerRadii.length;
-		const testCuts = 3;
-		numLayers.set(testLayers);
-		numCuts.set(testCuts);
-		const areas = getRadialCutAreas();
+		const numLayers = 3;
+		const numCuts = 3;
+		const onion = new Onion({
+			radius: 9,
+			numLayers,
+			numCuts,
+			cutType: "radial",
+			cutTargetDepthPercentage: 0
+		});
+		const { layerRadii, radialAreas } = onion;
 
-		const expectedAreas = testLayerRadii.map((radius, layerNum) =>
+		const expectedAreas = layerRadii.map((radius, layerNum) =>
 			getRadialCutAreaPolar({
-				...(layerNum > 0 && { radius1: testLayerRadii[layerNum - 1] }),
+				...(layerNum > 0 && { radius1: layerRadii[layerNum - 1] }),
 				radius2: radius,
 				theta2: Math.PI / 6
 			})
 		);
 
-		const testCoordinates = Array.from({ length: testLayers })
+		const testCoordinates = Array.from({ length: numLayers })
 			.map((_, layerNum) =>
-				Array.from({ length: testCuts }).map((_, pieceNum) => ({
+				Array.from({ length: numCuts }).map((_, pieceNum) => ({
 					layerNum,
 					pieceNum
 				}))
@@ -214,7 +201,7 @@ describe("radial cuts aimed below center", () => {
 			({ layerNum, pieceNum }) => {
 				// 13 digits after the decimal point is pretty darn close
 				// any difference past that is likely due to rounding errors
-				expect(areas[layerNum].pieces[pieceNum].area).toBeCloseTo(
+				expect(radialAreas[layerNum].pieces[pieceNum].area).toBeCloseTo(
 					expectedAreas[layerNum],
 					13
 				);
@@ -223,25 +210,27 @@ describe("radial cuts aimed below center", () => {
 	});
 
 	describe("aimed 100% below center", () => {
-		const testLayerRadii = [3, 6, 9];
-		setTestRadius(9);
-		const testLayers = testLayerRadii.length;
-		const testCuts = 3;
-		numLayers.set(testLayers);
-		numCuts.set(testCuts);
-		cutTargetDepthPercentage.set(100);
-		const areas = getRadialCutAreas();
+		const numLayers = 3;
+		const numCuts = 3;
+		const onion = new Onion({
+			radius: 9,
+			numLayers,
+			numCuts,
+			cutType: "radial",
+			cutTargetDepthPercentage: 100
+		});
+		const { layerRadii, radialAreas } = onion;
 
-		const expectedAreas = testLayerRadii.map((radius, layerNum) =>
+		const expectedAreas = layerRadii.map((radius, layerNum) =>
 			getRadialCutAreaPolar({
-				...(layerNum > 0 && { radius1: testLayerRadii[layerNum - 1] }),
+				...(layerNum > 0 && { radius1: layerRadii[layerNum - 1] }),
 				radius2: radius,
 				theta2: Math.PI / 2
 			})
 		);
 
 		test.each([0, 1, 2])("layer %i", (layerNum) => {
-			const layerArea = areas[layerNum].pieces.reduce(
+			const layerArea = radialAreas[layerNum].pieces.reduce(
 				(total, { area }) => total + area,
 				0
 			);
