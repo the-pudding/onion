@@ -96,15 +96,17 @@
 {:else if cutType === "radial"}
 	{#each radialAreas as { layerRadius, pieces }, layerNum}
 		{@const numPieces = pieces.length}
+		{@const isInnermostLayer = layerNum === 0}
+		{@const isOutermostLayer = layerNum === radialAreas.length - 1}
 
-		<text
+		<!-- <text
 			x="-10"
 			y={yScale(layerRadius)}
 			text-anchor="end"
 			alignment-baseline="middle"
 		>
 			{numPieces} piece{numPieces === 1 ? "" : "s"}
-		</text>
+		</text> -->
 
 		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces }}
 			{@const x = xOfLeftCutIntersection}
@@ -112,14 +114,22 @@
 			{@const y = layerArcFunction(x)}
 			{@const yNormalized = yScale(y)}
 
-			<!-- <text {x} y={yNormalized} font-size="x-small">
-				({Math.round(x)}, {Math.round(y)})
-			</text> -->
-			<text {x} y={yNormalized} font-size="x-small">
-				{Math.round(area)}
-			</text>
+			{#if isInnermostLayer || isOutermostLayer}
+				<!-- <text {x} y={yNormalized} font-size="x-small">
+					({Math.round(x)}, {Math.round(y)})
+				</text> -->
+				<text
+					{x}
+					y={yNormalized}
+					font-size="x-small"
+					class:primary={isOutermostLayer}
+					class:secondary={isInnermostLayer}
+				>
+					{Math.round(area)}
+				</text>
+			{/if}
 
-			<circle cx={x} cy={yNormalized} r="2" fill="red" />
+			<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
 
 			<text
 				{x}

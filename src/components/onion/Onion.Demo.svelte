@@ -19,6 +19,7 @@
 	export let controlCutType = false;
 	export let controlHorizontalCuts = false;
 	export let captionId = undefined;
+	export let cutType = "vertical";
 
 	const width = 600;
 	const height = width / 2;
@@ -30,7 +31,6 @@
 
 	let numLayers = 10;
 	let numCuts = 10;
-	let cutType = "vertical";
 	let cutTargetDepthPercentage = 0;
 	let numHorizontalCuts = 0;
 
