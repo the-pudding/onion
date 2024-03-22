@@ -20,6 +20,7 @@
 	export let controlHorizontalCuts = false;
 	export let captionId = undefined;
 	export let cutType = "vertical";
+	export let cutTargetDepthPercentage = 0;
 
 	const width = 600;
 	const height = width / 2;
@@ -31,7 +32,6 @@
 
 	let numLayers = 10;
 	let numCuts = 10;
-	let cutTargetDepthPercentage = 0;
 	let numHorizontalCuts = 0;
 
 	// onionStore is an instance of the Onion class, which is recreated whenever onion props change,
@@ -62,6 +62,8 @@
 </script>
 
 <figure aria-describedby={captionId}>
+	<!-- TODO add chart/explode toggle -->
+
 	<svg {width} {height} viewBox="{-width / 2} 0 {width} {height}">
 		<!-- TODO should axes be rewritten w/layercake? -->
 		<OnionAxisX {width} {height} />

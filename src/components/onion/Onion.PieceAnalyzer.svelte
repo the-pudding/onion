@@ -108,21 +108,24 @@
 			{numPieces} piece{numPieces === 1 ? "" : "s"}
 		</text> -->
 
-		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces }}
+		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces }, pieceNum}
 			{@const x = xOfLeftCutIntersection}
 			{@const layerArcFunction = layerArcs[layerNum]}
 			{@const y = layerArcFunction(x)}
 			{@const yNormalized = yScale(y)}
+			{@const isBottomPiece =
+				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
-			{#if isInnermostLayer || isOutermostLayer}
+			{#if highlightExtremes && ((cutTargetDepthPercentage === 0 && (isInnermostLayer || isOutermostLayer)) || isBottomPiece)}
 				<!-- <text {x} y={yNormalized} font-size="x-small">
-					({Math.round(x)}, {Math.round(y)})
+				({Math.round(x)}, {Math.round(y)})
 				</text> -->
+				<!-- TODO highlight piece outline instead of displaying area -->
 				<text
 					{x}
 					y={yNormalized}
 					font-size="x-small"
-					class:primary={isOutermostLayer}
+					class:primary={isOutermostLayer || isBottomPiece}
 					class:secondary={isInnermostLayer}
 				>
 					{Math.round(area)}
