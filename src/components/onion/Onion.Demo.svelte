@@ -11,6 +11,7 @@
 	import OnionPieceAnalyzer from "$components/onion/Onion.PieceAnalyzer.svelte";
 	import ButtonSet from "$components/helpers/ButtonSet.svelte";
 	import Range from "$components/helpers/Range.svelte";
+	import Toggle from "$components/helpers/Toggle.svelte";
 
 	export let showCuts = true;
 	export let highlightExtremes = false;
@@ -21,6 +22,8 @@
 	export let captionId = undefined;
 	export let cutType = "vertical";
 	export let cutTargetDepthPercentage = 0;
+	export let toggleExplode = false;
+	export let showStandardDeviation = false;
 
 	const width = 600;
 	const height = width / 2;
@@ -33,6 +36,7 @@
 	let numLayers = 10;
 	let numCuts = 10;
 	let numHorizontalCuts = 0;
+	let explode = false;
 
 	// onionStore is an instance of the Onion class, which is recreated whenever onion props change,
 	//   specific to this instance of OnionDemo component
@@ -62,8 +66,23 @@
 </script>
 
 <figure aria-describedby={captionId}>
-	<!-- TODO add chart/explode toggle -->
+	{#if toggleExplode || showStandardDeviation}
+		<div class="controls top">
+			{#if toggleExplode}
+				<Toggle label="explode" style="slider" bind:value={explode} />
+			{/if}
 
+			{#if showStandardDeviation}
+				<label class="standard-deviation">
+					standard deviation
+					<!-- TODO bind std dev to value in onion.js -->
+					<input type="number" readonly />
+				</label>
+			{/if}
+		</div>
+	{/if}
+
+	<!-- TODO show exploded view -->
 	<svg {width} {height} viewBox="{-width / 2} 0 {width} {height}">
 		<!-- TODO should axes be rewritten w/layercake? -->
 		<OnionAxisX {width} {height} />
@@ -83,7 +102,7 @@
 	</svg>
 
 	{#if showControls}
-		<div class="controls">
+		<div class="controls bottom">
 			{#if controlLayers}
 				<p>number of layers: {numLayers}</p>
 				<Range
@@ -130,8 +149,12 @@
 </figure>
 
 <style>
-	svg {
-		margin-bottom: 2rem;
+	:root {
+		--demo-spacing: 1rem;
+	}
+
+	figure {
+		margin-block: calc(var(--demo-spacing) * 2);
 	}
 
 	:global(line) {
@@ -139,7 +162,19 @@
 	}
 
 	.controls {
-		width: 300px;
+		width: 350px;
+
+		&.top {
+			margin-bottom: var(--demo-spacing);
+
+			& .standard-deviation {
+				display: block;
+			}
+		}
+
+		&.bottom {
+			margin-top: var(--demo-spacing);
+		}
 	}
 
 	.hidden {
