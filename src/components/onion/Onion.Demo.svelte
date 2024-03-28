@@ -72,11 +72,22 @@
 				<Toggle label="explode" style="slider" bind:value={explode} />
 			{/if}
 
+			<!-- TODO are these multiline graphs more informative than a number printout? -->
+			<!-- <h2>standard deviation in piece size</h2>
+
+			<h3>radial cuts, from cut target depth 0-100% of onion radius</h3>
+			<OnionRadialStandardDeviationGraph />
+
+			<h3>vertical cuts</h3>
+			<OnionStandardDeviationGraph /> -->
 			{#if showStandardDeviation}
 				<label class="standard-deviation">
 					standard deviation
-					<!-- TODO bind std dev to value in onion.js -->
-					<input type="number" readonly />
+					<input
+						type="number"
+						readonly
+						bind:value={$onionStore.standardDeviation}
+					/>
 				</label>
 			{/if}
 		</div>

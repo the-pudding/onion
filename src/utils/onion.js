@@ -1,6 +1,8 @@
-import { scaleLinear } from "d3";
+import { deviation, format, mean, scaleLinear } from "d3";
 import {
 	doesLineIntersectCircleAboveXAxis,
+	flattenRadialAreas,
+	flattenVerticalAreas,
 	formatPercentage,
 	getAreaUnderLine,
 	getVerticalCutArea,
@@ -429,5 +431,17 @@ export default class Onion {
 		});
 
 		return pieceAreas;
+	}
+
+	// relative standard deviation = standard deviation expressed as a percentage of the mean
+	get standardDeviation() {
+		const allAreas =
+			this.cutType === "vertical"
+				? flattenVerticalAreas(this.verticalAreas)
+				: flattenRadialAreas(this.radialAreas);
+		const standardDeviation = deviation(allAreas);
+		const meanArea = mean(allAreas);
+
+		return +format(".3f")((standardDeviation / meanArea) * 100);
 	}
 }

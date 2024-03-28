@@ -1,7 +1,5 @@
 <script>
 	import { getContext } from "svelte";
-	import { deviation, format, mean } from "d3";
-	import { flattenRadialAreas, flattenVerticalAreas } from "$utils/math";
 
 	export let yScale;
 	export let highlightExtremes;
@@ -21,25 +19,6 @@
 	// y-range is blue if piece is intersected by only one horizontal cut
 	// y-range is cyan if piece is intersected by both horizontal cuts
 	const yRangeColors = ["black", undefined, "blue", "cyan"];
-
-	$: allAreas =
-		cutType === "vertical"
-			? flattenVerticalAreas(verticalAreas)
-			: flattenRadialAreas(radialAreas);
-
-	$: standardDeviation = deviation(allAreas);
-
-	// TODO generate graphs based on multiple parameters
-	$: meanArea = mean(allAreas);
-	$: console.log({
-		cutType,
-		numCuts,
-		cutTargetDepthPercentage,
-		meanArea,
-		standardDeviationPercentage: +format(".3f")(
-			(standardDeviation / meanArea) * 100
-		)
-	});
 </script>
 
 {#if cutType === "vertical"}
