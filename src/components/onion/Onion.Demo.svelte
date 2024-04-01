@@ -94,7 +94,7 @@
 	{/if}
 
 	<!-- TODO show exploded view -->
-	<svg {width} {height} viewBox="{-width / 2} 0 {width} {height}">
+	<svg viewBox="{-width / 2} 0 {width} {height}">
 		<!-- TODO should axes be rewritten w/layercake? -->
 		<OnionAxisX {width} {height} />
 		<OnionAxisX {width} {height} isBottom />
@@ -161,11 +161,13 @@
 
 <style>
 	:root {
-		--demo-spacing: 1rem;
+		--demo-spacing-y: 1rem;
+		--demo-spacing-x: 2rem;
 	}
 
 	figure {
-		margin-block: calc(var(--demo-spacing) * 2);
+		margin-block: calc(var(--demo-spacing-y) * 2);
+		padding-inline: var(--demo-spacing-x);
 	}
 
 	:global(line) {
@@ -176,7 +178,7 @@
 		width: 350px;
 
 		&.top {
-			margin-bottom: var(--demo-spacing);
+			margin-bottom: var(--demo-spacing-y);
 
 			& .standard-deviation {
 				display: block;
@@ -184,7 +186,7 @@
 		}
 
 		&.bottom {
-			margin-top: var(--demo-spacing);
+			margin-top: var(--demo-spacing-y);
 		}
 	}
 

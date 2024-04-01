@@ -24,6 +24,11 @@
 		--color-secondary: var(--color-green);
 	}
 
+	#content {
+		max-width: 600px;
+		margin-inline: auto;
+	}
+
 	/* TODO Inter font */
 
 	.text {
