@@ -19,7 +19,7 @@
 	export let controlLayers = false;
 	export let controlCutType = false;
 	export let controlHorizontalCuts = false;
-	export let captionId = undefined;
+	export let caption = "";
 	export let cutType = "vertical";
 	export let cutTargetDepthPercentage = 0;
 	export let toggleExplode = false;
@@ -65,7 +65,7 @@
 	});
 </script>
 
-<figure aria-describedby={captionId}>
+<figure>
 	{#if toggleExplode || showStandardDeviation}
 		<div class="controls top">
 			{#if toggleExplode}
@@ -156,6 +156,10 @@
 				/>
 			{/if}
 		</div>
+	{/if}
+
+	{#if caption}
+		<figcaption>{caption}</figcaption>
 	{/if}
 </figure>
 

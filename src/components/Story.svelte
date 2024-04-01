@@ -17,9 +17,7 @@
 	{#if type === "Component"}
 		<OnionDemo {...getCopyObjectWithBooleans(value)} />
 	{:else}
-		{@const id = copy.story[i - 1]?.value.captionId}
-
-		<p class={type} {id}>{@html value}</p>
+		<p class={type}>{@html value}</p>
 	{/if}
 {/each}
 
