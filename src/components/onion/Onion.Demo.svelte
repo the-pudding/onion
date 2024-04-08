@@ -18,6 +18,7 @@
 	export let showControls = true;
 	export let controlLayers = false;
 	export let controlCutType = false;
+	export let controlRadialDepth = false;
 	export let controlHorizontalCuts = false;
 	export let caption = "";
 	export let cutType = "vertical";
@@ -130,7 +131,7 @@
 			{#if controlCutType}
 				<ButtonSet legend="cut type" {options} bind:value={cutType} />
 
-				<div class:hidden={cutType !== "radial"}>
+				<div class:hidden={!(cutType === "radial" && controlRadialDepth)}>
 					<p>
 						cut target height:
 						{formatPercentage(-cutTargetDepthPercentage)} of outer radius
