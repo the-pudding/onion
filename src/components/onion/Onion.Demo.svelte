@@ -170,7 +170,7 @@
 	}
 
 	figure {
-		margin-block: calc(var(--demo-spacing-y) * 2);
+		margin-block: calc(var(--demo-spacing-y) * 4);
 		padding-inline: var(--demo-spacing-x);
 	}
 
