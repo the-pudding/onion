@@ -12,7 +12,7 @@
 	{#each layerRadii as r}
 		<circle cx="0" cy={height} {r} />
 
-		<!-- TODO pass these paths to clipper-js to create piece paths based on intersections w/cuts (after also converting cuts to closed paths) -->
+		<!-- TODO pass these paths to clipper-js to create piece paths based on intersections w/cuts -->
 		<!-- should keep drawing onion layers as circles, because drawing closed paths flush with each other has odd-looking antialiasing -->
 		<!-- path is a semi-annulus, except for the innermost layer which is a semi-disk -->
 		<!-- {@const previousRadius = r - layerThickness}
@@ -28,8 +28,8 @@
 		stroke: black;
 	}
 
-	path {
+	/* path {
 		fill: none;
 		stroke: black;
-	}
+	} */
 </style>

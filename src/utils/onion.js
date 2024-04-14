@@ -55,6 +55,10 @@ export default class Onion {
 		return scaleLinear().domain([0, this.numCuts]).range([0, this.radius]);
 	}
 
+	get cutThickness() {
+		return this.cutWidthScale(1);
+	}
+
 	get cutAngleScale() {
 		return scaleLinear()
 			.domain([0, this.numCuts])
