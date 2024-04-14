@@ -28,6 +28,8 @@
 
 		{#each pieceColumn as { layerRadius, pieceArea, yRange, subPieces }, layerNumInColumn}
 			<!-- {@debug pieceColumn} -->
+			{@const isInCenterColumn = cutNum === 0}
+			{@const isBottomPiece = layerNumInColumn === 0}
 
 			{@const columnArcFunctions = layerArcs.filter(
 				(_, arcNum) => layerRadii[arcNum] > cutX
@@ -57,25 +59,10 @@
 					layerRadii.findLastIndex((r) => r <= cutX) +
 					1}
 				{cutNum}
+				highlight={highlightExtremes}
+				primary={highlightExtremes && isInCenterColumn}
+				secondary={highlightExtremes && isBottomPiece}
 			/>
-
-			{#if highlightExtremes}
-				{@const isInCenterColumn = cutNum === 0}
-				{@const isBottomPiece = layerNumInColumn === 0}
-
-				{#if isInCenterColumn || isBottomPiece}
-					<!-- TODO highlight piece outline instead of displaying area -->
-					<text
-						x={cutX}
-						y={cutY}
-						font-size="x-small"
-						class:primary={isInCenterColumn}
-						class:secondary={isBottomPiece}
-					>
-						{Math.round(pieceArea)}
-					</text>
-				{/if}
-			{/if}
 		{/each}
 	{/each}
 {:else if cutType === "radial"}
