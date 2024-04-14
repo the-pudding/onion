@@ -37,6 +37,10 @@ export default class Onion {
 		);
 	}
 
+	get layerThickness() {
+		return this.rScale(1);
+	}
+
 	get layerArcs() {
 		return this.layerRadii.map(
 			(layerRadius) => (x) => Math.sqrt(layerRadius ** 2 - x ** 2)
