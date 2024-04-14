@@ -78,9 +78,9 @@
 		stroke-dasharray: 5;
 	}
 
-	path {
+	/* path {
 		fill: none;
 		stroke-dasharray: 5;
 		stroke: black;
-	}
+	} */
 </style>
