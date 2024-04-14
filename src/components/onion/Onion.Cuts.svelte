@@ -31,7 +31,6 @@
 			<!-- <path d="M {x} {height} V 0 h {cutThickness} V {height} z" /> -->
 		{:else if cutType === "radial"}
 			{@const theta = cutAngleScale(i + 1)}
-
 			{@const [xIntercept, yIntercept] = polarToCartesian(radius, theta)}
 
 			<line
@@ -41,7 +40,19 @@
 				y2={yScale(-cutTargetDepth)}
 			/>
 
-			<!-- TODO create radial paths as triangles -->
+			<!-- TODO pass these paths to clipper-js to create piece paths based on intersections w/cuts -->
+			<!-- {@const previousTheta = cutAngleScale(i)}
+			{@const [previousXIntercept, previousYIntercept] = polarToCartesian(
+				radius,
+				previousTheta
+			)}
+			<path
+				d="M 0 {yScale(-cutTargetDepth)} L {xIntercept * 2} {yScale(
+					yIntercept * 2 + cutTargetDepth
+				)} L {previousXIntercept * 2} {yScale(
+					previousYIntercept * 2 + cutTargetDepth
+				)} z"
+			/> -->
 		{/if}
 	{/each}
 
@@ -67,9 +78,9 @@
 		stroke-dasharray: 5;
 	}
 
-	/* path {
+	path {
 		fill: none;
 		stroke-dasharray: 5;
 		stroke: black;
-	} */
+	}
 </style>
