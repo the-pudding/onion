@@ -13,7 +13,6 @@
 		cutNumbers,
 		cutType,
 		cutWidthScale,
-		cutThickness,
 		cutAngleScale,
 		cutTargetDepth,
 		horizontalCutNumbers,
@@ -26,9 +25,6 @@
 		{#if cutType === "vertical"}
 			{@const x = cutWidthScale(i)}
 			<line x1={x} y1="0" x2={x} y2={height} />
-
-			<!-- TODO pass these paths to clipper-js to create piece paths based on intersections w/cuts -->
-			<!-- <path d="M {x} {height} V 0 h {cutThickness} V {height} z" /> -->
 		{:else if cutType === "radial"}
 			{@const theta = cutAngleScale(i + 1)}
 			{@const [xIntercept, yIntercept] = polarToCartesian(radius, theta)}
@@ -39,20 +35,6 @@
 				x2="0"
 				y2={yScale(-cutTargetDepth)}
 			/>
-
-			<!-- TODO pass these paths to clipper-js to create piece paths based on intersections w/cuts -->
-			<!-- {@const previousTheta = cutAngleScale(i)}
-			{@const [previousXIntercept, previousYIntercept] = polarToCartesian(
-				radius,
-				previousTheta
-			)}
-			<path
-				d="M 0 {yScale(-cutTargetDepth)} L {xIntercept * 2} {yScale(
-					yIntercept * 2 + cutTargetDepth
-				)} L {previousXIntercept * 2} {yScale(
-					previousYIntercept * 2 + cutTargetDepth
-				)} z"
-			/> -->
 		{/if}
 	{/each}
 
@@ -77,10 +59,4 @@
 	line {
 		stroke-dasharray: 5;
 	}
-
-	/* path {
-		fill: none;
-		stroke-dasharray: 5;
-		stroke: black;
-	} */
 </style>

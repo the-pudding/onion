@@ -1,17 +1,16 @@
 <script>
 	import { getContext } from "svelte";
+	import OnionPiece from "$components/onion/Onion.Piece.svelte";
 
 	export let yScale;
 	export let highlightExtremes;
 
 	const onionStore = getContext("onionStore");
-
 	$: ({
 		cutTargetDepthPercentage,
 		cutType,
 		layerArcs,
 		layerRadii,
-		numCuts,
 		verticalAreas,
 		radialAreas
 	} = $onionStore);
@@ -27,14 +26,14 @@
 			{pieceColumn.length}x
 		</text> -->
 
-		{#each pieceColumn as { layerRadius, pieceArea, yRange, subPieces }, layerNum}
+		{#each pieceColumn as { layerRadius, pieceArea, yRange, subPieces }, layerNumInColumn}
 			<!-- {@debug pieceColumn} -->
 
 			{@const columnArcFunctions = layerArcs.filter(
 				(_, arcNum) => layerRadii[arcNum] > cutX
 			)}
 			{@const layerArcFunction =
-				columnArcFunctions[layerNum] ?? columnArcFunctions[0]}
+				columnArcFunctions[layerNumInColumn] ?? columnArcFunctions[0]}
 			{@const y = layerArcFunction(cutX)}
 			{@const cutY = yScale(y)}
 
@@ -53,9 +52,16 @@
 				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
 			</text>
 
+			<OnionPiece
+				layerNum={layerNumInColumn +
+					layerRadii.findLastIndex((r) => r <= cutX) +
+					1}
+				{cutNum}
+			/>
+
 			{#if highlightExtremes}
 				{@const isInCenterColumn = cutNum === 0}
-				{@const isBottomPiece = layerNum === 0}
+				{@const isBottomPiece = layerNumInColumn === 0}
 
 				{#if isInCenterColumn || isBottomPiece}
 					<!-- TODO highlight piece outline instead of displaying area -->

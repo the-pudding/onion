@@ -3,7 +3,7 @@
 	import { setContext } from "svelte";
 	import { scaleLinear } from "d3";
 	import Onion from "$utils/onion";
-	import { formatPercentage } from "$utils/math";
+	import { formatPercentage, polarToCartesian } from "$utils/math";
 	import OnionAxisX from "$components/onion/Onion.AxisX.svelte";
 	import OnionAxisY from "$components/onion/Onion.AxisY.svelte";
 	import OnionLayers from "$components/onion/OnionLayers.svelte";
@@ -43,7 +43,7 @@
 	//   specific to this instance of OnionDemo component
 	// below, onionStore is stored in context so that child components can access up-to-date values
 	// onion functions are written in the Onion class so that the generate-onion-data script can call them as well (not just Svelte components)
-	let onionStore = writable(
+	const onionStore = writable(
 		new Onion({
 			radius,
 			numLayers,
@@ -53,9 +53,7 @@
 			numHorizontalCuts
 		})
 	);
-
 	setContext("onionStore", onionStore);
-
 	$: $onionStore = new Onion({
 		radius,
 		numLayers,
@@ -63,6 +61,61 @@
 		cutType,
 		cutTargetDepthPercentage,
 		numHorizontalCuts
+	});
+
+	// TODO pass these paths to clipper-js to create piece paths based on intersections w/cuts
+	// each layer path is a semi-annulus, except for the innermost layer which is a semi-disk
+	const layerPathStore = writable([]);
+	setContext("layerPathStore", layerPathStore);
+	$: $layerPathStore = $onionStore.layerRadii.map((r) => {
+		const { layerThickness } = $onionStore;
+		const previousRadius = r - layerThickness;
+
+		return [
+			`M ${r} ${height}`,
+			`A ${r} ${r} 0 0 0 ${-r} ${height}`,
+			`H ${-previousRadius}`,
+			`A ${previousRadius} ${previousRadius} 0 0 1 ${previousRadius} ${height}`,
+			"z"
+		].join(" ");
+	});
+
+	// TODO pass these paths to clipper-js to create piece paths based on intersections w/cuts
+	const cutPathStore = writable([]);
+	setContext("cutPathStore", cutPathStore);
+	$: $cutPathStore = $onionStore.cutNumbers.map((c) => {
+		if (cutType === "vertical") {
+			const { cutThickness } = $onionStore;
+			const x = $onionStore.cutWidthScale(c);
+
+			return [
+				`M ${x} ${height}`,
+				"V 0",
+				`h ${cutThickness}`,
+				`V ${height}`,
+				"z"
+			].join(" ");
+		}
+
+		if (cutType === "radial") {
+			const { cutTargetDepth } = $onionStore;
+			const theta = $onionStore.cutAngleScale(c + 1);
+			const previousTheta = $onionStore.cutAngleScale(c);
+			const [xIntercept, yIntercept] = polarToCartesian(radius, theta);
+			const [previousXIntercept, previousYIntercept] = polarToCartesian(
+				radius,
+				previousTheta
+			);
+
+			return [
+				`M 0 ${yScale(-cutTargetDepth)}`,
+				`L ${xIntercept * 2} ${yScale(yIntercept * 2 + cutTargetDepth)}`,
+				`L ${previousXIntercept * 2} ${yScale(
+					previousYIntercept * 2 + cutTargetDepth
+				)}`,
+				"z"
+			].join(" ");
+		}
 	});
 </script>
 
