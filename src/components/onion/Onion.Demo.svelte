@@ -2,6 +2,7 @@
 	import { writable } from "svelte/store";
 	import { setContext } from "svelte";
 	import { scaleLinear } from "d3";
+	import { paper } from "paper";
 	import Onion from "$utils/onion";
 	import { formatPercentage, polarToCartesian } from "$utils/math";
 	import OnionAxisX from "$components/onion/Onion.AxisX.svelte";
@@ -39,6 +40,11 @@
 	let numHorizontalCuts = 0;
 	let explode = false;
 
+	// use paper without canvas
+	// https://github.com/paperjs/paper.js/issues/1889#issuecomment-1323458006
+	paper.setup(new paper.Size(1, 1));
+	paper.view.autoUpdate = false;
+
 	// onionStore is an instance of the Onion class, which is recreated whenever onion props change,
 	//   specific to this instance of OnionDemo component
 	// below, onionStore is stored in context so that child components can access up-to-date values
@@ -63,32 +69,32 @@
 		numHorizontalCuts
 	});
 
-	// TODO pass these paths to clipper-js to create piece paths based on intersections w/cuts
 	// each layer path is a semi-annulus, except for the innermost layer which is a semi-disk
 	const layerPathStore = writable([]);
 	setContext("layerPathStore", layerPathStore);
 	$: $layerPathStore = $onionStore.layerRadii.map((r) => {
 		const { layerThickness } = $onionStore;
 		const previousRadius = r - layerThickness;
-
-		return [
+		const d = [
 			`M ${r} ${height}`,
 			`A ${r} ${r} 0 0 0 ${-r} ${height}`,
 			`H ${-previousRadius}`,
 			`A ${previousRadius} ${previousRadius} 0 0 1 ${previousRadius} ${height}`,
 			"z"
 		].join(" ");
+
+		return new paper.Path(d);
 	});
 
-	// TODO pass these paths to clipper-js to create piece paths based on intersections w/cuts
 	const cutPathStore = writable([]);
 	setContext("cutPathStore", cutPathStore);
 	$: $cutPathStore = $onionStore.cutNumbers.map((c) => {
+		let d;
+
 		if (cutType === "vertical") {
 			const { cutThickness } = $onionStore;
 			const x = $onionStore.cutWidthScale(c);
-
-			return [
+			d = [
 				`M ${x} ${height}`,
 				"V 0",
 				`h ${cutThickness}`,
@@ -106,8 +112,7 @@
 				radius,
 				previousTheta
 			);
-
-			return [
+			d = [
 				`M 0 ${yScale(-cutTargetDepth)}`,
 				`L ${xIntercept * 2} ${yScale(yIntercept * 2 + cutTargetDepth)}`,
 				`L ${previousXIntercept * 2} ${yScale(
@@ -116,6 +121,8 @@
 				"z"
 			].join(" ");
 		}
+
+		return new paper.Path(d);
 	});
 </script>
 
