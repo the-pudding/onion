@@ -15,7 +15,12 @@
 	$: piecePath = layerPath.intersect(cutPath);
 </script>
 
-<path d={piecePath.pathData} class:highlight class:primary class:secondary />
+<path
+	d={piecePath.pathData}
+	class:highlight
+	class:primary={highlight && primary}
+	class:secondary={highlight && secondary}
+/>
 
 <style>
 	path {

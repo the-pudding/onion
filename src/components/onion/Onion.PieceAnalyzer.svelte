@@ -88,11 +88,21 @@
 			{@const isBottomPiece =
 				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
-			{#if highlightExtremes && ((cutTargetDepthPercentage === 0 && (isInnermostLayer || isOutermostLayer)) || isBottomPiece)}
+			<!-- TODO color bottom pieces as primary -->
+			<OnionPiece
+				{layerNum}
+				cutNum={pieceNum}
+				highlight={highlightExtremes &&
+					cutTargetDepthPercentage === 0 &&
+					(isInnermostLayer || isOutermostLayer)}
+				primary={isOutermostLayer}
+				secondary={isInnermostLayer}
+			/>
+
+			{#if highlightExtremes && isBottomPiece}
 				<!-- <text {x} y={yNormalized} font-size="x-small">
 				({Math.round(x)}, {Math.round(y)})
 				</text> -->
-				<!-- TODO highlight piece outline instead of displaying area -->
 				<text
 					{x}
 					y={yNormalized}
