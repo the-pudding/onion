@@ -241,7 +241,8 @@ export default class Onion {
 					if (x > 0 && cutLineFunction(x) > 0) {
 						pieces.push({
 							xOfLeftCutIntersection: x,
-							leftCutLineSlope: m
+							leftCutLineSlope: m,
+							cutNum
 						});
 					}
 				}

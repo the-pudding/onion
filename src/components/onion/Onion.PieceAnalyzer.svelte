@@ -80,7 +80,7 @@
 			{numPieces} piece{numPieces === 1 ? "" : "s"}
 		</text> -->
 
-		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces }, pieceNum}
+		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces, cutNum }, pieceNum}
 			{@const x = xOfLeftCutIntersection}
 			{@const layerArcFunction = layerArcs[layerNum]}
 			{@const y = layerArcFunction(x)}
@@ -88,31 +88,23 @@
 			{@const isBottomPiece =
 				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
-			<!-- TODO color bottom pieces as primary -->
 			<OnionPiece
 				{layerNum}
-				cutNum={pieceNum}
+				{cutNum}
 				highlight={highlightExtremes &&
-					cutTargetDepthPercentage === 0 &&
-					(isInnermostLayer || isOutermostLayer)}
-				primary={isOutermostLayer}
+					((cutTargetDepthPercentage === 0 &&
+						(isInnermostLayer || isOutermostLayer)) ||
+						isBottomPiece)}
+				primary={isOutermostLayer || isBottomPiece}
 				secondary={isInnermostLayer}
 			/>
 
-			{#if highlightExtremes && isBottomPiece}
-				<!-- <text {x} y={yNormalized} font-size="x-small">
+			<!-- <text {x} y={yNormalized} font-size="x-small">
 				({Math.round(x)}, {Math.round(y)})
 				</text> -->
-				<text
-					{x}
-					y={yNormalized}
-					font-size="x-small"
-					class:primary={isOutermostLayer || isBottomPiece}
-					class:secondary={isInnermostLayer}
-				>
-					{Math.round(area)}
-				</text>
-			{/if}
+			<!-- <text {x} y={yNormalized} font-size="x-small">
+				{Math.round(area)}
+			</text> -->
 
 			<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
 

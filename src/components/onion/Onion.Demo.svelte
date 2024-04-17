@@ -88,7 +88,7 @@
 
 	const cutPathStore = writable([]);
 	setContext("cutPathStore", cutPathStore);
-	$: $cutPathStore = $onionStore.cutNumbers.map((c) => {
+	$: $cutPathStore = $onionStore.cutNumbers.map((c, _, cutNumbers) => {
 		let d;
 
 		if (cutType === "vertical") {
@@ -104,9 +104,12 @@
 		}
 
 		if (cutType === "radial") {
+			// because cutAngleScale's range goes from PI/2 to 0 instead of the other way around,
+			//   _c is the c's complementary index (counting from 0 to PI/2)
+			const _c = cutNumbers.length - c;
 			const { cutTargetDepth } = $onionStore;
-			const theta = $onionStore.cutAngleScale(c + 1);
-			const previousTheta = $onionStore.cutAngleScale(c);
+			const theta = $onionStore.cutAngleScale(_c);
+			const previousTheta = $onionStore.cutAngleScale(_c - 1);
 			const [xIntercept, yIntercept] = polarToCartesian(radius, theta);
 			const [previousXIntercept, previousYIntercept] = polarToCartesian(
 				radius,
