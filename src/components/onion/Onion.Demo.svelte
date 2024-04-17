@@ -2,7 +2,7 @@
 	import { writable } from "svelte/store";
 	import { setContext } from "svelte";
 	import { scaleLinear } from "d3";
-	import { paper } from "paper";
+	import paper from "paper";
 	import Onion from "$utils/onion";
 	import { formatPercentage, polarToCartesian } from "$utils/math";
 	import OnionAxisX from "$components/onion/Onion.AxisX.svelte";
