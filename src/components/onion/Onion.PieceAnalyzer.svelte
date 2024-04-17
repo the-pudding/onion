@@ -1,17 +1,16 @@
 <script>
 	import { getContext } from "svelte";
+	import OnionPiece from "$components/onion/Onion.Piece.svelte";
 
 	export let yScale;
 	export let highlightExtremes;
 
 	const onionStore = getContext("onionStore");
-
 	$: ({
 		cutTargetDepthPercentage,
 		cutType,
 		layerArcs,
 		layerRadii,
-		numCuts,
 		verticalAreas,
 		radialAreas
 	} = $onionStore);
@@ -27,14 +26,16 @@
 			{pieceColumn.length}x
 		</text> -->
 
-		{#each pieceColumn as { layerRadius, pieceArea, yRange, subPieces }, layerNum}
+		{#each pieceColumn as { layerRadius, pieceArea, yRange, subPieces }, layerNumInColumn}
 			<!-- {@debug pieceColumn} -->
+			{@const isInCenterColumn = cutNum === 0}
+			{@const isBottomPiece = layerNumInColumn === 0}
 
 			{@const columnArcFunctions = layerArcs.filter(
 				(_, arcNum) => layerRadii[arcNum] > cutX
 			)}
 			{@const layerArcFunction =
-				columnArcFunctions[layerNum] ?? columnArcFunctions[0]}
+				columnArcFunctions[layerNumInColumn] ?? columnArcFunctions[0]}
 			{@const y = layerArcFunction(cutX)}
 			{@const cutY = yScale(y)}
 
@@ -53,23 +54,15 @@
 				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
 			</text>
 
-			{#if highlightExtremes}
-				{@const isInCenterColumn = cutNum === 0}
-				{@const isBottomPiece = layerNum === 0}
-
-				{#if isInCenterColumn || isBottomPiece}
-					<!-- TODO highlight piece outline instead of displaying area -->
-					<text
-						x={cutX}
-						y={cutY}
-						font-size="x-small"
-						class:primary={isInCenterColumn}
-						class:secondary={isBottomPiece}
-					>
-						{Math.round(pieceArea)}
-					</text>
-				{/if}
-			{/if}
+			<OnionPiece
+				layerNum={layerNumInColumn +
+					layerRadii.findLastIndex((r) => r <= cutX) +
+					1}
+				{cutNum}
+				highlight={highlightExtremes}
+				primary={highlightExtremes && isInCenterColumn}
+				secondary={highlightExtremes && isBottomPiece}
+			/>
 		{/each}
 	{/each}
 {:else if cutType === "radial"}
@@ -87,7 +80,7 @@
 			{numPieces} piece{numPieces === 1 ? "" : "s"}
 		</text> -->
 
-		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces }, pieceNum}
+		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces, cutNum }, pieceNum}
 			{@const x = xOfLeftCutIntersection}
 			{@const layerArcFunction = layerArcs[layerNum]}
 			{@const y = layerArcFunction(x)}
@@ -95,21 +88,23 @@
 			{@const isBottomPiece =
 				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
-			{#if highlightExtremes && ((cutTargetDepthPercentage === 0 && (isInnermostLayer || isOutermostLayer)) || isBottomPiece)}
-				<!-- <text {x} y={yNormalized} font-size="x-small">
+			<OnionPiece
+				{layerNum}
+				{cutNum}
+				highlight={highlightExtremes &&
+					((cutTargetDepthPercentage === 0 &&
+						(isInnermostLayer || isOutermostLayer)) ||
+						isBottomPiece)}
+				primary={isOutermostLayer || isBottomPiece}
+				secondary={isInnermostLayer}
+			/>
+
+			<!-- <text {x} y={yNormalized} font-size="x-small">
 				({Math.round(x)}, {Math.round(y)})
 				</text> -->
-				<!-- TODO highlight piece outline instead of displaying area -->
-				<text
-					{x}
-					y={yNormalized}
-					font-size="x-small"
-					class:primary={isOutermostLayer || isBottomPiece}
-					class:secondary={isInnermostLayer}
-				>
-					{Math.round(area)}
-				</text>
-			{/if}
+			<!-- <text {x} y={yNormalized} font-size="x-small">
+				{Math.round(area)}
+			</text> -->
 
 			<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
 

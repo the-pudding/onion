@@ -27,7 +27,6 @@
 			<line x1={x} y1="0" x2={x} y2={height} />
 		{:else if cutType === "radial"}
 			{@const theta = cutAngleScale(i + 1)}
-
 			{@const [xIntercept, yIntercept] = polarToCartesian(radius, theta)}
 
 			<line
@@ -43,6 +42,7 @@
 		{@const y = horizontalCutScale(i) * radius}
 		{@const yNormalized = yScale(y)}
 		<line x1="0" y1={yNormalized} x2={width / 2} y2={yNormalized} />
+		<!-- TODO create horizontal paths as rectangles -->
 		<text
 			x="0"
 			y={yNormalized}

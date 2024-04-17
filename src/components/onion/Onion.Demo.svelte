@@ -2,8 +2,9 @@
 	import { writable } from "svelte/store";
 	import { setContext } from "svelte";
 	import { scaleLinear } from "d3";
+	import paper from "paper";
 	import Onion from "$utils/onion";
-	import { formatPercentage } from "$utils/math";
+	import { formatPercentage, polarToCartesian } from "$utils/math";
 	import OnionAxisX from "$components/onion/Onion.AxisX.svelte";
 	import OnionAxisY from "$components/onion/Onion.AxisY.svelte";
 	import OnionLayers from "$components/onion/OnionLayers.svelte";
@@ -39,11 +40,16 @@
 	let numHorizontalCuts = 0;
 	let explode = false;
 
+	// use paper without canvas
+	// https://github.com/paperjs/paper.js/issues/1889#issuecomment-1323458006
+	paper.setup(new paper.Size(1, 1));
+	paper.view.autoUpdate = false;
+
 	// onionStore is an instance of the Onion class, which is recreated whenever onion props change,
 	//   specific to this instance of OnionDemo component
 	// below, onionStore is stored in context so that child components can access up-to-date values
 	// onion functions are written in the Onion class so that the generate-onion-data script can call them as well (not just Svelte components)
-	let onionStore = writable(
+	const onionStore = writable(
 		new Onion({
 			radius,
 			numLayers,
@@ -53,9 +59,7 @@
 			numHorizontalCuts
 		})
 	);
-
 	setContext("onionStore", onionStore);
-
 	$: $onionStore = new Onion({
 		radius,
 		numLayers,
@@ -63,6 +67,65 @@
 		cutType,
 		cutTargetDepthPercentage,
 		numHorizontalCuts
+	});
+
+	// each layer path is a semi-annulus, except for the innermost layer which is a semi-disk
+	const layerPathStore = writable([]);
+	setContext("layerPathStore", layerPathStore);
+	$: $layerPathStore = $onionStore.layerRadii.map((r) => {
+		const { layerThickness } = $onionStore;
+		const previousRadius = r - layerThickness;
+		const d = [
+			`M ${r} ${height}`,
+			`A ${r} ${r} 0 0 0 ${-r} ${height}`,
+			`H ${-previousRadius}`,
+			`A ${previousRadius} ${previousRadius} 0 0 1 ${previousRadius} ${height}`,
+			"z"
+		].join(" ");
+
+		return new paper.Path(d);
+	});
+
+	const cutPathStore = writable([]);
+	setContext("cutPathStore", cutPathStore);
+	$: $cutPathStore = $onionStore.cutNumbers.map((c, _, cutNumbers) => {
+		let d;
+
+		if (cutType === "vertical") {
+			const { cutThickness } = $onionStore;
+			const x = $onionStore.cutWidthScale(c);
+			d = [
+				`M ${x} ${height}`,
+				"V 0",
+				`h ${cutThickness}`,
+				`V ${height}`,
+				"z"
+			].join(" ");
+		}
+
+		if (cutType === "radial") {
+			// because cutAngleScale's range goes from PI/2 to 0 instead of the other way around,
+			//   _c is the c's complementary index (counting from 0 to PI/2)
+			const _c = cutNumbers.length - c;
+			const { cutTargetDepth } = $onionStore;
+			const theta = $onionStore.cutAngleScale(_c);
+			const previousTheta = $onionStore.cutAngleScale(_c - 1);
+			const [xIntercept, yIntercept] = polarToCartesian(radius, theta);
+			const [previousXIntercept, previousYIntercept] = polarToCartesian(
+				radius,
+				previousTheta
+			);
+			d = [
+				`M 0 ${yScale(-cutTargetDepth)}`,
+				`L ${xIntercept * 2} ${yScale(yIntercept * 2 + cutTargetDepth)}`,
+				`L ${previousXIntercept * 2} ${yScale(
+					previousYIntercept * 2 + cutTargetDepth
+				)}`,
+				"z"
+			].join(" ");
+		}
+
+		return new paper.Path(d);
 	});
 </script>
 

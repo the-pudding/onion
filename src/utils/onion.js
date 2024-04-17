@@ -37,6 +37,10 @@ export default class Onion {
 		);
 	}
 
+	get layerThickness() {
+		return this.rScale(1);
+	}
+
 	get layerArcs() {
 		return this.layerRadii.map(
 			(layerRadius) => (x) => Math.sqrt(layerRadius ** 2 - x ** 2)
@@ -49,6 +53,10 @@ export default class Onion {
 
 	get cutWidthScale() {
 		return scaleLinear().domain([0, this.numCuts]).range([0, this.radius]);
+	}
+
+	get cutThickness() {
+		return this.cutWidthScale(1);
 	}
 
 	get cutAngleScale() {
@@ -233,7 +241,8 @@ export default class Onion {
 					if (x > 0 && cutLineFunction(x) > 0) {
 						pieces.push({
 							xOfLeftCutIntersection: x,
-							leftCutLineSlope: m
+							leftCutLineSlope: m,
+							cutNum
 						});
 					}
 				}

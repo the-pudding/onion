@@ -1,5 +1,14 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  paper:
+    specifier: ^0.12.17
+    version: 0.12.17
+
 devDependencies:
   '@rollup/plugin-dsv':
     specifier: ^3.0.4
@@ -1742,6 +1751,11 @@ packages:
       yocto-queue: 1.0.0
     dev: true
 
+  /paper@0.12.17:
+    resolution: {integrity: sha512-oCe+e1C2w8hKIcGoAqUjD0GGxGPv+itrRXlEFUmp3H8tY/NTnHOkYgpJFPGw6OJ8Q1Wa6+RgzlY7Dx/2WWHtkA==}
+    engines: {node: '>=8.0.0'}
+    dev: false
+
   /param-case@3.0.4:
     resolution: {integrity: sha512-RXlj7zCYokReqWpOPH9oYivUzLYZ5vAPIfEmCTNViosC78F8F0H9y7T7gG2M39ymgutxF5gcFEsyZQSph9Bp3A==}
     dependencies:
@@ -2411,7 +2425,3 @@ packages:
     resolution: {integrity: sha512-9bnSc/HEW2uRy67wc+T8UwauLuPJVn28jb+GtJY16iiKWyvmYJRXVT4UamsAEGQfPohgr2q4Tq0sQbQlxTfi1g==}
     engines: {node: '>=12.20'}
     dev: true
-
-settings:
-  autoInstallPeers: true
-  excludeLinksFromLockfile: false
