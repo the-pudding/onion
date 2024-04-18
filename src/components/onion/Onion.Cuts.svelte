@@ -18,6 +18,8 @@
 		horizontalCutNumbers,
 		horizontalCutScale
 	} = $onionStore);
+
+	const horizontalCutPathStore = getContext("horizontalCutPathStore");
 </script>
 
 <g class="cuts">
@@ -42,7 +44,8 @@
 		{@const y = horizontalCutScale(i) * radius}
 		{@const yNormalized = yScale(y)}
 		<line x1="0" y1={yNormalized} x2={width / 2} y2={yNormalized} />
-		<!-- TODO create horizontal paths as rectangles -->
+		<!-- TODO remove debugging element for path -->
+		<path d={$horizontalCutPathStore[i].pathData} />
 		<text
 			x="0"
 			y={yNormalized}
@@ -57,6 +60,11 @@
 
 <style>
 	line {
+		stroke-dasharray: 5;
+	}
+
+	path {
+		/* fill: none; */
 		stroke-dasharray: 5;
 	}
 </style>

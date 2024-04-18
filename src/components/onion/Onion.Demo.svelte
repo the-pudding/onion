@@ -127,6 +127,30 @@
 
 		return new paper.Path(d);
 	});
+
+	const horizontalCutPathStore = writable([]);
+	setContext("horizontalCutPathStore", horizontalCutPathStore);
+	$: $horizontalCutPathStore = $onionStore.horizontalCutNumbers.map((h) => {
+		const y = $onionStore.horizontalCutScale(h) * radius;
+		const yNormalized = yScale(y);
+		const previousHeight = yScale(
+			$onionStore.horizontalCutScale(h - 1) * radius
+		);
+		const d = [
+			`M 0 ${previousHeight}`,
+			`V ${yNormalized}`,
+			`H ${radius}`,
+			`V ${previousHeight}`,
+			"z"
+		].join(" ");
+
+		return new paper.Path(d);
+	});
+	// TODO include additional path for "top" cut
+
+	// TODO remove log
+	$: $horizontalCutPathStore.length &&
+		console.log($horizontalCutPathStore.map((h) => h.pathData));
 </script>
 
 <figure>
