@@ -11,6 +11,7 @@
 		cutType,
 		layerArcs,
 		layerRadii,
+		numHorizontalCuts,
 		verticalAreas,
 		radialAreas
 	} = $onionStore);
@@ -43,16 +44,19 @@
 				({Math.round(cutX)},{Math.round(y)})
 			</text> -->
 			<!-- <circle r="2" cx={cutX} cy={cutY} fill="red" /> -->
-			<text
-				x={cutX}
-				y={cutY}
-				font-size="xx-small"
-				alignment-baseline="hanging"
-				fill={yRangeColors[subPieces.length]}
-			>
-				<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
-				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
-			</text>
+
+			{#if numHorizontalCuts}
+				<text
+					x={cutX}
+					y={cutY}
+					font-size="xx-small"
+					alignment-baseline="hanging"
+					fill={yRangeColors[subPieces.length]}
+				>
+					<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
+					{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
+				</text>
+			{/if}
 
 			<OnionPiece
 				layerNum={layerNumInColumn +
@@ -106,16 +110,18 @@
 
 			<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
 
-			<text
-				{x}
-				y={yNormalized}
-				font-size="xx-small"
-				alignment-baseline="hanging"
-				fill={yRangeColors[subPieces.length]}
-			>
-				<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
-				{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
-			</text>
+			{#if numHorizontalCuts}
+				<text
+					{x}
+					y={yNormalized}
+					font-size="xx-small"
+					alignment-baseline="hanging"
+					fill={yRangeColors[subPieces.length]}
+				>
+					<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
+					{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
+				</text>
+			{/if}
 
 			<!-- {@const markerY = yScale(layerArcFunction(xOfLeftCutIntersection))} -->
 			<!-- <text {x} y={markerY} font-size="x-small">
