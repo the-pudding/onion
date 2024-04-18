@@ -130,27 +130,43 @@
 
 	const horizontalCutPathStore = writable([]);
 	setContext("horizontalCutPathStore", horizontalCutPathStore);
-	$: $horizontalCutPathStore = $onionStore.horizontalCutNumbers.map((h) => {
-		const y = $onionStore.horizontalCutScale(h) * radius;
-		const yNormalized = yScale(y);
-		const previousHeight = yScale(
-			$onionStore.horizontalCutScale(h - 1) * radius
-		);
-		const d = [
-			`M 0 ${previousHeight}`,
-			`V ${yNormalized}`,
-			`H ${radius}`,
-			`V ${previousHeight}`,
-			"z"
-		].join(" ");
+	$: $horizontalCutPathStore = [
+		// we need 2 paths if making 1 horizontal cut,
+		//   and 3 paths if making 2 horizontal cuts
+		...($onionStore.horizontalCutNumbers.length
+			? [
+					new paper.Path(
+						[
+							`M 0 ${yScale(radius)}`,
+							`V ${yScale(
+								$onionStore.horizontalCutScale(
+									$onionStore.horizontalCutNumbers.length - 1
+								) * radius
+							)}`,
+							`H ${radius}`,
+							`V ${yScale(radius)}`,
+							"z"
+						].join(" ")
+					)
+			  ]
+			: []),
+		...$onionStore.horizontalCutNumbers.map((h) => {
+			const y = $onionStore.horizontalCutScale(h) * radius;
+			const yNormalized = yScale(y);
+			const previousHeight = yScale(
+				$onionStore.horizontalCutScale(h - 1) * radius
+			);
+			const d = [
+				`M 0 ${previousHeight}`,
+				`V ${yNormalized}`,
+				`H ${radius}`,
+				`V ${previousHeight}`,
+				"z"
+			].join(" ");
 
-		return new paper.Path(d);
-	});
-	// TODO include additional path for "top" cut
-
-	// TODO remove log
-	$: $horizontalCutPathStore.length &&
-		console.log($horizontalCutPathStore.map((h) => h.pathData));
+			return new paper.Path(d);
+		})
+	].reverse();
 </script>
 
 <figure>
