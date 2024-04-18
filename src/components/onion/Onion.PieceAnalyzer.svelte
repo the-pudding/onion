@@ -60,8 +60,8 @@
 					1}
 				{cutNum}
 				highlight={highlightExtremes}
-				primary={highlightExtremes && isInCenterColumn}
-				secondary={highlightExtremes && isBottomPiece}
+				primary={isInCenterColumn}
+				secondary={isBottomPiece}
 			/>
 		{/each}
 	{/each}
@@ -91,12 +91,10 @@
 			<OnionPiece
 				{layerNum}
 				{cutNum}
-				highlight={highlightExtremes &&
-					((cutTargetDepthPercentage === 0 &&
-						(isInnermostLayer || isOutermostLayer)) ||
-						isBottomPiece)}
-				primary={isOutermostLayer || isBottomPiece}
-				secondary={isInnermostLayer}
+				highlight={highlightExtremes}
+				primary={(cutTargetDepthPercentage === 0 && isOutermostLayer) ||
+					isBottomPiece}
+				secondary={cutTargetDepthPercentage === 0 && isInnermostLayer}
 			/>
 
 			<!-- <text {x} y={yNormalized} font-size="x-small">

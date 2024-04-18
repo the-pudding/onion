@@ -7,6 +7,9 @@
 	export let primary = false;
 	export let secondary = false;
 
+	const onionStore = getContext("onionStore");
+	$: ({ cutType, cutTargetDepthPercentage } = $onionStore);
+
 	const layerPathStore = getContext("layerPathStore");
 	const cutPathStore = getContext("cutPathStore");
 
@@ -20,6 +23,9 @@
 	class:highlight
 	class:primary={highlight && primary}
 	class:secondary={highlight && secondary}
+	class:thin={secondary &&
+		cutType === "radial" &&
+		cutTargetDepthPercentage === 0}
 />
 
 <style>
@@ -28,6 +34,10 @@
 
 		&.highlight {
 			stroke-width: 4px;
+		}
+
+		&.thin {
+			stroke-width: 2px;
 		}
 	}
 </style>
