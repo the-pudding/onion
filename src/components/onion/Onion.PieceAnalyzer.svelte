@@ -45,7 +45,7 @@
 			</text> -->
 			<!-- <circle r="2" cx={cutX} cy={cutY} fill="red" /> -->
 
-			{#if numHorizontalCuts}
+			<!-- {#if numHorizontalCuts && subPieces.length}
 				<text
 					x={cutX}
 					y={cutY}
@@ -53,16 +53,17 @@
 					alignment-baseline="hanging"
 					fill={yRangeColors[subPieces.length]}
 				>
-					<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
-					{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
+					y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+					{JSON.stringify(subPieces.map(Math.round))}
 				</text>
-			{/if}
+			{/if} -->
 
 			<OnionPiece
 				layerNum={layerNumInColumn +
 					layerRadii.findLastIndex((r) => r <= cutX) +
 					1}
 				{cutNum}
+				{subPieces}
 				highlight={highlightExtremes}
 				primary={isInCenterColumn}
 				secondary={isBottomPiece}
@@ -95,6 +96,7 @@
 			<OnionPiece
 				{layerNum}
 				{cutNum}
+				{subPieces}
 				highlight={highlightExtremes}
 				primary={(cutTargetDepthPercentage === 0 && isOutermostLayer) ||
 					isBottomPiece}
@@ -110,7 +112,7 @@
 
 			<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
 
-			{#if numHorizontalCuts}
+			<!-- {#if numHorizontalCuts && subPieces.length}
 				<text
 					{x}
 					y={yNormalized}
@@ -118,10 +120,10 @@
 					alignment-baseline="hanging"
 					fill={yRangeColors[subPieces.length]}
 				>
-					<!-- y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}] -->
-					{subPieces.length ? JSON.stringify(subPieces.map(Math.round)) : ""}
+					y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+					{JSON.stringify(subPieces.map(Math.round))}
 				</text>
-			{/if}
+			{/if} -->
 
 			<!-- {@const markerY = yScale(layerArcFunction(xOfLeftCutIntersection))} -->
 			<!-- <text {x} y={markerY} font-size="x-small">

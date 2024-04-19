@@ -3,6 +3,7 @@
 
 	export let layerNum;
 	export let cutNum;
+	export let subPieces;
 	export let highlight = false;
 	export let primary = false;
 	export let secondary = false;
@@ -12,21 +13,31 @@
 
 	const layerPathStore = getContext("layerPathStore");
 	const cutPathStore = getContext("cutPathStore");
+	const horizontalCutPathStore = getContext("horizontalCutPathStore");
 
 	$: layerPath = $layerPathStore[layerNum];
 	$: cutPath = $cutPathStore[cutNum];
 	$: piecePath = layerPath.intersect(cutPath);
+	$: subPiecePaths = $horizontalCutPathStore.map((horizontalCutPath) =>
+		piecePath.intersect(horizontalCutPath)
+	);
 </script>
 
-<path
-	d={piecePath.pathData}
-	class:highlight
-	class:primary={highlight && primary}
-	class:secondary={highlight && secondary}
-	class:thin={secondary &&
-		cutType === "radial" &&
-		cutTargetDepthPercentage === 0}
-/>
+{#if subPieces.length}
+	{#each subPiecePaths as subPiecePath}
+		<path d={subPiecePath.pathData} class="subpiece" />
+	{/each}
+{:else}
+	<path
+		d={piecePath.pathData}
+		class:highlight
+		class:primary={highlight && primary}
+		class:secondary={highlight && secondary}
+		class:thin={secondary &&
+			cutType === "radial" &&
+			cutTargetDepthPercentage === 0}
+	/>
+{/if}
 
 <style>
 	path {
@@ -37,6 +48,11 @@
 		}
 
 		&.thin {
+			stroke-width: 2px;
+		}
+
+		&.subpiece {
+			stroke: blue;
 			stroke-width: 2px;
 		}
 	}
