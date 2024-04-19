@@ -42,8 +42,7 @@
 		{@const y = horizontalCutScale(i) * radius}
 		{@const yNormalized = yScale(y)}
 		<line x1="0" y1={yNormalized} x2={width / 2} y2={yNormalized} />
-		<!-- TODO create horizontal paths as rectangles -->
-		<text
+		<!-- <text
 			x="0"
 			y={yNormalized}
 			alignment-baseline="central"
@@ -51,7 +50,7 @@
 			font-size="x-small"
 		>
 			horizontal cut at {y}
-		</text>
+		</text> -->
 	{/each}
 </g>
 
