@@ -42,6 +42,7 @@
 <style>
 	path {
 		fill: none;
+		transition: stroke 200ms 200ms;
 
 		&.highlight {
 			stroke-width: 4px;
@@ -55,5 +56,9 @@
 			stroke: blue;
 			stroke-width: 2px;
 		}
+	}
+
+	:global(figure.explode path) {
+		stroke: black;
 	}
 </style>

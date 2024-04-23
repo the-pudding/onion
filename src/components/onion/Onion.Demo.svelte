@@ -38,7 +38,7 @@
 	let numLayers = 10;
 	let numCuts = 10;
 	let numHorizontalCuts = 0;
-	let explode = false;
+	let explode = "off";
 
 	// use paper without canvas
 	// https://github.com/paperjs/paper.js/issues/1889#issuecomment-1323458006
@@ -169,7 +169,7 @@
 	].reverse();
 </script>
 
-<figure>
+<figure class:explode={explode === "on"}>
 	{#if toggleExplode || showStandardDeviation}
 		<div class="controls top">
 			{#if toggleExplode}
@@ -278,8 +278,13 @@
 		padding-inline: var(--demo-spacing-x);
 	}
 
-	:global(line) {
+	:global(line, circle) {
 		stroke: black;
+		transition: stroke 200ms;
+	}
+
+	:global(.explode :is(line, circle)) {
+		stroke: transparent;
 	}
 
 	.controls {
