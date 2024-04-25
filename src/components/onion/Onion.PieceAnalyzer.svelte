@@ -28,7 +28,15 @@
 		.flat(2);
 	$: radialPieces = radialAreas
 		.map(({ layerRadius, pieces }, layerNum) =>
-			pieces.map((piece) => ({ ...piece, layerRadius, layerNum }))
+			pieces.map((piece, pieceNum) => ({
+				...piece,
+				layerRadius,
+				layerNum,
+				numPieces: pieces.length,
+				isInnermostLayer: layerNum === 0,
+				isOutermostLayer: layerNum === radialAreas.length - 1,
+				pieceNum
+			}))
 		)
 		.flat(2);
 
@@ -79,73 +87,58 @@
 		/>
 	{/each}
 {:else if cutType === "radial"}
-	{#each radialAreas as { layerRadius, pieces }, layerNum}
-		{@const numPieces = pieces.length}
-		{@const isInnermostLayer = layerNum === 0}
-		{@const isOutermostLayer = layerNum === radialAreas.length - 1}
+	{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }}
+		{@const x = xOfLeftCutIntersection}
+		{@const layerArcFunction = layerArcs[layerNum]}
+		{@const y = layerArcFunction(x)}
+		{@const yNormalized = yScale(y)}
+		{@const isBottomPiece =
+			cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
-		<!-- <text
-			x="-10"
-			y={yScale(layerRadius)}
-			text-anchor="end"
-			alignment-baseline="middle"
-		>
-			{numPieces} piece{numPieces === 1 ? "" : "s"}
+		<OnionPiece
+			{layerNum}
+			{cutNum}
+			{subPieces}
+			highlight={highlightExtremes}
+			primary={(cutTargetDepthPercentage === 0 && isOutermostLayer) ||
+				isBottomPiece}
+			secondary={cutTargetDepthPercentage === 0 && isInnermostLayer}
+		/>
+
+		<!-- <text {x} y={yNormalized} font-size="x-small">
+		({Math.round(x)}, {Math.round(y)})
 		</text> -->
+		<!-- <text {x} y={yNormalized} font-size="x-small">
+		{Math.round(area)}
+	</text> -->
 
-		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces, cutNum }, pieceNum}
-			{@const x = xOfLeftCutIntersection}
-			{@const layerArcFunction = layerArcs[layerNum]}
-			{@const y = layerArcFunction(x)}
-			{@const yNormalized = yScale(y)}
-			{@const isBottomPiece =
-				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
+		<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
 
-			<OnionPiece
-				{layerNum}
-				{cutNum}
-				{subPieces}
-				highlight={highlightExtremes}
-				primary={(cutTargetDepthPercentage === 0 && isOutermostLayer) ||
-					isBottomPiece}
-				secondary={cutTargetDepthPercentage === 0 && isInnermostLayer}
-			/>
+		<!-- {#if numHorizontalCuts && subPieces.length}
+		<text
+			{x}
+			y={yNormalized}
+			font-size="xx-small"
+			alignment-baseline="hanging"
+			fill={yRangeColors[subPieces.length]}
+		>
+			y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+			{JSON.stringify(subPieces.map(Math.round))}
+		</text>
+	{/if} -->
 
-			<!-- <text {x} y={yNormalized} font-size="x-small">
-				({Math.round(x)}, {Math.round(y)})
-				</text> -->
-			<!-- <text {x} y={yNormalized} font-size="x-small">
-				{Math.round(area)}
-			</text> -->
+		<!-- {@const markerY = yScale(layerArcFunction(xOfLeftCutIntersection))} -->
+		<!-- <text {x} y={markerY} font-size="x-small">
+		[{Math.round(xRange[0])}, {Math.round(xRange[1])}]
+	</text> -->
 
-			<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
-
-			<!-- {#if numHorizontalCuts && subPieces.length}
-				<text
-					{x}
-					y={yNormalized}
-					font-size="xx-small"
-					alignment-baseline="hanging"
-					fill={yRangeColors[subPieces.length]}
-				>
-					y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
-					{JSON.stringify(subPieces.map(Math.round))}
-				</text>
-			{/if} -->
-
-			<!-- {@const markerY = yScale(layerArcFunction(xOfLeftCutIntersection))} -->
-			<!-- <text {x} y={markerY} font-size="x-small">
-				[{Math.round(xRange[0])}, {Math.round(xRange[1])}]
-			</text> -->
-
-			<!-- <line
-				x1={xRange[0]}
-				y1={markerY}
-				x2={xRange[1]}
-				y2={markerY}
-				stroke-width="2"
-				style="stroke: red"
-			/> -->
-		{/each}
+		<!-- <line
+		x1={xRange[0]}
+		y1={markerY}
+		x2={xRange[1]}
+		y2={markerY}
+		stroke-width="2"
+		style="stroke: red"
+	/> -->
 	{/each}
 {/if}
