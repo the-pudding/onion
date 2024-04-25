@@ -15,6 +15,22 @@
 		verticalAreas,
 		radialAreas
 	} = $onionStore);
+	// TODO refactor to use flattenVerticalAreas/flattenRadialAreas?
+	$: verticalPieces = verticalAreas
+		.map(({ cutX, pieceColumn }, cutNum) =>
+			pieceColumn.map((piece, layerNumInColumn) => ({
+				...piece,
+				cutX,
+				cutNum,
+				layerNumInColumn
+			}))
+		)
+		.flat(2);
+	$: radialPieces = radialAreas
+		.map(({ layerRadius, pieces }, layerNum) =>
+			pieces.map((piece) => ({ ...piece, layerRadius, layerNum }))
+		)
+		.flat(2);
 
 	// y-range is blue if piece is intersected by only one horizontal cut
 	// y-range is cyan if piece is intersected by both horizontal cuts
@@ -22,53 +38,45 @@
 </script>
 
 {#if cutType === "vertical"}
-	{#each verticalAreas as { cutX, pieceColumn }, cutNum}
-		<!-- <text x={cutX} y={yScale(0)} font-size="x-small">
-			{pieceColumn.length}x
+	{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieces, cutX, cutNum, layerNumInColumn }}
+		{@const isInCenterColumn = cutNum === 0}
+		{@const isBottomPiece = layerNumInColumn === 0}
+		{@const columnArcFunctions = layerArcs.filter(
+			(_, arcNum) => layerRadii[arcNum] > cutX
+		)}
+		{@const layerArcFunction =
+			columnArcFunctions[layerNumInColumn] ?? columnArcFunctions[0]}
+		{@const y = layerArcFunction(cutX)}
+		{@const cutY = yScale(y)}
+
+		<!-- <text x={cutX} y={cutY} font-size="xx-small">
+			({Math.round(cutX)},{Math.round(y)})
 		</text> -->
+		<!-- <circle r="2" cx={cutX} cy={cutY} fill="red" /> -->
 
-		{#each pieceColumn as { layerRadius, pieceArea, yRange, subPieces }, layerNumInColumn}
-			<!-- {@debug pieceColumn} -->
-			{@const isInCenterColumn = cutNum === 0}
-			{@const isBottomPiece = layerNumInColumn === 0}
+		<!-- {#if numHorizontalCuts && subPieces.length}
+			<text
+				x={cutX}
+				y={cutY}
+				font-size="xx-small"
+				alignment-baseline="hanging"
+				fill={yRangeColors[subPieces.length]}
+			>
+				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+				{JSON.stringify(subPieces.map(Math.round))}
+			</text>
+		{/if} -->
 
-			{@const columnArcFunctions = layerArcs.filter(
-				(_, arcNum) => layerRadii[arcNum] > cutX
-			)}
-			{@const layerArcFunction =
-				columnArcFunctions[layerNumInColumn] ?? columnArcFunctions[0]}
-			{@const y = layerArcFunction(cutX)}
-			{@const cutY = yScale(y)}
-
-			<!-- <text x={cutX} y={cutY} font-size="xx-small">
-				({Math.round(cutX)},{Math.round(y)})
-			</text> -->
-			<!-- <circle r="2" cx={cutX} cy={cutY} fill="red" /> -->
-
-			<!-- {#if numHorizontalCuts && subPieces.length}
-				<text
-					x={cutX}
-					y={cutY}
-					font-size="xx-small"
-					alignment-baseline="hanging"
-					fill={yRangeColors[subPieces.length]}
-				>
-					y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
-					{JSON.stringify(subPieces.map(Math.round))}
-				</text>
-			{/if} -->
-
-			<OnionPiece
-				layerNum={layerNumInColumn +
-					layerRadii.findLastIndex((r) => r <= cutX) +
-					1}
-				{cutNum}
-				{subPieces}
-				highlight={highlightExtremes}
-				primary={isInCenterColumn}
-				secondary={isBottomPiece}
-			/>
-		{/each}
+		<OnionPiece
+			layerNum={layerNumInColumn +
+				layerRadii.findLastIndex((r) => r <= cutX) +
+				1}
+			{cutNum}
+			{subPieces}
+			highlight={highlightExtremes}
+			primary={isInCenterColumn}
+			secondary={isBottomPiece}
+		/>
 	{/each}
 {:else if cutType === "radial"}
 	{#each radialAreas as { layerRadius, pieces }, layerNum}
