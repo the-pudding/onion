@@ -36,10 +36,10 @@
 {:else}
 	<path
 		d={piecePath.pathData}
-		transform={$explodeStore
-			? `translate(${-piecePath.bounds.center.x + $explodeXScaleStore(area)}, ${
-					-piecePath.bounds.center.y + radius * 0.7
-			  })`
+		style={$explodeStore
+			? `transform: translate(${
+					-piecePath.bounds.center.x + $explodeXScaleStore(area)
+			  }px, ${-piecePath.bounds.center.y + radius * 0.7}px)`
 			: undefined}
 		class:highlight
 		class:primary={highlight && primary}
