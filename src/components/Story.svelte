@@ -38,11 +38,11 @@
 
 	:global(.primary) {
 		color: var(--color-primary);
-		stroke: var(--color-primary);
+		stroke: var(--color-primary) !important;
 	}
 
 	:global(.secondary:not(.primary)) {
 		color: var(--color-secondary);
-		stroke: var(--color-secondary);
+		stroke: var(--color-secondary) !important;
 	}
 </style>

@@ -1,6 +1,6 @@
 <script>
 	import { writable } from "svelte/store";
-	import { setContext } from "svelte";
+	import { getContext, setContext } from "svelte";
 	import { scaleLinear } from "d3";
 	import paper from "paper";
 	import Onion from "$utils/onion";
@@ -38,7 +38,7 @@
 	let numLayers = 10;
 	let numCuts = 10;
 	let numHorizontalCuts = 0;
-	let explode = false;
+	let explode = "off";
 
 	// use paper without canvas
 	// https://github.com/paperjs/paper.js/issues/1889#issuecomment-1323458006
@@ -167,9 +167,13 @@
 			return new paper.Path(d);
 		})
 	].reverse();
+
+	const explodeStore = writable(explode === "on");
+	setContext("explodeStore", explodeStore);
+	$: $explodeStore = explode === "on";
 </script>
 
-<figure>
+<figure class:explode={explode === "on"}>
 	{#if toggleExplode || showStandardDeviation}
 		<div class="controls top">
 			{#if toggleExplode}
@@ -197,7 +201,6 @@
 		</div>
 	{/if}
 
-	<!-- TODO show exploded view -->
 	<svg viewBox="{-width / 2} 0 {width} {height}">
 		<!-- TODO should axes be rewritten w/layercake? -->
 		<OnionAxisX {width} {height} />
@@ -211,8 +214,6 @@
 			<OnionCuts {width} {height} {yScale} />
 		{/if}
 
-		<!-- TODO will need to adjust OnionPieceAnalyzer implementation to highlight pieces -->
-		<!--   e.g., exploded view, small vs large pieces in vertical / 0-depth radial -->
 		<OnionPieceAnalyzer {yScale} {highlightExtremes} />
 	</svg>
 
@@ -278,8 +279,13 @@
 		padding-inline: var(--demo-spacing-x);
 	}
 
-	:global(line) {
+	:global(line, circle) {
 		stroke: black;
+		transition: stroke 200ms;
+	}
+
+	:global(.explode :is(line, circle)) {
+		stroke: transparent;
 	}
 
 	.controls {

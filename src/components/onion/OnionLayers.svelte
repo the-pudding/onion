@@ -18,6 +18,5 @@
 <style>
 	circle {
 		fill: none;
-		stroke: black;
 	}
 </style>
