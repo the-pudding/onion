@@ -64,6 +64,7 @@
 	const yRangeColors = ["black", undefined, "blue", "cyan"];
 </script>
 
+<!-- TODO draw scale/ticks for exploded view? -->
 {#if cutType === "vertical"}
 	{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieces, cutX, cutNum, layerNumInColumn }}
 		{@const isInCenterColumn = cutNum === 0}
