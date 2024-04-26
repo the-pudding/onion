@@ -1,6 +1,6 @@
 <script>
 	import { writable } from "svelte/store";
-	import { setContext } from "svelte";
+	import { getContext, setContext } from "svelte";
 	import { scaleLinear } from "d3";
 	import paper from "paper";
 	import Onion from "$utils/onion";
@@ -167,6 +167,10 @@
 			return new paper.Path(d);
 		})
 	].reverse();
+
+	const explodeStore = writable(explode === "on");
+	setContext("explodeStore", explodeStore);
+	$: $explodeStore = explode === "on";
 </script>
 
 <figure class:explode={explode === "on"}>
@@ -197,7 +201,6 @@
 		</div>
 	{/if}
 
-	<!-- TODO show exploded view -->
 	<svg viewBox="{-width / 2} 0 {width} {height}">
 		<!-- TODO should axes be rewritten w/layercake? -->
 		<OnionAxisX {width} {height} />
@@ -211,8 +214,6 @@
 			<OnionCuts {width} {height} {yScale} />
 		{/if}
 
-		<!-- TODO will need to adjust OnionPieceAnalyzer implementation to highlight pieces -->
-		<!--   e.g., exploded view, small vs large pieces in vertical / 0-depth radial -->
 		<OnionPieceAnalyzer {yScale} {highlightExtremes} />
 	</svg>
 
