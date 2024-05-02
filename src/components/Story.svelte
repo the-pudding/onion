@@ -16,6 +16,9 @@
 {#each copy.story as { type, value }, i}
 	{#if type === "Component"}
 		<OnionDemo {...getCopyObjectWithBooleans(value)} />
+	{:else if type === "image"}
+		{@const { src, alt } = value}
+		<img {src} {alt} />
 	{:else}
 		<p class={type}>{@html value}</p>
 	{/if}
