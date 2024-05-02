@@ -196,6 +196,7 @@
 						readonly
 						bind:value={$onionStore.standardDeviation}
 					/>
+					%
 				</label>
 			{/if}
 		</div>
