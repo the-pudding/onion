@@ -3,6 +3,8 @@
 	import WIP from "$components/helpers/WIP.svelte";
 	import Intro from "./Intro.svelte";
 	import Story from "./Story.svelte";
+	import Conclustion from "./Conclustion.svelte";
+	import Appendix from "./Appendix.svelte";
 	// import Footer from "$components/Footer.svelte";
 
 	const copy = getContext("copy");
@@ -14,6 +16,8 @@
 <WIP />
 <Intro />
 <Story />
+<Conclustion />
+<Appendix />
 
 <!-- <Footer /> -->
 
