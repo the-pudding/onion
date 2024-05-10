@@ -26,6 +26,7 @@
 	export let cutTargetDepthPercentage = 0;
 	export let toggleExplode = false;
 	export let showStandardDeviation = false;
+	export let showRadialTarget = false;
 
 	const width = 600;
 	const height = width / 2;
@@ -68,6 +69,7 @@
 		cutTargetDepthPercentage,
 		numHorizontalCuts
 	});
+	$: ({ cutTargetDepth } = $onionStore);
 
 	// each layer path is a semi-annulus, except for the innermost layer which is a semi-disk
 	const layerPathStore = writable([]);
@@ -107,7 +109,6 @@
 			// because cutAngleScale's range goes from PI/2 to 0 instead of the other way around,
 			//   _c is the c's complementary index (counting from 0 to PI/2)
 			const _c = cutNumbers.length - c;
-			const { cutTargetDepth } = $onionStore;
 			const theta = $onionStore.cutAngleScale(_c);
 			const previousTheta = $onionStore.cutAngleScale(_c - 1);
 			const [xIntercept, yIntercept] = polarToCartesian(radius, theta);
@@ -202,7 +203,11 @@
 		</div>
 	{/if}
 
-	<svg viewBox="{-width / 2} 0 {width} {height}">
+	<svg
+		viewBox="{-width / 2} 0 {width} {showRadialTarget
+			? height * (5 / 3)
+			: height}"
+	>
 		<!-- TODO should axes be rewritten w/layercake? -->
 		<OnionAxisX {width} {height} />
 		<OnionAxisX {width} {height} isBottom />
@@ -213,6 +218,19 @@
 
 		{#if showCuts}
 			<OnionCuts {width} {height} {yScale} />
+		{/if}
+
+		{#if showRadialTarget}
+			<clipPath id="layer-mask">
+				<rect {width} {height} x={-width / 2} />
+			</clipPath>
+
+			<circle
+				r="10"
+				cx="0"
+				cy={yScale(-cutTargetDepth)}
+				class="radial-target"
+			/>
 		{/if}
 
 		<OnionPieceAnalyzer {yScale} {highlightExtremes} />
@@ -287,6 +305,11 @@
 
 	:global(.explode :is(line, circle)) {
 		stroke: transparent;
+	}
+
+	.radial-target {
+		stroke: transparent;
+		fill: red;
 	}
 
 	.controls {
