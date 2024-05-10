@@ -208,11 +208,10 @@
 			? height * (5 / 3)
 			: height}"
 	>
-		<!-- TODO should axes be rewritten w/layercake? -->
-		<OnionAxisX {width} {height} />
+		<!-- <OnionAxisX {width} {height} /> -->
 		<OnionAxisX {width} {height} isBottom isHalfWidth={showRadialTarget} />
 		<!-- TODO responsive sizing: move y axis when screen resizes -->
-		<OnionAxisY {height} />
+		<!-- <OnionAxisY {height} /> -->
 
 		<OnionLayers {height} />
 
