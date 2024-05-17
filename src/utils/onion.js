@@ -451,6 +451,6 @@ export default class Onion {
 		const standardDeviation = deviation(allAreas);
 		const meanArea = mean(allAreas);
 
-		return +format(".3f")((standardDeviation / meanArea) * 100);
+		return +format(".1f")((standardDeviation / meanArea) * 100);
 	}
 }
