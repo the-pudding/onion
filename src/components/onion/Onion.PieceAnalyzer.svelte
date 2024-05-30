@@ -65,7 +65,7 @@
 	$: minStandardDeviations = (minArea - meanArea) / standardDeviation;
 	$: maxStandardDeviations = (maxArea - meanArea) / standardDeviation;
 	// pieces with areas closer to average are more purple;
-	//   piece with areas further from average are more orange
+	//   pieces with areas further from average are more orange
 	// TODO purple/orange are just placeholder colors
 	$: minStandardDeviations,
 		maxStandardDeviations,
