@@ -1,6 +1,6 @@
 <script>
 	import { getContext, setContext } from "svelte";
-	import { scaleLinear } from "d3";
+	import { interpolateHcl, scaleLinear, scaleSequential } from "d3";
 	import OnionPiece from "$components/onion/Onion.Piece.svelte";
 	import { writable } from "svelte/store";
 
@@ -16,7 +16,9 @@
 		layerRadii,
 		numHorizontalCuts,
 		verticalAreas,
-		radialAreas
+		radialAreas,
+		meanArea,
+		standardDeviation
 	} = $onionStore);
 	// TODO refactor to use flattenVerticalAreas/flattenRadialAreas?
 	$: verticalPieces = verticalAreas
@@ -58,6 +60,22 @@
 			.domain([minArea, maxArea])
 			.range([-radius, radius]));
 	setContext("explodeXScaleStore", explodeXScaleStore);
+
+	const colorScaleStore = writable();
+	$: minStandardDeviations = (minArea - meanArea) / standardDeviation;
+	$: maxStandardDeviations = (maxArea - meanArea) / standardDeviation;
+	// pieces with areas closer to average are more purple;
+	//   piece with areas further from average are more orange
+	// TODO purple/orange are just placeholder colors
+	$: minStandardDeviations,
+		maxStandardDeviations,
+		($colorScaleStore = scaleSequential()
+			.domain([
+				0,
+				Math.max(maxStandardDeviations, Math.abs(minStandardDeviations))
+			])
+			.interpolator(interpolateHcl("purple", "orange")));
+	setContext("colorScaleStore", colorScaleStore);
 
 	// y-range is blue if piece is intersected by only one horizontal cut
 	// y-range is cyan if piece is intersected by both horizontal cuts

@@ -442,15 +442,23 @@ export default class Onion {
 		return pieceAreas;
 	}
 
+	get #allAreas() {
+		return this.cutType === "vertical"
+			? flattenVerticalAreas(this.verticalAreas)
+			: flattenRadialAreas(this.radialAreas);
+	}
+
+	get meanArea() {
+		return mean(this.#allAreas);
+	}
+
 	// relative standard deviation = standard deviation expressed as a percentage of the mean
 	get standardDeviation() {
-		const allAreas =
-			this.cutType === "vertical"
-				? flattenVerticalAreas(this.verticalAreas)
-				: flattenRadialAreas(this.radialAreas);
-		const standardDeviation = deviation(allAreas);
-		const meanArea = mean(allAreas);
+		const standardDeviation = deviation(this.#allAreas);
+		return (standardDeviation / this.meanArea) * 100;
+	}
 
-		return +format(".1f")((standardDeviation / meanArea) * 100);
+	get standardDeviationString() {
+		return +format(".1f")(this.standardDeviation);
 	}
 }

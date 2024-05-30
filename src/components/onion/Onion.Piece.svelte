@@ -10,7 +10,13 @@
 	export let secondary = false;
 
 	const onionStore = getContext("onionStore");
-	$: ({ radius, cutType, cutTargetDepthPercentage } = $onionStore);
+	$: ({
+		radius,
+		cutType,
+		cutTargetDepthPercentage,
+		meanArea,
+		standardDeviation
+	} = $onionStore);
 
 	const layerPathStore = getContext("layerPathStore");
 	const cutPathStore = getContext("cutPathStore");
@@ -26,6 +32,8 @@
 	const explodeStore = getContext("explodeStore");
 
 	const explodeXScaleStore = getContext("explodeXScaleStore");
+
+	const colorScaleStore = getContext("colorScaleStore");
 </script>
 
 {#if subPieces.length}
@@ -37,7 +45,9 @@
 	<path
 		d={piecePath.pathData}
 		style={$explodeStore
-			? `transform: translate(${
+			? `stroke: ${$colorScaleStore(
+					Math.abs(area - meanArea) / standardDeviation
+			  )}; transform: translate(${
 					-piecePath.bounds.center.x + $explodeXScaleStore(area)
 			  }px, ${-piecePath.bounds.center.y + radius * 0.7}px)`
 			: undefined}

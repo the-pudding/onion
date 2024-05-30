@@ -195,7 +195,7 @@
 					<input
 						type="number"
 						readonly
-						bind:value={$onionStore.standardDeviation}
+						bind:value={$onionStore.standardDeviationString}
 					/>
 					%
 				</label>
