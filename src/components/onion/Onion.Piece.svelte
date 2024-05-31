@@ -10,13 +10,8 @@
 	export let secondary = false;
 
 	const onionStore = getContext("onionStore");
-	$: ({
-		radius,
-		cutType,
-		cutTargetDepthPercentage,
-		meanArea,
-		standardDeviation
-	} = $onionStore);
+	$: ({ cutType, cutTargetDepthPercentage, meanArea, standardDeviation } =
+		$onionStore);
 
 	const layerPathStore = getContext("layerPathStore");
 	const cutPathStore = getContext("cutPathStore");
@@ -28,44 +23,41 @@
 	$: subPiecePaths = $horizontalCutPathStore.map((horizontalCutPath) =>
 		piecePath.intersect(horizontalCutPath)
 	);
+	$: ({ width, height } = piecePath.strokeBounds);
 
 	const explodeStore = getContext("explodeStore");
-
-	const explodeXScaleStore = getContext("explodeXScaleStore");
 
 	const colorScaleStore = getContext("colorScaleStore");
 </script>
 
-{#if subPieces.length}
-	{#each subPiecePaths as subPiecePath}
-		<!-- TODO transform subpieces along x scale -->
-		<path d={subPiecePath.pathData} class="subpiece" />
-	{/each}
-{:else}
-	<path
-		d={piecePath.pathData}
-		style={$explodeStore
-			? `stroke: ${$colorScaleStore(
-					Math.abs(area - meanArea) / standardDeviation
-			  )}; transform: translate(${
-					-piecePath.bounds.center.x + $explodeXScaleStore(area)
-			  }px, ${-piecePath.bounds.center.y + radius * 0.7}px)`
-			: undefined}
-		class:highlight
-		class:primary={highlight && primary}
-		class:secondary={highlight && secondary}
-		class:thin={secondary &&
-			cutType === "radial" &&
-			cutTargetDepthPercentage === 0}
-	/>
-{/if}
-
-<!-- <circle
-	r="2"
-	cx={piecePath.bounds.center.x}
-	cy={piecePath.bounds.center.y}
-	fill="red"
-/> -->
+<svg
+	viewBox={$explodeStore ? `0 0 ${width} ${height}` : undefined}
+	width={$explodeStore ? width : undefined}
+>
+	{#if subPieces.length}
+		{#each subPiecePaths as subPiecePath}
+			<!-- TODO show subpieces in exploded view -->
+			<path d={subPiecePath.pathData} class="subpiece" />
+		{/each}
+	{:else}
+		<path
+			d={piecePath.pathData}
+			style={$explodeStore
+				? `stroke: ${$colorScaleStore(
+						Math.abs(area - meanArea) / standardDeviation
+				  )}; transform: translate(${width / 2 - piecePath.position.x}px, ${
+						height / 2 - piecePath.position.y
+				  }px)`
+				: undefined}
+			class:highlight
+			class:primary={highlight && primary}
+			class:secondary={highlight && secondary}
+			class:thin={secondary &&
+				cutType === "radial" &&
+				cutTargetDepthPercentage === 0}
+		/>
+	{/if}
+</svg>
 
 <style>
 	path {
