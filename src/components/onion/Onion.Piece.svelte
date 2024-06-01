@@ -9,6 +9,8 @@
 	export let primary = false;
 	export let secondary = false;
 
+	const svgPadding = 1;
+
 	const onionStore = getContext("onionStore");
 	$: ({ cutType, cutTargetDepthPercentage, meanArea, standardDeviation } =
 		$onionStore);
@@ -31,7 +33,11 @@
 </script>
 
 <svg
-	viewBox={$explodeStore ? `0 0 ${width} ${height}` : undefined}
+	viewBox={$explodeStore
+		? `${-svgPadding} ${-svgPadding} ${width + 2 * svgPadding} ${
+				height + 2 * svgPadding
+		  }`
+		: undefined}
 	width={$explodeStore ? width : undefined}
 >
 	{#if subPieces.length}
@@ -52,7 +58,8 @@
 			class:highlight
 			class:primary={highlight && primary}
 			class:secondary={highlight && secondary}
-			class:thin={secondary &&
+			class:thin={!$explodeStore &&
+				secondary &&
 				cutType === "radial" &&
 				cutTargetDepthPercentage === 0}
 		/>
