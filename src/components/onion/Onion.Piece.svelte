@@ -9,7 +9,7 @@
 	export let primary = false;
 	export let secondary = false;
 
-	const svgPadding = getContext("svgPadding");
+	const svgPadding = 1;
 
 	const onionStore = getContext("onionStore");
 	$: ({ cutType, cutTargetDepthPercentage, meanArea, standardDeviation } =

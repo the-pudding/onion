@@ -1,6 +1,6 @@
 <script>
 	import { writable } from "svelte/store";
-	import { setContext } from "svelte";
+	import { getContext, setContext } from "svelte";
 	import { scaleLinear } from "d3";
 	import paper from "paper";
 	import Onion from "$utils/onion";
@@ -35,8 +35,6 @@
 	// need to use yScale function to normalize every linear (y = f(x)) function's output
 	const yScale = scaleLinear().domain([0, height]).range([height, 0]);
 	const options = [{ value: "vertical" }, { value: "radial" }];
-	const svgPadding = 2;
-	setContext("svgPadding", svgPadding);
 
 	let numLayers = 10;
 	let numCuts = 10;
@@ -207,12 +205,12 @@
 
 	{#if explode === "off"}
 		<svg
-			viewBox="{-width / 2 - svgPadding} {-svgPadding} {width +
-				2 * svgPadding} {(showRadialTarget ? height * (5 / 3) : height) +
-				2 * svgPadding}"
+			viewBox="{-width / 2} 0 {width} {showRadialTarget
+				? height * (5 / 3)
+				: height}"
 		>
 			<!-- <OnionAxisX {width} {height} /> -->
-			<OnionAxisX {width} {height} isBottom />
+			<OnionAxisX {width} {height} isBottom isHalfWidth={showRadialTarget} />
 			<!-- TODO responsive sizing: move y axis when screen resizes -->
 			<!-- <OnionAxisY {height} /> -->
 
@@ -296,7 +294,7 @@
 	:root {
 		--demo-spacing-y: 1rem;
 		--demo-spacing-x: 2rem;
-		--axis-thickness: 1;
+		--axis-thickness: 2;
 	}
 
 	figure {
