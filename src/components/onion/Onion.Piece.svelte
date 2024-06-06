@@ -32,6 +32,9 @@
 	const colorScaleStore = getContext("colorScaleStore");
 </script>
 
+<!-- TODO can we prevent highlighted pieces next to y-axis from being truncated on the left? -->
+<!--   (involves setting viewBox when $explodeStore === false) -->
+<!--   (requires us to manually position each piece's SVG element) -->
 <svg
 	viewBox={$explodeStore
 		? `${-svgPadding} ${-svgPadding} ${width + 2 * svgPadding} ${
