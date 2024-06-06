@@ -9,14 +9,11 @@
 	export let primary = false;
 	export let secondary = false;
 
+	const svgPadding = 1;
+
 	const onionStore = getContext("onionStore");
-	$: ({
-		radius,
-		cutType,
-		cutTargetDepthPercentage,
-		meanArea,
-		standardDeviation
-	} = $onionStore);
+	$: ({ cutType, cutTargetDepthPercentage, meanArea, standardDeviation } =
+		$onionStore);
 
 	const layerPathStore = getContext("layerPathStore");
 	const cutPathStore = getContext("cutPathStore");
@@ -28,46 +25,55 @@
 	$: subPiecePaths = $horizontalCutPathStore.map((horizontalCutPath) =>
 		piecePath.intersect(horizontalCutPath)
 	);
+	$: ({ width, height } = piecePath.strokeBounds);
 
 	const explodeStore = getContext("explodeStore");
-
-	const explodeXScaleStore = getContext("explodeXScaleStore");
 
 	const colorScaleStore = getContext("colorScaleStore");
 </script>
 
-{#if subPieces.length}
-	{#each subPiecePaths as subPiecePath}
-		<!-- TODO transform subpieces along x scale -->
-		<path d={subPiecePath.pathData} class="subpiece" />
-	{/each}
-{:else}
-	<path
-		d={piecePath.pathData}
-		style={$explodeStore
-			? `stroke: ${$colorScaleStore(
-					Math.abs(area - meanArea) / standardDeviation
-			  )}; transform: translate(${
-					-piecePath.bounds.center.x + $explodeXScaleStore(area)
-			  }px, ${-piecePath.bounds.center.y + radius * 0.7}px)`
-			: undefined}
-		class:highlight
-		class:primary={highlight && primary}
-		class:secondary={highlight && secondary}
-		class:thin={secondary &&
-			cutType === "radial" &&
-			cutTargetDepthPercentage === 0}
-	/>
-{/if}
-
-<!-- <circle
-	r="2"
-	cx={piecePath.bounds.center.x}
-	cy={piecePath.bounds.center.y}
-	fill="red"
-/> -->
+<!-- TODO can we prevent highlighted pieces next to y-axis from being truncated on the left? -->
+<!--   (involves setting viewBox when $explodeStore === false) -->
+<!--   (requires us to manually position each piece's SVG element) -->
+<svg
+	viewBox={$explodeStore
+		? `${-svgPadding} ${-svgPadding} ${width + 2 * svgPadding} ${
+				height + 2 * svgPadding
+		  }`
+		: undefined}
+	width={$explodeStore ? width : undefined}
+>
+	{#if subPieces.length}
+		{#each subPiecePaths as subPiecePath}
+			<!-- TODO show subpieces in exploded view -->
+			<path d={subPiecePath.pathData} class="subpiece" />
+		{/each}
+	{:else}
+		<path
+			d={piecePath.pathData}
+			style={$explodeStore
+				? `stroke: ${$colorScaleStore(
+						Math.abs(area - meanArea) / standardDeviation
+				  )}; transform: translate(${width / 2 - piecePath.position.x}px, ${
+						height / 2 - piecePath.position.y
+				  }px)`
+				: undefined}
+			class:highlight
+			class:primary={highlight && primary}
+			class:secondary={highlight && secondary}
+			class:thin={!$explodeStore &&
+				secondary &&
+				cutType === "radial" &&
+				cutTargetDepthPercentage === 0}
+		/>
+	{/if}
+</svg>
 
 <style>
+	/**
+	* TODO transform transition looks interesting,
+	* but is there a way to animate transition between exploded and not exploded?
+	*/
 	path {
 		fill: none;
 		stroke: transparent;
