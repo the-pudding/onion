@@ -1,6 +1,7 @@
 <script>
 	import Select from "$components/helpers/Select.svelte";
 	import SortTable from "$components/helpers/SortTable.svelte";
+	import { pluralize } from "$lib/utils/pluralize";
 
 	const diagramSize = 32;
 
@@ -37,6 +38,7 @@
 	const rows = rowData.map((r) => {
 		// build an SVG string to render in table
 		const { numCuts, storageKey } = r;
+		const mainCutTypeMap = { v: "vertical", r: "radial" };
 
 		const mainCutType = storageKey[storageKey.indexOf("c") + 2]; // v | r
 		const cutTargetDepthPercentage = +storageKey.substring(
@@ -44,12 +46,13 @@
 			storageKey.indexOf("%")
 		); // 0-100
 		const numHorizontalCuts = storageKey[storageKey.indexOf("h") - 1]; // 0 | 1 | 2
-		const isVertical = mainCutType === "v";
-		const title = `${numCuts} ${isVertical ? "vertical" : "radial"} cut${
-			numCuts === 1 ? "" : "s"
-		}, ${
-			isVertical ? "" : `${cutTargetDepthPercentage}% depth, `
-		}${numHorizontalCuts} horizontal cut${numHorizontalCuts === 1 ? "" : "s"}`;
+		const isRadial = mainCutType === "r";
+		const title = `${numCuts} ${mainCutTypeMap[mainCutType]} ${pluralize(
+			"cut",
+			numCuts
+		)}, ${
+			isRadial ? `${cutTargetDepthPercentage}% depth, ` : ""
+		}${numHorizontalCuts} horizontal ${pluralize("cut", numHorizontalCuts)}`;
 
 		// TODO add dotted cut lines + depth labels
 		r.cuttingDiagram = `<svg viewBox="0 0 ${diagramSize} ${diagramSize}" width="${diagramSize}">
