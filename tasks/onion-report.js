@@ -1,5 +1,11 @@
 import path from "path";
 import { readFile } from "fs/promises";
+import {
+	MAX_CUTS,
+	MAX_LAYERS,
+	MIN_CUTS,
+	MIN_LAYERS
+} from "../src/utils/constants.js";
 
 const CWD = process.cwd();
 const DATA_DIRECTORY = path.join(CWD, "src/data");
@@ -24,9 +30,8 @@ function getEntryWithMinimumValue(data) {
 		);
 		const data = JSON.parse(file);
 
-		// TODO import loop bounds from generate-onion-data.js
-		for (let l = 7; l <= 13; l++) {
-			for (let c = 1; c <= 10; c++) {
+		for (let l = MIN_LAYERS; l <= MAX_LAYERS; l++) {
+			for (let c = MIN_CUTS; c <= MAX_CUTS; c++) {
 				const configurationData = getConfigurationData({
 					data,
 					numLayers: l,

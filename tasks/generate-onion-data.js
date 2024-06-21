@@ -1,5 +1,13 @@
 import path from "path";
 import { writeFile } from "fs/promises";
+import {
+	MIN_LAYERS,
+	MAX_LAYERS,
+	MIN_CUTS,
+	MAX_CUTS,
+	MIN_HORIZONTAL_CUTS,
+	MAX_HORIZONTAL_CUTS
+} from "../src/utils/constants.js";
 import { flattenRadialAreas, flattenVerticalAreas } from "../src/utils/math.js";
 import Onion from "../src/utils/onion.js";
 import { deviation, format, mean } from "d3";
@@ -23,12 +31,6 @@ const DATA_FILE_STANDARD_DEVIATION = path.join(
 	CWD,
 	DATA_FILE_STANDARD_DEVIATION_RELATIVE
 );
-export const MIN_LAYERS = 7;
-export const MAX_LAYERS = 13;
-export const MIN_CUTS = 1;
-export const MAX_CUTS = 10;
-const MIN_HORIZONTAL_CUTS = 0;
-const MAX_HORIZONTAL_CUTS = 2;
 
 // async function writeAllVerticalAreasToFile() {
 // 	numHorizontalCuts.set(0);

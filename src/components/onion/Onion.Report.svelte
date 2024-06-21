@@ -3,6 +3,7 @@
 	import Select from "$components/helpers/Select.svelte";
 	import SortTable from "$components/helpers/SortTable.svelte";
 	import { pluralize } from "$utils/pluralize";
+	import { MAX_LAYERS, MIN_LAYERS } from "$utils/constants";
 
 	const diagramSize = 32;
 	const diagramPadding = 4;
@@ -10,17 +11,10 @@
 	const diagramExtent = halfDiagramSize - diagramPadding;
 	const radialTargetPosition = diagramPadding / 2;
 
-	// TODO can these be imported from another file?
-	let numLayers = 7;
-	const options = [
-		{ value: 7 },
-		{ value: 8 },
-		{ value: 9 },
-		{ value: 10 },
-		{ value: 11 },
-		{ value: 12 },
-		{ value: 13 }
-	];
+	let numLayers = MIN_LAYERS;
+	const options = Array.from({ length: MAX_LAYERS - MIN_LAYERS + 1 }).map(
+		(_, i) => ({ value: MIN_LAYERS + i })
+	);
 
 	const columns = [
 		{ label: "Cuts", prop: "numCuts", sort: true, type: "number" },
