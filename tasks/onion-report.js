@@ -1,5 +1,5 @@
 import path from "path";
-import { readFile } from "fs/promises";
+import { readFile, writeFile } from "fs/promises";
 import {
 	MAX_CUTS,
 	MAX_LAYERS,
@@ -9,6 +9,7 @@ import {
 
 const CWD = process.cwd();
 const DATA_DIRECTORY = path.join(CWD, "src/data");
+const outputFilename = path.join(DATA_DIRECTORY, "onion-report.json");
 
 function getConfigurationData({ data, numLayers, numCuts }) {
 	return Object.fromEntries(
@@ -25,10 +26,11 @@ function getEntryWithMinimumValue(data) {
 
 (async () => {
 	try {
-		const file = await readFile(
+		const inputFile = await readFile(
 			path.join(DATA_DIRECTORY, "onion-standard-deviation.json")
 		);
-		const data = JSON.parse(file);
+		const data = JSON.parse(inputFile);
+		let reportData = [];
 
 		for (let l = MIN_LAYERS; l <= MAX_LAYERS; l++) {
 			for (let c = MIN_CUTS; c <= MAX_CUTS; c++) {
@@ -38,9 +40,13 @@ function getEntryWithMinimumValue(data) {
 					numCuts: c
 				});
 				const e = getEntryWithMinimumValue(configurationData);
-				console.log(e);
+				reportData.push(e);
 			}
 		}
+
+		await writeFile(outputFilename, JSON.stringify(reportData), "utf8");
+
+		console.log(`Wrote onion report to ${outputFilename}`);
 	} catch (error) {
 		console.error(error);
 	}
