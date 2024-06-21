@@ -1,9 +1,10 @@
 <script>
-	import { scaleLinear } from "d3";
+	import { format, scaleLinear } from "d3";
 	import Select from "$components/helpers/Select.svelte";
 	import SortTable from "$components/helpers/SortTable.svelte";
 	import { pluralize } from "$utils/pluralize";
 	import { MAX_LAYERS, MIN_LAYERS } from "$utils/constants";
+	import data from "$data/onion-report.json";
 
 	const diagramSize = 32;
 	const diagramPadding = 4;
@@ -27,14 +28,14 @@
 		}
 	];
 
-	// TODO import this from onion-report.js
-	// TODO get rows for all numLayers values
-	const rowData = [
-		{ numCuts: 1, storageKey: "7l:1c:v:2h", standardDeviation: 47.25 },
-		{ numCuts: 2, storageKey: "7l:2c:r:48%d:0h", standardDeviation: 48.156 },
-		{ numCuts: 3, storageKey: "7l:3c:r:49%d:0h", standardDeviation: 43.65 }
-	];
-	const rows = rowData.map((r) => {
+	$: rowData = data
+		.filter(([storageKey]) => storageKey.startsWith(numLayers))
+		.map(([storageKey, standardDeviation], i) => ({
+			numCuts: i + 1,
+			storageKey,
+			standardDeviation: format(".1f")(standardDeviation) + "%"
+		}));
+	$: rows = rowData.map((r) => {
 		// build an SVG string to render in table
 		const { numCuts, storageKey } = r;
 		const mainCutTypeMap = { v: "vertical", r: "radial" };
