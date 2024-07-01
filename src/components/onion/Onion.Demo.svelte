@@ -1,8 +1,16 @@
 <script>
 	import { writable } from "svelte/store";
-	import { getContext, setContext } from "svelte";
+	import { setContext } from "svelte";
 	import { scaleLinear } from "d3";
 	import paper from "paper";
+	import {
+		MAX_CUTS,
+		MAX_HORIZONTAL_CUTS,
+		MAX_LAYERS,
+		MIN_CUTS,
+		MIN_HORIZONTAL_CUTS,
+		MIN_LAYERS
+	} from "$utils/constants";
 	import Onion from "$utils/onion";
 	import { formatPercentage, polarToCartesian } from "$utils/math";
 	import OnionAxisX from "$components/onion/Onion.AxisX.svelte";
@@ -37,8 +45,8 @@
 	const options = [{ value: "vertical" }, { value: "radial" }];
 
 	let numLayers = 10;
-	let numCuts = 10;
-	let numHorizontalCuts = 0;
+	let numCuts = MAX_CUTS;
+	let numHorizontalCuts = MIN_HORIZONTAL_CUTS;
 	let explode = "off";
 
 	// use paper without canvas
@@ -244,15 +252,20 @@
 			{#if controlLayers}
 				<p>number of layers: {numLayers}</p>
 				<Range
-					min={7}
-					max={13}
+					min={MIN_LAYERS}
+					max={MAX_LAYERS}
 					label="number of layers"
 					bind:value={numLayers}
 				/>
 			{/if}
 
 			<p>number of cuts: {numCuts}</p>
-			<Range min={1} max={10} label="number of cuts" bind:value={numCuts} />
+			<Range
+				min={MIN_CUTS}
+				max={MAX_CUTS}
+				label="number of cuts"
+				bind:value={numCuts}
+			/>
 
 			{#if controlCutType}
 				<ButtonSet legend="cut type" {options} bind:value={cutType} />
@@ -276,8 +289,8 @@
 			{#if controlHorizontalCuts}
 				<p>horizontal cuts: {numHorizontalCuts}</p>
 				<Range
-					min={0}
-					max={2}
+					min={MIN_HORIZONTAL_CUTS}
+					max={MAX_HORIZONTAL_CUTS}
 					label="horizontal cuts"
 					bind:value={numHorizontalCuts}
 				/>

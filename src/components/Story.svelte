@@ -2,6 +2,7 @@
 	import { getContext } from "svelte";
 	import getCopyObjectWithBooleans from "$utils/getCopyObjectWithBooleans";
 	import OnionDemo from "$components/onion/Onion.Demo.svelte";
+	import OnionReport from "./onion/Onion.Report.svelte";
 
 	const copy = getContext("copy");
 </script>
@@ -16,6 +17,8 @@
 {#each copy.story as { type, value }, i}
 	{#if type === "Component"}
 		<OnionDemo {...getCopyObjectWithBooleans(value)} />
+	{:else if type === "Report"}
+		<OnionReport />
 	{:else if type === "image"}
 		{@const { src, alt } = value}
 		<img {src} {alt} />
