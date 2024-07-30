@@ -22,6 +22,12 @@
 	{:else if type === "image"}
 		{@const { src, alt } = value}
 		<img {src} {alt} />
+	{:else if type === "list"}
+		<ul>
+			{#each value as item}
+				<li>{@html item}</li>
+			{/each}
+		</ul>
 	{:else}
 		<p class={type}>{@html value}</p>
 	{/if}

@@ -35,7 +35,8 @@
 
 	/* TODO Inter font */
 
-	.text {
+	.text,
+	li {
 		font-size: var(--text-size);
 	}
 
