@@ -23,7 +23,7 @@
 		{
 			label: "Standard Deviation",
 			prop: "standardDeviation",
-			sort: false,
+			sort: true,
 			type: "number"
 		}
 	];
