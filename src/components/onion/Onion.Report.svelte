@@ -3,7 +3,7 @@
 	import Select from "$components/helpers/Select.svelte";
 	import SortTable from "$components/helpers/SortTable.svelte";
 	import { pluralize } from "$utils/pluralize";
-	import { MAX_LAYERS, MIN_LAYERS } from "$utils/constants";
+	import { ESCAPED_NBSP, MAX_LAYERS, MIN_LAYERS } from "$utils/constants";
 	import data from "$data/onion-report.json";
 
 	const diagramSize = 32;
@@ -12,7 +12,7 @@
 	const diagramExtent = halfDiagramSize - diagramPadding;
 	const radialTargetPosition = diagramPadding / 2;
 
-	let numLayers = MIN_LAYERS;
+	let numLayers = 10;
 	const options = Array.from({ length: MAX_LAYERS - MIN_LAYERS + 1 }).map(
 		(_, i) => ({ value: MIN_LAYERS + i })
 	);
@@ -50,14 +50,20 @@
 			.domain([0, numHorizontalCuts])
 			.range([1 / (numHorizontalCuts + 1), 1]);
 		const isRadial = mainCutType === "r";
-		const title = `${numCuts} ${mainCutTypeMap[mainCutType]} ${pluralize(
-			"cut",
-			numCuts
-		)}, ${
-			isRadial ? `${cutTargetDepthPercentage}% depth, ` : ""
-		}${numHorizontalCuts} horizontal ${pluralize("cut", numHorizontalCuts)}`;
+		const title = [
+			`${mainCutTypeMap[mainCutType]}`,
+			...(isRadial ? [`${cutTargetDepthPercentage}%${ESCAPED_NBSP}depth`] : []),
+			...(numHorizontalCuts
+				? [
+						`${numHorizontalCuts} horizontal${ESCAPED_NBSP}${pluralize(
+							"cut",
+							numHorizontalCuts
+						)}`
+				  ]
+				: [])
+		].join(", ");
 
-		r.cuttingDiagram = `<svg viewBox="${-halfDiagramSize} ${-halfDiagramSize} ${diagramSize} ${diagramSize}" width="${diagramSize}">
+		r.cuttingDiagram = `<svg viewBox="${-halfDiagramSize} ${-halfDiagramSize} ${diagramSize} ${diagramSize}" width="${diagramSize}" style="min-width: ${diagramSize}">
 			<style>
 				rect {
 					fill: rgba(239, 239, 239, 1);
@@ -100,6 +106,8 @@
 			}
 		</svg>`;
 
+		r.cuttingDiagram += title;
+
 		return r;
 	});
 </script>
@@ -107,3 +115,11 @@
 <Select label="number of layers" bind:value={numLayers} {options} />
 
 <SortTable {rows} {columns} />
+
+<style>
+	:global(td[data-th="Method"]) {
+		display: flex;
+		align-items: flex-end;
+		gap: 1.5ch;
+	}
+</style>
