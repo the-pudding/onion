@@ -20,17 +20,25 @@
 		meanArea,
 		standardDeviation
 	} = $onionStore);
-	// TODO refactor to use flattenVerticalAreas/flattenRadialAreas?
 	$: verticalPieces = verticalAreas
-		.map(({ cutX, pieceColumn }, cutNum) =>
-			pieceColumn.map((piece, layerNumInColumn) => ({
-				...piece,
-				cutX,
-				cutNum,
-				layerNumInColumn
-			}))
+		.flatMap(({ cutX, pieceColumn }, cutNum) =>
+			pieceColumn.flatMap((piece, layerNumInColumn) => {
+				const pieceForSVG = {
+					...piece,
+					cutX,
+					cutNum,
+					layerNumInColumn
+				};
+
+				return piece.subPieces.length
+					? piece.subPieces.map((subPieceArea, subPieceIndex) => ({
+							...pieceForSVG,
+							pieceArea: subPieceArea,
+							subPieceIndex
+					  }))
+					: pieceForSVG;
+			})
 		)
-		.flat(2)
 		.sort((a, b) => b.pieceArea - a.pieceArea);
 	$: radialPieces = radialAreas
 		.map(({ layerRadius, pieces }, layerNum) =>
@@ -84,7 +92,7 @@
 
 <!-- TODO draw scale/ticks for exploded view? -->
 {#if cutType === "vertical"}
-	{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieces, cutX, cutNum, layerNumInColumn }}
+	{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }}
 		{@const isInCenterColumn = cutNum === 0}
 		{@const isBottomPiece = layerNumInColumn === 0}
 		{@const columnArcFunctions = layerArcs.filter(
@@ -119,7 +127,7 @@
 				layerRadii.findLastIndex((r) => r <= cutX) +
 				1}
 			{cutNum}
-			{subPieces}
+			{subPieceIndex}
 			highlight={highlightExtremes}
 			primary={isInCenterColumn}
 			secondary={isBottomPiece}

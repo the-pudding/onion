@@ -44,8 +44,8 @@
 	const yScale = scaleLinear().domain([0, height]).range([height, 0]);
 	const options = [{ value: "vertical" }, { value: "radial" }];
 
-	let numLayers = 10;
-	let numCuts = MAX_CUTS;
+	let numLayers = 7;
+	let numCuts = 2;
 	let numHorizontalCuts = MIN_HORIZONTAL_CUTS;
 	let explode = "off";
 
@@ -241,10 +241,14 @@
 				/>
 			{/if}
 
-			<OnionPieceAnalyzer {yScale} {highlightExtremes} />
+			{#key numHorizontalCuts}
+				<OnionPieceAnalyzer {yScale} {highlightExtremes} />
+			{/key}
 		</svg>
 	{:else if explode === "on"}
-		<OnionPieceAnalyzer {yScale} highlightExtremes={false} />
+		{#key numHorizontalCuts}
+			<OnionPieceAnalyzer {yScale} highlightExtremes={false} />
+		{/key}
 	{/if}
 
 	{#if showControls}
