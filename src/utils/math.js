@@ -96,7 +96,9 @@ export function flattenVerticalAreas(verticalAreas) {
 	return verticalAreas
 		.map(({ pieceColumn }) =>
 			pieceColumn.map(({ pieceArea, subPieces }) =>
-				subPieces.length ? subPieces : pieceArea
+				subPieces.length
+					? subPieces.map(({ subPieceArea }) => subPieceArea)
+					: pieceArea
 			)
 		)
 		.flat(2);

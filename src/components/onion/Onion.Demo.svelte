@@ -241,12 +241,12 @@
 				/>
 			{/if}
 
-			{#key numHorizontalCuts}
+			{#key $onionStore}
 				<OnionPieceAnalyzer {yScale} {highlightExtremes} />
 			{/key}
 		</svg>
 	{:else if explode === "on"}
-		{#key numHorizontalCuts}
+		{#key $onionStore}
 			<OnionPieceAnalyzer {yScale} highlightExtremes={false} />
 		{/key}
 	{/if}

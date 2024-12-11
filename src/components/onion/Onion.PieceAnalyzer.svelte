@@ -31,10 +31,10 @@
 				};
 
 				return piece.subPieces.length
-					? piece.subPieces.map((subPieceArea, subPieceIndex) => ({
+					? piece.subPieces.map(({ subPieceArea, horizontalCutPathNum }) => ({
 							...pieceForSVG,
 							pieceArea: subPieceArea,
-							subPieceIndex
+							subPieceIndex: horizontalCutPathNum
 					  }))
 					: pieceForSVG;
 			})
