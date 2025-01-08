@@ -44,8 +44,8 @@
 	const yScale = scaleLinear().domain([0, height]).range([height, 0]);
 	const options = [{ value: "vertical" }, { value: "radial" }];
 
-	let numLayers = 7;
-	let numCuts = 2;
+	let numLayers = 10;
+	let numCuts = MAX_CUTS;
 	let numHorizontalCuts = MIN_HORIZONTAL_CUTS;
 	let explode = "off";
 
