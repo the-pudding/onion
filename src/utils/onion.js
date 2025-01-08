@@ -437,19 +437,36 @@ export default class Onion {
 								(xRange[1] - x1) * cutY;
 						}
 
-						// TODO convert subPieces members to objects which include horizontalCutPathNum (see vertical subpieces above)
 						if (subPieces.length) {
 							// in this block, upperPieceArea is actually the top 2/3 pieces' area
 							const topPieceArea = subPieces[0];
 
 							subPieces = [
-								topPieceArea,
-								upperPieceArea - topPieceArea,
-								area - upperPieceArea
+								{
+									subPieceArea: topPieceArea,
+									horizontalCutPathNum: horizontalCutNum + 2
+								},
+								{
+									subPieceArea: upperPieceArea - topPieceArea,
+									horizontalCutPathNum: horizontalCutNum + 1
+								},
+								{
+									subPieceArea: area - upperPieceArea,
+									horizontalCutPathNum: horizontalCutNum
+								}
 							];
 						} else {
 							// add a top piece and a bottom piece
-							subPieces = [upperPieceArea, area - upperPieceArea];
+							subPieces = [
+								{
+									subPieceArea: upperPieceArea,
+									horizontalCutPathNum: horizontalCutNum + 1
+								},
+								{
+									subPieceArea: area - upperPieceArea,
+									horizontalCutPathNum: horizontalCutNum
+								}
+							];
 						}
 					}
 				});

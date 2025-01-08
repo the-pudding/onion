@@ -41,18 +41,27 @@
 		)
 		.sort((a, b) => b.pieceArea - a.pieceArea);
 	$: radialPieces = radialAreas
-		.map(({ layerRadius, pieces }, layerNum) =>
-			pieces.map((piece, pieceNum) => ({
-				...piece,
-				layerRadius,
-				layerNum,
-				numPieces: pieces.length,
-				isInnermostLayer: layerNum === 0,
-				isOutermostLayer: layerNum === radialAreas.length - 1,
-				pieceNum
-			}))
+		.flatMap(({ layerRadius, pieces }, layerNum) =>
+			pieces.flatMap((piece, pieceNum) => {
+				const pieceForSVG = {
+					...piece,
+					layerRadius,
+					layerNum,
+					numPieces: pieces.length,
+					isInnermostLayer: layerNum === 0,
+					isOutermostLayer: layerNum === radialAreas.length - 1,
+					pieceNum
+				};
+
+				return piece.subPieces.length
+					? piece.subPieces.map(({ subPieceArea, horizontalCutPathNum }) => ({
+							...pieceForSVG,
+							pieceArea: subPieceArea,
+							subPieceIndex: horizontalCutPathNum
+					  }))
+					: pieceForSVG;
+			})
 		)
-		.flat(2)
 		.sort((a, b) => b.area - a.area);
 
 	const explodeXScaleStore = writable();
@@ -134,7 +143,7 @@
 		/>
 	{/each}
 {:else if cutType === "radial"}
-	{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }}
+	{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }}
 		{@const x = xOfLeftCutIntersection}
 		{@const layerArcFunction = layerArcs[layerNum]}
 		{@const y = layerArcFunction(x)}
@@ -146,7 +155,7 @@
 			{area}
 			{layerNum}
 			{cutNum}
-			{subPieces}
+			{subPieceIndex}
 			highlight={highlightExtremes}
 			primary={(cutTargetDepthPercentage === 0 && isOutermostLayer) ||
 				isBottomPiece}
