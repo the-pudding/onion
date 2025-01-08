@@ -91,18 +91,20 @@ export function isInRange(n, min, max) {
 	return n > min && n - min > tolerance && n < max && max - n > tolerance;
 }
 
-// verticalAreas is returned by getVerticalAreas
+// verticalAreas is returned by Onion.verticalAreas
 export function flattenVerticalAreas(verticalAreas) {
 	return verticalAreas
 		.map(({ pieceColumn }) =>
 			pieceColumn.map(({ pieceArea, subPieces }) =>
-				subPieces.length ? subPieces : pieceArea
+				subPieces.length
+					? subPieces.map(({ subPieceArea }) => subPieceArea)
+					: pieceArea
 			)
 		)
 		.flat(2);
 }
 
-// radialAreas is returned by getRadialAreas
+// radialAreas is returned by Onion.radialAreas
 export function flattenRadialAreas(radialAreas) {
 	return radialAreas
 		.map(({ pieces }) =>

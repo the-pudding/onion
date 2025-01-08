@@ -20,31 +20,48 @@
 		meanArea,
 		standardDeviation
 	} = $onionStore);
-	// TODO refactor to use flattenVerticalAreas/flattenRadialAreas?
 	$: verticalPieces = verticalAreas
-		.map(({ cutX, pieceColumn }, cutNum) =>
-			pieceColumn.map((piece, layerNumInColumn) => ({
-				...piece,
-				cutX,
-				cutNum,
-				layerNumInColumn
-			}))
+		.flatMap(({ cutX, pieceColumn }, cutNum) =>
+			pieceColumn.flatMap((piece, layerNumInColumn) => {
+				const pieceForSVG = {
+					...piece,
+					cutX,
+					cutNum,
+					layerNumInColumn
+				};
+
+				return piece.subPieces.length
+					? piece.subPieces.map(({ subPieceArea, horizontalCutPathNum }) => ({
+							...pieceForSVG,
+							pieceArea: subPieceArea,
+							subPieceIndex: horizontalCutPathNum
+					  }))
+					: pieceForSVG;
+			})
 		)
-		.flat(2)
 		.sort((a, b) => b.pieceArea - a.pieceArea);
 	$: radialPieces = radialAreas
-		.map(({ layerRadius, pieces }, layerNum) =>
-			pieces.map((piece, pieceNum) => ({
-				...piece,
-				layerRadius,
-				layerNum,
-				numPieces: pieces.length,
-				isInnermostLayer: layerNum === 0,
-				isOutermostLayer: layerNum === radialAreas.length - 1,
-				pieceNum
-			}))
+		.flatMap(({ layerRadius, pieces }, layerNum) =>
+			pieces.flatMap((piece, pieceNum) => {
+				const pieceForSVG = {
+					...piece,
+					layerRadius,
+					layerNum,
+					numPieces: pieces.length,
+					isInnermostLayer: layerNum === 0,
+					isOutermostLayer: layerNum === radialAreas.length - 1,
+					pieceNum
+				};
+
+				return piece.subPieces.length
+					? piece.subPieces.map(({ subPieceArea, horizontalCutPathNum }) => ({
+							...pieceForSVG,
+							pieceArea: subPieceArea,
+							subPieceIndex: horizontalCutPathNum
+					  }))
+					: pieceForSVG;
+			})
 		)
-		.flat(2)
 		.sort((a, b) => b.area - a.area);
 
 	const explodeXScaleStore = writable();
@@ -84,7 +101,7 @@
 
 <!-- TODO draw scale/ticks for exploded view? -->
 {#if cutType === "vertical"}
-	{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieces, cutX, cutNum, layerNumInColumn }}
+	{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }}
 		{@const isInCenterColumn = cutNum === 0}
 		{@const isBottomPiece = layerNumInColumn === 0}
 		{@const columnArcFunctions = layerArcs.filter(
@@ -119,14 +136,14 @@
 				layerRadii.findLastIndex((r) => r <= cutX) +
 				1}
 			{cutNum}
-			{subPieces}
+			{subPieceIndex}
 			highlight={highlightExtremes}
 			primary={isInCenterColumn}
 			secondary={isBottomPiece}
 		/>
 	{/each}
 {:else if cutType === "radial"}
-	{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieces, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }}
+	{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }}
 		{@const x = xOfLeftCutIntersection}
 		{@const layerArcFunction = layerArcs[layerNum]}
 		{@const y = layerArcFunction(x)}
@@ -138,7 +155,7 @@
 			{area}
 			{layerNum}
 			{cutNum}
-			{subPieces}
+			{subPieceIndex}
 			highlight={highlightExtremes}
 			primary={(cutTargetDepthPercentage === 0 && isOutermostLayer) ||
 				isBottomPiece}

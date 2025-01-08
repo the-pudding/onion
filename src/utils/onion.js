@@ -169,13 +169,31 @@ export default class Onion {
 								const topPieceArea = subPieces[0];
 
 								subPieces = [
-									topPieceArea,
-									upperPieceArea - topPieceArea,
-									pieceArea - upperPieceArea
+									{
+										subPieceArea: topPieceArea,
+										horizontalCutPathNum: horizontalCutNum + 2
+									},
+									{
+										subPieceArea: upperPieceArea - topPieceArea,
+										horizontalCutPathNum: horizontalCutNum + 1
+									},
+									{
+										subPieceArea: pieceArea - upperPieceArea,
+										horizontalCutPathNum: horizontalCutNum
+									}
 								];
 							} else {
 								// add a top piece and a bottom piece
-								subPieces = [upperPieceArea, pieceArea - upperPieceArea];
+								subPieces = [
+									{
+										subPieceArea: upperPieceArea,
+										horizontalCutPathNum: horizontalCutNum + 1
+									},
+									{
+										subPieceArea: pieceArea - upperPieceArea,
+										horizontalCutPathNum: horizontalCutNum
+									}
+								];
 							}
 						}
 					});
@@ -424,13 +442,31 @@ export default class Onion {
 							const topPieceArea = subPieces[0];
 
 							subPieces = [
-								topPieceArea,
-								upperPieceArea - topPieceArea,
-								area - upperPieceArea
+								{
+									subPieceArea: topPieceArea,
+									horizontalCutPathNum: horizontalCutNum + 2
+								},
+								{
+									subPieceArea: upperPieceArea - topPieceArea,
+									horizontalCutPathNum: horizontalCutNum + 1
+								},
+								{
+									subPieceArea: area - upperPieceArea,
+									horizontalCutPathNum: horizontalCutNum
+								}
 							];
 						} else {
 							// add a top piece and a bottom piece
-							subPieces = [upperPieceArea, area - upperPieceArea];
+							subPieces = [
+								{
+									subPieceArea: upperPieceArea,
+									horizontalCutPathNum: horizontalCutNum + 1
+								},
+								{
+									subPieceArea: area - upperPieceArea,
+									horizontalCutPathNum: horizontalCutNum
+								}
+							];
 						}
 					}
 				});

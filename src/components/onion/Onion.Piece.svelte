@@ -4,11 +4,12 @@
 	export let area;
 	export let layerNum;
 	export let cutNum;
-	export let subPieces;
+	export let subPieceIndex = undefined;
 	export let highlight = false;
 	export let primary = false;
 	export let secondary = false;
 
+	const subpiece = subPieceIndex !== undefined;
 	const svgPadding = 1;
 
 	const onionStore = getContext("onionStore");
@@ -22,10 +23,9 @@
 	$: layerPath = $layerPathStore[layerNum];
 	$: cutPath = $cutPathStore[cutNum];
 	$: piecePath = layerPath.intersect(cutPath);
-	$: subPiecePaths = $horizontalCutPathStore.map((horizontalCutPath) =>
-		piecePath.intersect(horizontalCutPath)
-	);
+	$: subPiecePath = piecePath.intersect($horizontalCutPathStore[subPieceIndex]);
 	$: ({ width, height } = piecePath.strokeBounds);
+	$: d = (subpiece ? subPiecePath : piecePath).pathData;
 
 	const explodeStore = getContext("explodeStore");
 
@@ -43,30 +43,28 @@
 		: undefined}
 	width={$explodeStore ? width : undefined}
 >
-	{#if subPieces.length}
-		{#each subPiecePaths as subPiecePath}
-			<!-- TODO show subpieces in exploded view -->
-			<path d={subPiecePath.pathData} class="subpiece" />
-		{/each}
-	{:else}
-		<path
-			d={piecePath.pathData}
-			style={$explodeStore
-				? `stroke: ${$colorScaleStore(
-						Math.abs(area - meanArea) / standardDeviation
-				  )}; transform: translate(${width / 2 - piecePath.position.x}px, ${
-						height / 2 - piecePath.position.y
-				  }px)`
-				: undefined}
-			class:highlight
-			class:primary={highlight && primary}
-			class:secondary={highlight && secondary}
-			class:thin={!$explodeStore &&
-				secondary &&
-				cutType === "radial" &&
-				cutTargetDepthPercentage === 0}
-		/>
-	{/if}
+	<!-- {#if subpiece}
+		{@debug piecePath, subPiecePath, d, area}
+	{/if} -->
+	<path
+		{d}
+		style={$explodeStore
+			? `stroke: ${$colorScaleStore(
+					Math.abs(area - meanArea) / standardDeviation
+			  )}; transform: translate(${width / 2 - piecePath.position.x}px, ${
+					height / 2 - piecePath.position.y
+			  }px)`
+			: undefined}
+		class:highlight
+		class:primary={highlight && primary}
+		class:secondary={highlight && secondary}
+		class:thin={!$explodeStore &&
+			secondary &&
+			cutType === "radial" &&
+			cutTargetDepthPercentage === 0}
+		class:subpiece
+		data-area={area}
+	/>
 </svg>
 
 <style>
@@ -91,8 +89,11 @@
 
 		&.subpiece {
 			stroke: blue;
-			stroke-width: 2px;
 		}
+	}
+
+	:global(figure:not(.explode) .subpiece) {
+		stroke-width: 2px;
 	}
 
 	:global(figure.explode path) {

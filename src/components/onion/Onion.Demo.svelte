@@ -241,10 +241,14 @@
 				/>
 			{/if}
 
-			<OnionPieceAnalyzer {yScale} {highlightExtremes} />
+			{#key $onionStore}
+				<OnionPieceAnalyzer {yScale} {highlightExtremes} />
+			{/key}
 		</svg>
 	{:else if explode === "on"}
-		<OnionPieceAnalyzer {yScale} highlightExtremes={false} />
+		{#key $onionStore}
+			<OnionPieceAnalyzer {yScale} highlightExtremes={false} />
+		{/key}
 	{/if}
 
 	{#if showControls}
