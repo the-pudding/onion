@@ -166,7 +166,7 @@ export default class Onion {
 							if (subPieces.length) {
 								// add the third piece on the bottom
 								// in this block, upperPieceArea is actually the top 2/3 pieces' area
-								const topPieceArea = subPieces[0];
+								const topPieceArea = subPieces[0].subPieceArea;
 
 								subPieces = [
 									{
@@ -439,7 +439,7 @@ export default class Onion {
 
 						if (subPieces.length) {
 							// in this block, upperPieceArea is actually the top 2/3 pieces' area
-							const topPieceArea = subPieces[0];
+							const topPieceArea = subPieces[0].subPieceArea;
 
 							subPieces = [
 								{
