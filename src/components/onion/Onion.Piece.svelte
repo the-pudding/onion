@@ -1,5 +1,6 @@
 <script>
 	import { getContext } from "svelte";
+	import { tweened } from "svelte/motion";
 
 	export let area;
 	export let layerNum;
@@ -28,8 +29,11 @@
 	$: d = (subpiece ? subPiecePath : piecePath).pathData;
 
 	const explodeStore = getContext("explodeStore");
-
+	const explodeXScaleStore = getContext("explodeXScaleStore");
 	const colorScaleStore = getContext("colorScaleStore");
+
+	const xTweened = tweened($explodeStore ? -$explodeXScaleStore(area) : 0);
+	$: $xTweened = $explodeStore ? -$explodeXScaleStore(area) : 0;
 </script>
 
 <!-- TODO can we prevent highlighted pieces next to y-axis from being truncated on the left? -->
@@ -42,6 +46,7 @@
 		  }`
 		: undefined}
 	width={$explodeStore ? width : undefined}
+	x={$xTweened}
 >
 	<!-- {#if subpiece}
 		{@debug piecePath, subPiecePath, d, area}
@@ -76,8 +81,8 @@
 		fill: none;
 		stroke: transparent;
 		transition:
-			stroke 200ms 200ms,
-			transform 200ms;
+			stroke 400ms 400ms,
+			transform 400ms;
 
 		&.highlight {
 			stroke-width: 4px;
@@ -99,7 +104,7 @@
 	:global(figure.explode path) {
 		stroke: black;
 		transition:
-			stroke 200ms,
-			transform 200ms;
+			stroke 400ms,
+			transform 400ms;
 	}
 </style>
