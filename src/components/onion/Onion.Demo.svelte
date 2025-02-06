@@ -1,5 +1,5 @@
 <script>
-	import { run } from 'svelte/legacy';
+	import { run } from "svelte/legacy";
 
 	import { writable } from "svelte/store";
 	import { setContext } from "svelte";
@@ -20,6 +20,7 @@
 	import OnionLayers from "$components/onion/OnionLayers.svelte";
 	import OnionCuts from "$components/onion/Onion.Cuts.svelte";
 	import OnionPieceAnalyzer from "$components/onion/Onion.PieceAnalyzer.svelte";
+	import OnionPiece from "$components/onion/Onion.Piece.svelte";
 	import ButtonSet from "$components/helpers/ButtonSet.svelte";
 	import Range from "$components/helpers/Range.svelte";
 	import Toggle from "$components/helpers/Toggle.svelte";
@@ -101,7 +102,8 @@
 			numHorizontalCuts
 		});
 	});
-	let { cutTargetDepth } = $derived($onionStore);
+	let { cutTargetDepth, layerArcs, layerRadii, verticalAreas, radialAreas } =
+		$derived($onionStore);
 
 	// each layer path is a semi-annulus, except for the innermost layer which is a semi-disk
 	const layerPathStore = writable([]);
@@ -212,7 +214,158 @@
 	run(() => {
 		$explodeStore = explode === "on";
 	});
+
+	let verticalPieces = $derived(
+		verticalAreas
+			.flatMap(({ cutX, pieceColumn }, cutNum) =>
+				pieceColumn.flatMap((piece, layerNumInColumn) => {
+					const pieceForSVG = {
+						...piece,
+						cutX,
+						cutNum,
+						layerNumInColumn
+					};
+
+					return piece.subPieces.length
+						? piece.subPieces.map(({ subPieceArea, horizontalCutPathNum }) => ({
+								...pieceForSVG,
+								pieceArea: subPieceArea,
+								subPieceIndex: horizontalCutPathNum
+						  }))
+						: pieceForSVG;
+				})
+			)
+			.sort((a, b) => b.pieceArea - a.pieceArea)
+	);
+	let radialPieces = $derived(
+		radialAreas
+			.flatMap(({ layerRadius, pieces }, layerNum) =>
+				pieces.flatMap((piece, pieceNum) => {
+					const pieceForSVG = {
+						...piece,
+						layerRadius,
+						layerNum,
+						numPieces: pieces.length,
+						isInnermostLayer: layerNum === 0,
+						isOutermostLayer: layerNum === radialAreas.length - 1,
+						pieceNum
+					};
+
+					return piece.subPieces.length
+						? piece.subPieces.map(({ subPieceArea, horizontalCutPathNum }) => ({
+								...pieceForSVG,
+								area: subPieceArea,
+								subPieceIndex: horizontalCutPathNum
+						  }))
+						: pieceForSVG;
+				})
+			)
+			.sort((a, b) => b.area - a.area)
+	);
 </script>
+
+<!-- TODO delete Onion.PieceAnalyzer.svelte -->
+{#snippet pieceAnalyzer()}
+	{#if cutType === "vertical"}
+		{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }}
+			{@const isInCenterColumn = cutNum === 0}
+			{@const isBottomPiece = layerNumInColumn === 0}
+			{@const columnArcFunctions = layerArcs.filter(
+				(_, arcNum) => layerRadii[arcNum] > cutX
+			)}
+			{@const layerArcFunction =
+				columnArcFunctions[layerNumInColumn] ?? columnArcFunctions[0]}
+			{@const y = layerArcFunction(cutX)}
+			{@const cutY = yScale(y)}
+
+			<!-- <text x={cutX} y={cutY} font-size="xx-small">
+			({Math.round(cutX)},{Math.round(y)})
+		</text> -->
+			<!-- <circle r="2" cx={cutX} cy={cutY} fill="red" /> -->
+
+			<!-- {#if numHorizontalCuts && subPieces.length}
+			<text
+				x={cutX}
+				y={cutY}
+				font-size="xx-small"
+				alignment-baseline="hanging"
+				fill={yRangeColors[subPieces.length]}
+			>
+				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+				{JSON.stringify(subPieces.map(Math.round))}
+			</text>
+		{/if} -->
+
+			<OnionPiece
+				area={pieceArea}
+				layerNum={layerNumInColumn +
+					layerRadii.findLastIndex((r) => r <= cutX) +
+					1}
+				{cutNum}
+				{subPieceIndex}
+				highlight={highlightExtremes}
+				primary={isInCenterColumn}
+				secondary={isBottomPiece}
+			/>
+		{/each}
+	{:else if cutType === "radial"}
+		{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }}
+			{@const x = xOfLeftCutIntersection}
+			{@const layerArcFunction = layerArcs[layerNum]}
+			{@const y = layerArcFunction(x)}
+			{@const yNormalized = yScale(y)}
+			{@const isBottomPiece =
+				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
+
+			<OnionPiece
+				{area}
+				{layerNum}
+				{cutNum}
+				{subPieceIndex}
+				highlight={highlightExtremes}
+				primary={(cutTargetDepthPercentage === 0 && isOutermostLayer) ||
+					isBottomPiece}
+				secondary={cutTargetDepthPercentage === 0 && isInnermostLayer}
+			/>
+
+			<!-- <text {x} y={yNormalized} font-size="x-small">
+		({Math.round(x)}, {Math.round(y)})
+		</text> -->
+			<!-- <text {x} y={yNormalized} font-size="x-small">
+		{Math.round(area)}
+	</text> -->
+
+			<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
+
+			<!-- {#if numHorizontalCuts && subPieces.length}
+		<text
+			{x}
+			y={yNormalized}
+			font-size="xx-small"
+			alignment-baseline="hanging"
+			fill={yRangeColors[subPieces.length]}
+		>
+			y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+			{JSON.stringify(subPieces.map(Math.round))}
+		</text>
+	{/if} -->
+
+			<!-- {@const markerY = yScale(layerArcFunction(xOfLeftCutIntersection))} -->
+			<!-- <text {x} y={markerY} font-size="x-small">
+		[{Math.round(xRange[0])}, {Math.round(xRange[1])}]
+	</text> -->
+
+			<!-- <line
+		x1={xRange[0]}
+		y1={markerY}
+		x2={xRange[1]}
+		y2={markerY}
+		stroke-width="2"
+		style="stroke: red"
+	/> -->
+		{/each}
+	{/if}
+{/snippet}
 
 <figure class:explode={explode === "on"}>
 	{#if toggleExplode || showStandardDeviation}
@@ -274,12 +427,12 @@
 			{/if}
 
 			{#key $onionStore}
-				<OnionPieceAnalyzer {yScale} {highlightExtremes} />
+				{@render pieceAnalyzer()}
 			{/key}
 		</svg>
 	{:else if explode === "on"}
 		{#key $onionStore}
-			<OnionPieceAnalyzer {yScale} highlightExtremes={false} />
+			{@render pieceAnalyzer()}
 		{/key}
 	{/if}
 
