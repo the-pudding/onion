@@ -1,8 +1,19 @@
 <script>
-	export let width;
-	export let height;
-	export let isBottom = false;
-	export let isHalfWidth = false;
+	/**
+	 * @typedef {Object} Props
+	 * @property {any} width
+	 * @property {any} height
+	 * @property {boolean} [isBottom]
+	 * @property {boolean} [isHalfWidth]
+	 */
+
+	/** @type {Props} */
+	let {
+		width,
+		height,
+		isBottom = false,
+		isHalfWidth = false
+	} = $props();
 
 	let y = isBottom ? height : 0;
 </script>
