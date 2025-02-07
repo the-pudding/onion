@@ -3,6 +3,7 @@
 
 	import { writable } from "svelte/store";
 	import { setContext } from "svelte";
+	import { crossfade } from "svelte/transition";
 	import { interpolateHcl, scaleLinear, scaleSequential } from "d3";
 	import paper from "paper";
 	import {
@@ -290,6 +291,8 @@
 			Math.max(maxStandardDeviations, Math.abs(minStandardDeviations))
 		])
 		.interpolator(interpolateHcl("purple", "orange"));
+
+	const [send, receive] = crossfade({});
 </script>
 
 <!-- TODO delete Onion.PieceAnalyzer.svelte -->
@@ -447,7 +450,10 @@
 				cutTargetDepthPercentage === 0}
 			class:subpiece
 			data-area={area}
+			in:send|global={{ key: d }}
+			out:receive|global={{ key: d }}
 		/>
+		<!-- TODO hide pieces' container during crossfade animation? -->
 	</svg>
 {/snippet}
 
@@ -590,7 +596,7 @@
 
 	:global(line, circle) {
 		stroke: black;
-		transition: stroke 200ms;
+		/* transition: stroke 200ms; */
 	}
 
 	:global(.explode :is(line, circle)) {
@@ -624,10 +630,12 @@
 
 	path {
 		fill: none;
-		stroke: transparent;
-		transition:
+		stroke-width: 1px;
+		stroke: black;
+		/* stroke: transparent; */
+		/* transition:
 			stroke 200ms 200ms,
-			transform 200ms;
+			transform 200ms; */
 
 		&.highlight {
 			stroke-width: 4px;
@@ -648,8 +656,8 @@
 
 	:global(figure.explode path) {
 		stroke: black;
-		transition:
+		/* transition:
 			stroke 200ms,
-			transform 200ms;
+			transform 200ms; */
 	}
 </style>
