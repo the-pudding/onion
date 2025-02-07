@@ -293,7 +293,6 @@
 </script>
 
 <!-- TODO delete Onion.PieceAnalyzer.svelte -->
-<!-- TODO copy Onion.PieceAnalyzer.svelte styles -->
 {#snippet pieceAnalyzer()}
 	{#if cutType === "vertical"}
 		{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }}
@@ -396,7 +395,6 @@
 {/snippet}
 
 <!-- TODO delete Onion.Piece.svelte -->
-<!-- TODO copy Onion.Piece.svelte styles -->
 {#snippet piece({
 	area,
 	layerNum,
@@ -622,5 +620,36 @@
 
 	.hidden {
 		visibility: hidden;
+	}
+
+	path {
+		fill: none;
+		stroke: transparent;
+		transition:
+			stroke 200ms 200ms,
+			transform 200ms;
+
+		&.highlight {
+			stroke-width: 4px;
+		}
+
+		&.thin {
+			stroke-width: 2px;
+		}
+
+		&.subpiece {
+			stroke: blue;
+		}
+	}
+
+	:global(figure:not(.explode) .subpiece) {
+		stroke-width: 2px;
+	}
+
+	:global(figure.explode path) {
+		stroke: black;
+		transition:
+			stroke 200ms,
+			transform 200ms;
 	}
 </style>
