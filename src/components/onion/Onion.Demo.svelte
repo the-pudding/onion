@@ -3,7 +3,7 @@
 
 	import { writable } from "svelte/store";
 	import { setContext } from "svelte";
-	import { scaleLinear } from "d3";
+	import { interpolateHcl, scaleLinear, scaleSequential } from "d3";
 	import paper from "paper";
 	import {
 		MAX_CUTS,
@@ -102,8 +102,15 @@
 			numHorizontalCuts
 		});
 	});
-	let { cutTargetDepth, layerArcs, layerRadii, verticalAreas, radialAreas } =
-		$derived($onionStore);
+	let {
+		cutTargetDepth,
+		layerArcs,
+		layerRadii,
+		verticalAreas,
+		radialAreas,
+		meanArea,
+		standardDeviation
+	} = $derived($onionStore);
 
 	// each layer path is a semi-annulus, except for the innermost layer which is a semi-disk
 	const layerPathStore = writable([]);
@@ -262,9 +269,31 @@
 			)
 			.sort((a, b) => b.area - a.area)
 	);
+
+	let minArea = $derived(
+		cutType === "vertical"
+			? verticalPieces.at(-1).pieceArea
+			: radialPieces.at(-1).area
+	);
+	let maxArea = $derived(
+		cutType === "vertical" ? verticalPieces[0].pieceArea : radialPieces[0].area
+	);
+	let minStandardDeviations = $derived(
+		(minArea - meanArea) / standardDeviation
+	);
+	let maxStandardDeviations = $derived(
+		(maxArea - meanArea) / standardDeviation
+	);
+	let colorScale = scaleSequential()
+		.domain([
+			0,
+			Math.max(maxStandardDeviations, Math.abs(minStandardDeviations))
+		])
+		.interpolator(interpolateHcl("purple", "orange"));
 </script>
 
 <!-- TODO delete Onion.PieceAnalyzer.svelte -->
+<!-- TODO copy Onion.PieceAnalyzer.svelte styles -->
 {#snippet pieceAnalyzer()}
 	{#if cutType === "vertical"}
 		{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }}
@@ -296,17 +325,16 @@
 			</text>
 		{/if} -->
 
-			<OnionPiece
-				area={pieceArea}
-				layerNum={layerNumInColumn +
-					layerRadii.findLastIndex((r) => r <= cutX) +
-					1}
-				{cutNum}
-				{subPieceIndex}
-				highlight={highlightExtremes}
-				primary={isInCenterColumn}
-				secondary={isBottomPiece}
-			/>
+			{@render piece({
+				area: pieceArea,
+				layerNum:
+					layerNumInColumn + layerRadii.findLastIndex((r) => r <= cutX) + 1,
+				cutNum,
+				subPieceIndex,
+				highlight: highlightExtremes,
+				primary: isInCenterColumn,
+				secondary: isBottomPiece
+			})}
 		{/each}
 	{:else if cutType === "radial"}
 		{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }}
@@ -317,16 +345,16 @@
 			{@const isBottomPiece =
 				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
-			<OnionPiece
-				{area}
-				{layerNum}
-				{cutNum}
-				{subPieceIndex}
-				highlight={highlightExtremes}
-				primary={(cutTargetDepthPercentage === 0 && isOutermostLayer) ||
-					isBottomPiece}
-				secondary={cutTargetDepthPercentage === 0 && isInnermostLayer}
-			/>
+			{@render piece({
+				area,
+				layerNum,
+				cutNum,
+				subPieceIndex,
+				highlight: highlightExtremes,
+				primary:
+					(cutTargetDepthPercentage === 0 && isOutermostLayer) || isBottomPiece,
+				secondary: cutTargetDepthPercentage === 0 && isInnermostLayer
+			})}
 
 			<!-- <text {x} y={yNormalized} font-size="x-small">
 		({Math.round(x)}, {Math.round(y)})
@@ -365,6 +393,64 @@
 	/> -->
 		{/each}
 	{/if}
+{/snippet}
+
+<!-- TODO delete Onion.Piece.svelte -->
+<!-- TODO copy Onion.Piece.svelte styles -->
+{#snippet piece({
+	area,
+	layerNum,
+	cutNum,
+	subPieceIndex = undefined,
+	highlight = false,
+	primary = false,
+	secondary = false
+})}
+	{@const subpiece = subPieceIndex !== undefined}
+	{@const svgPadding = 1}
+	{@const layerPath = $layerPathStore[layerNum]}
+	{@const cutPath = $cutPathStore[cutNum]}
+	{@const piecePath = layerPath.intersect(cutPath)}
+	{@const subPiecePath = piecePath.intersect(
+		$horizontalCutPathStore[subPieceIndex]
+	)}
+	{@const { width, height } = piecePath.strokeBounds}
+	{@const d = (subpiece ? subPiecePath : piecePath).pathData}
+
+	<!-- TODO can we prevent highlighted pieces next to y-axis from being truncated on the left? -->
+	<!--   (involves setting viewBox when $explodeStore === false) -->
+	<!--   (requires us to manually position each piece's SVG element) -->
+	<svg
+		viewBox={$explodeStore
+			? `${-svgPadding} ${-svgPadding} ${width + 2 * svgPadding} ${
+					height + 2 * svgPadding
+			  }`
+			: undefined}
+		width={$explodeStore ? width : undefined}
+	>
+		<!-- {#if subpiece}
+		{@debug piecePath, subPiecePath, d, area}
+	{/if} -->
+		<path
+			{d}
+			style={$explodeStore
+				? `stroke: ${colorScale(
+						Math.abs(area - meanArea) / standardDeviation
+				  )}; transform: translate(${width / 2 - piecePath.position.x}px, ${
+						height / 2 - piecePath.position.y
+				  }px)`
+				: undefined}
+			class:highlight
+			class:primary={highlight && primary}
+			class:secondary={highlight && secondary}
+			class:thin={!$explodeStore &&
+				secondary &&
+				cutType === "radial" &&
+				cutTargetDepthPercentage === 0}
+			class:subpiece
+			data-area={area}
+		/>
+	</svg>
 {/snippet}
 
 <figure class:explode={explode === "on"}>
