@@ -32,6 +32,7 @@
 	const explodeXScaleStore = getContext("explodeXScaleStore");
 	const colorScaleStore = getContext("colorScaleStore");
 
+	// TODO prevent pieces from overlapping; move them to another row if they won't fit
 	const xTweened = tweened($explodeStore ? -$explodeXScaleStore(area) : 0);
 	$: $xTweened = $explodeStore ? -$explodeXScaleStore(area) : 0;
 </script>
@@ -39,38 +40,28 @@
 <!-- TODO can we prevent highlighted pieces next to y-axis from being truncated on the left? -->
 <!--   (involves setting viewBox when $explodeStore === false) -->
 <!--   (requires us to manually position each piece's SVG element) -->
-<svg
-	viewBox={$explodeStore
-		? `${-svgPadding} ${-svgPadding} ${width + 2 * svgPadding} ${
-				height + 2 * svgPadding
-		  }`
-		: undefined}
-	width={$explodeStore ? width : undefined}
-	x={$xTweened}
->
-	<!-- {#if subpiece}
+<!-- {#if subpiece}
 		{@debug piecePath, subPiecePath, d, area}
 	{/if} -->
-	<path
-		{d}
-		style={$explodeStore
-			? `stroke: ${$colorScaleStore(
-					Math.abs(area - meanArea) / standardDeviation
-			  )}; transform: translate(${width / 2 - piecePath.position.x}px, ${
-					height / 2 - piecePath.position.y
-			  }px)`
-			: undefined}
-		class:highlight
-		class:primary={highlight && primary}
-		class:secondary={highlight && secondary}
-		class:thin={!$explodeStore &&
-			secondary &&
-			cutType === "radial" &&
-			cutTargetDepthPercentage === 0}
-		class:subpiece
-		data-area={area}
-	/>
-</svg>
+<path
+	{d}
+	style={$explodeStore
+		? `stroke: ${$colorScaleStore(
+				Math.abs(area - meanArea) / standardDeviation
+		  )}; transform: translate(${
+				width / 2 - piecePath.position.x + $xTweened
+		  }px, ${height / 2 - piecePath.position.y}px)`
+		: undefined}
+	class:highlight
+	class:primary={highlight && primary}
+	class:secondary={highlight && secondary}
+	class:thin={!$explodeStore &&
+		secondary &&
+		cutType === "radial" &&
+		cutTargetDepthPercentage === 0}
+	class:subpiece
+	data-area={area}
+/>
 
 <style>
 	/**

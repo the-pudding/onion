@@ -211,6 +211,7 @@
 		</div>
 	{/if}
 
+	<!-- TODO tween viewBox height on explode toggle -->
 	<svg
 		viewBox="{-width / 2} 0 {width} {showRadialTarget
 			? height * (5 / 3)
@@ -240,9 +241,7 @@
 			/>
 		{/if}
 
-		{#key $onionStore}
-			<OnionPieceAnalyzer {yScale} {highlightExtremes} />
-		{/key}
+		<OnionPieceAnalyzer {yScale} {highlightExtremes} />
 	</svg>
 
 	{#if showControls}
