@@ -64,10 +64,6 @@
 />
 
 <style>
-	/**
-	* TODO transform transition looks interesting,
-	* but is there a way to animate transition between exploded and not exploded?
-	*/
 	path {
 		fill: none;
 		stroke: transparent;
@@ -96,6 +92,6 @@
 		stroke: black;
 		transition:
 			stroke 400ms,
-			transform 400ms;
+			transform 400ms 400ms;
 	}
 </style>
