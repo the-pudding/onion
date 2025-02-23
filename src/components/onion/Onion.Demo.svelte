@@ -3,7 +3,7 @@
 
 	import { writable } from "svelte/store";
 	import { setContext } from "svelte";
-	import { crossfade } from "svelte/transition";
+	import { Tween } from "svelte/motion";
 	import { interpolateHcl, scaleLinear, scaleSequential } from "d3";
 	import paper from "paper";
 	import {
@@ -292,13 +292,18 @@
 		])
 		.interpolator(interpolateHcl("purple", "orange"));
 
-	const [send, receive] = crossfade({});
+	// TODO tween viewBox height instead of width
+	const viewBoxWidth = new Tween(width);
+
+	$effect(() => {
+		viewBoxWidth.target = $explodeStore ? 1450 : width;
+	});
 </script>
 
 <!-- TODO delete Onion.PieceAnalyzer.svelte -->
 {#snippet pieceAnalyzer()}
 	{#if cutType === "vertical"}
-		{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }}
+		{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }, index}
 			{@const isInCenterColumn = cutNum === 0}
 			{@const isBottomPiece = layerNumInColumn === 0}
 			{@const columnArcFunctions = layerArcs.filter(
@@ -328,6 +333,7 @@
 		{/if} -->
 
 			{@render piece({
+				index,
 				area: pieceArea,
 				layerNum:
 					layerNumInColumn + layerRadii.findLastIndex((r) => r <= cutX) + 1,
@@ -339,7 +345,7 @@
 			})}
 		{/each}
 	{:else if cutType === "radial"}
-		{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }}
+		{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }, index}
 			{@const x = xOfLeftCutIntersection}
 			{@const layerArcFunction = layerArcs[layerNum]}
 			{@const y = layerArcFunction(x)}
@@ -348,6 +354,7 @@
 				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
 			{@render piece({
+				index,
 				area,
 				layerNum,
 				cutNum,
@@ -399,6 +406,7 @@
 
 <!-- TODO delete Onion.Piece.svelte -->
 {#snippet piece({
+	index,
 	area,
 	layerNum,
 	cutNum,
@@ -417,44 +425,34 @@
 	)}
 	{@const { width, height } = piecePath.strokeBounds}
 	{@const d = (subpiece ? subPiecePath : piecePath).pathData}
+	<!-- TODO move pieces to new row if they won't fit in the current one -->
+	{@const explodedX =
+		width / 2 - piecePath.position.x - 300 + (width + 2) * index}
+	{@const explodedY = height / 2 - piecePath.position.y}
 
 	<!-- TODO can we prevent highlighted pieces next to y-axis from being truncated on the left? -->
 	<!--   (involves setting viewBox when $explodeStore === false) -->
 	<!--   (requires us to manually position each piece's SVG element) -->
-	<svg
-		viewBox={$explodeStore
-			? `${-svgPadding} ${-svgPadding} ${width + 2 * svgPadding} ${
-					height + 2 * svgPadding
-			  }`
-			: undefined}
-		width={$explodeStore ? width : undefined}
-	>
-		<!-- {#if subpiece}
+	<!-- {#if subpiece}
 		{@debug piecePath, subPiecePath, d, area}
 	{/if} -->
-		<path
-			{d}
-			style={$explodeStore
-				? `stroke: ${colorScale(
-						Math.abs(area - meanArea) / standardDeviation
-				  )}; transform: translate(${width / 2 - piecePath.position.x}px, ${
-						height / 2 - piecePath.position.y
-				  }px)`
-				: undefined}
-			class:highlight
-			class:primary={highlight && primary}
-			class:secondary={highlight && secondary}
-			class:thin={!$explodeStore &&
-				secondary &&
-				cutType === "radial" &&
-				cutTargetDepthPercentage === 0}
-			class:subpiece
-			data-area={area}
-			in:send|global={{ key: d }}
-			out:receive|global={{ key: d }}
-		/>
-		<!-- TODO hide pieces' container during crossfade animation? -->
-	</svg>
+	<path
+		{d}
+		style={$explodeStore
+			? `stroke: ${colorScale(
+					Math.abs(area - meanArea) / standardDeviation
+			  )}; transform: translate(${explodedX}px, ${explodedY}px)`
+			: undefined}
+		class:highlight
+		class:primary={highlight && primary}
+		class:secondary={highlight && secondary}
+		class:thin={!$explodeStore &&
+			secondary &&
+			cutType === "radial" &&
+			cutTargetDepthPercentage === 0}
+		class:subpiece
+		data-area={area}
+	/>
 {/snippet}
 
 <figure class:explode={explode === "on"}>
@@ -486,45 +484,36 @@
 		</div>
 	{/if}
 
-	{#if explode === "off"}
-		<svg
-			viewBox="{-width / 2} 0 {width} {showRadialTarget
-				? height * (5 / 3)
-				: height}"
-		>
-			<!-- <OnionAxisX {width} {height} /> -->
-			<OnionAxisX {width} {height} isBottom isHalfWidth={showRadialTarget} />
-			<!-- TODO responsive sizing: move y axis when screen resizes -->
-			<!-- <OnionAxisY {height} /> -->
+	<svg
+		viewBox="{-width / 2} 0 {viewBoxWidth.current} {showRadialTarget
+			? height * (5 / 3)
+			: height}"
+	>
+		<!-- <OnionAxisX {width} {height} /> -->
+		<OnionAxisX {width} {height} isBottom isHalfWidth={showRadialTarget} />
+		<!-- <OnionAxisY {height} /> -->
 
-			<OnionLayers {height} />
+		<OnionLayers {height} />
 
-			{#if showCuts}
-				<OnionCuts {width} {height} {yScale} />
-			{/if}
+		{#if showCuts}
+			<OnionCuts {width} {height} {yScale} />
+		{/if}
 
-			{#if showRadialTarget}
-				<clipPath id="layer-mask">
-					<rect {width} {height} x={-width / 2} />
-				</clipPath>
+		{#if showRadialTarget}
+			<clipPath id="layer-mask">
+				<rect {width} {height} x={-width / 2} />
+			</clipPath>
 
-				<circle
-					r="10"
-					cx="0"
-					cy={yScale(-cutTargetDepth)}
-					class="radial-target"
-				/>
-			{/if}
+			<circle
+				r="10"
+				cx="0"
+				cy={yScale(-cutTargetDepth)}
+				class="radial-target"
+			/>
+		{/if}
 
-			{#key $onionStore}
-				{@render pieceAnalyzer()}
-			{/key}
-		</svg>
-	{:else if explode === "on"}
-		{#key $onionStore}
-			{@render pieceAnalyzer()}
-		{/key}
-	{/if}
+		{@render pieceAnalyzer()}
+	</svg>
 
 	{#if showControls}
 		<div class="controls bottom">
@@ -587,6 +576,7 @@
 		--demo-spacing-y: 1rem;
 		--demo-spacing-x: 2rem;
 		--axis-thickness: 2;
+		--duration-transform: 800ms;
 	}
 
 	figure {
@@ -633,9 +623,9 @@
 		stroke-width: 1px;
 		stroke: black;
 		/* stroke: transparent; */
-		/* transition:
+		transition:
 			stroke 200ms 200ms,
-			transform 200ms; */
+			transform var(--duration-transform);
 
 		&.highlight {
 			stroke-width: 4px;
@@ -656,8 +646,8 @@
 
 	:global(figure.explode path) {
 		stroke: black;
-		/* transition:
+		transition:
 			stroke 200ms,
-			transform 200ms; */
+			transform var(--duration-transform);
 	}
 </style>
