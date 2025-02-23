@@ -33,7 +33,7 @@
 	const colorScaleStore = getContext("colorScaleStore");
 
 	// TODO prevent pieces from overlapping; move them to another row if they won't fit
-	const xTweened = tweened($explodeStore ? -$explodeXScaleStore(area) : 0);
+	const xTweened = tweened(0);
 	$: $xTweened = $explodeStore ? -$explodeXScaleStore(area) : 0;
 </script>
 
