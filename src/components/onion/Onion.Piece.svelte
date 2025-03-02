@@ -68,8 +68,8 @@
 		fill: none;
 		stroke: transparent;
 		transition:
-			stroke 400ms 400ms,
-			transform 400ms;
+			stroke var(--transition-duration) var(--transition-duration),
+			transform var(--transition-duration);
 
 		&.highlight {
 			stroke-width: 4px;
@@ -91,7 +91,7 @@
 	:global(figure.explode path) {
 		stroke: black;
 		transition:
-			stroke 400ms,
-			transform 400ms 400ms;
+			stroke var(--transition-duration) var(--transition-duration),
+			transform var(--transition-duration) var(--transition-duration);
 	}
 </style>

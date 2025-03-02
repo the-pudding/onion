@@ -305,6 +305,7 @@
 		--demo-spacing-y: 1rem;
 		--demo-spacing-x: 2rem;
 		--axis-thickness: 2;
+		--transition-duration: 300ms;
 	}
 
 	figure {
@@ -314,7 +315,7 @@
 
 	:global(line, circle) {
 		stroke: black;
-		transition: stroke 200ms;
+		transition: stroke var(--transition-duration) var(--transition-duration);
 	}
 
 	:global(.explode :is(line, circle)) {
