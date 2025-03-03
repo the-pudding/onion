@@ -621,10 +621,9 @@
 	path {
 		fill: none;
 		stroke-width: 1px;
-		stroke: black;
-		/* stroke: transparent; */
+		stroke: transparent;
 		transition:
-			stroke 200ms 200ms,
+			stroke var(--duration-transform) var(--duration-transform),
 			transform var(--duration-transform);
 
 		&.highlight {
