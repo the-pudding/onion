@@ -60,6 +60,7 @@
 	} = $props();
 
 	const width = 600;
+	setContext("width", width);
 	const height = width / 2;
 	const radius = height * 0.8;
 	// SVG drawing is flipped upside down
@@ -215,11 +216,6 @@
 	});
 
 	// TODO tween viewBox height instead of width
-	const viewBoxWidth = new Tween(width);
-
-	$effect(() => {
-		viewBoxWidth.target = $explodeStore ? 1450 : width;
-	});
 </script>
 
 <figure class:explode={explode === "on"}>
@@ -252,7 +248,7 @@
 	{/if}
 
 	<svg
-		viewBox="{-width / 2} 0 {viewBoxWidth.current} {showRadialTarget
+		viewBox="{-width / 2} 0 {width} {showRadialTarget
 			? height * (5 / 3)
 			: height}"
 	>

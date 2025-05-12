@@ -112,51 +112,114 @@
 	// y-range is blue if piece is intersected by only one horizontal cut
 	// y-range is cyan if piece is intersected by both horizontal cuts
 	const yRangeColors = ["black", undefined, "blue", "cyan"];
+
+	const svgWidth = getContext("width");
+	const layerPathStore = getContext("layerPathStore");
+	const cutPathStore = getContext("cutPathStore");
+	const horizontalCutPathStore = getContext("horizontalCutPathStore");
+
+	// create a data structure arranges pieces in rows for exploded view
+	// ^this will be mapped over in template--whether exploded or not--so that pieces animate smoothly
+	let verticalPiecesLaidOut = $derived(
+		verticalPieces.reduce((rows, piece) => {
+			const lastRow = rows[rows.length - 1];
+			const layerNum =
+				piece.layerNumInColumn +
+				layerRadii.findLastIndex((r) => r <= piece.cutX) +
+				1;
+			const layerPath = $layerPathStore[layerNum];
+			const cutPath = $cutPathStore[piece.cutNum];
+			const piecePath = layerPath.intersect(cutPath);
+			const subPiecePath = piecePath.intersect(
+				$horizontalCutPathStore[piece.subPieceIndex]
+			);
+			// TODO pass height to rows
+			// TODO should we set each piece's x-coordinate too?
+			const { width, height } = (
+				piece.subPieceIndex === undefined ? piecePath : subPiecePath
+			).strokeBounds;
+			// TODO should these dimensions be set in onion.js instead?
+			piece.width = width;
+			piece.height = height;
+
+			const lastRowWidth = rows.length
+				? lastRow.pieces.reduce(
+						(totalWidth, piece) => totalWidth + piece.width,
+						0
+				  )
+				: 0;
+			const remainingWidth = svgWidth - lastRowWidth;
+
+			// if there is enough width in the last row to fit this piece, add it
+			// TODO account for gaps between pieces
+			if (rows.length && width <= remainingWidth) {
+				lastRow.pieces.push(piece);
+			} else {
+				// otherwise, add it to a new row
+				// but first, take note of the tallest piece in the last row; the new row will sit below it
+				const tallestPieceHeight = lastRow
+					? Math.max(...lastRow.pieces.map((p) => p.height))
+					: 0;
+				const explodedRowY =
+					rows.reduce((rowHeights, row) => rowHeights + row.explodedRowY, 0) +
+					tallestPieceHeight;
+
+				rows.push({ pieces: [piece], explodedRowY });
+			}
+
+			return rows;
+		}, [])
+	);
+
+	// TODO can radialPiecesLaidOut reuse the derivation for verticalPiecesLaidOut?
 </script>
 
 <!-- TODO draw scale/ticks for exploded view? -->
 {#if cutType === "vertical"}
-	{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }, index}
-		{@const isInCenterColumn = cutNum === 0}
-		{@const isBottomPiece = layerNumInColumn === 0}
-		{@const columnArcFunctions = layerArcs.filter(
-			(_, arcNum) => layerRadii[arcNum] > cutX
-		)}
-		{@const layerArcFunction =
-			columnArcFunctions[layerNumInColumn] ?? columnArcFunctions[0]}
-		{@const y = layerArcFunction(cutX)}
-		{@const cutY = yScale(y)}
+	{#each verticalPiecesLaidOut as { pieces, explodedRowY }}
+		{#each pieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }, index}
+			{@const isInCenterColumn = cutNum === 0}
+			{@const isBottomPiece = layerNumInColumn === 0}
+			{@const columnArcFunctions = layerArcs.filter(
+				(_, arcNum) => layerRadii[arcNum] > cutX
+			)}
+			{@const layerArcFunction =
+				columnArcFunctions[layerNumInColumn] ?? columnArcFunctions[0]}
+			{@const y = layerArcFunction(cutX)}
+			{@const cutY = yScale(y)}
 
-		<!-- <text x={cutX} y={cutY} font-size="xx-small">
-			({Math.round(cutX)},{Math.round(y)})
-		</text> -->
-		<!-- <circle r="2" cx={cutX} cy={cutY} fill="red" /> -->
+			<!-- <text x={cutX} y={cutY} font-size="xx-small">
+    			({Math.round(cutX)},{Math.round(y)})
+    		</text> -->
+			<!-- <circle r="2" cx={cutX} cy={cutY} fill="red" /> -->
 
-		<!-- {#if numHorizontalCuts && subPieces.length}
-			<text
-				x={cutX}
-				y={cutY}
-				font-size="xx-small"
-				alignment-baseline="hanging"
-				fill={yRangeColors[subPieces.length]}
-			>
-				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
-				{JSON.stringify(subPieces.map(Math.round))}
-			</text>
-		{/if} -->
+			<!-- {#if numHorizontalCuts && subPieces.length}
+    			<text
+    				x={cutX}
+    				y={cutY}
+    				font-size="xx-small"
+    				alignment-baseline="hanging"
+    				fill={yRangeColors[subPieces.length]}
+    			>
+    				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
+    				{JSON.stringify(subPieces.map(Math.round))}
+    			</text>
+    		{/if} -->
 
-		<OnionPiece
-			{index}
-			area={pieceArea}
-			layerNum={layerNumInColumn +
-				layerRadii.findLastIndex((r) => r <= cutX) +
-				1}
-			{cutNum}
-			{subPieceIndex}
-			highlight={highlightExtremes}
-			primary={isInCenterColumn}
-			secondary={isBottomPiece}
-		/>
+			<OnionPiece
+				{index}
+				area={pieceArea}
+				layerNum={layerNumInColumn +
+					layerRadii.findLastIndex((r) => r <= cutX) +
+					1}
+				{cutNum}
+				{subPieceIndex}
+				highlight={highlightExtremes}
+				primary={isInCenterColumn}
+				secondary={isBottomPiece}
+				explodedRowY={explodedRowY ?? 0}
+			/>
+		{/each}
 	{/each}
 {:else if cutType === "radial"}
 	{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }, index}

@@ -11,6 +11,7 @@
 	 * @property {boolean} [highlight]
 	 * @property {boolean} [primary]
 	 * @property {boolean} [secondary]
+	 * @property {number} explodedRowY
 	 */
 
 	/** @type {Props} */
@@ -22,7 +23,8 @@
 		subPieceIndex = undefined,
 		highlight = false,
 		primary = false,
-		secondary = false
+		secondary = false,
+		explodedRowY
 	} = $props();
 
 	const subpiece = subPieceIndex !== undefined;
@@ -36,6 +38,8 @@
 	const cutPathStore = getContext("cutPathStore");
 	const horizontalCutPathStore = getContext("horizontalCutPathStore");
 
+	// TODO this intersection logic was moved to OnionPieceAnalyzer;
+	//   it can be removed from here after radial pieces can smoothly transition to exploded
 	let layerPath = $derived($layerPathStore[layerNum]);
 	let cutPath = $derived($cutPathStore[cutNum]);
 	let piecePath = $derived(layerPath.intersect(cutPath));
@@ -49,16 +53,12 @@
 
 	const colorScaleStore = getContext("colorScaleStore");
 
-	// TODO move pieces to new row if they won't fit in the current one
 	let explodedX = $derived(
-		width / 2 - piecePath.position.x - 300 + (width + 2) * index
+		width / 2 - piecePath.position.x - 300 + width * index
 	);
-	let explodedY = $derived(height / 2 - piecePath.position.y);
+	let explodedY = $derived(height / 2 - piecePath.position.y + explodedRowY);
 </script>
 
-<!-- TODO can we prevent highlighted pieces next to y-axis from being truncated on the left? -->
-<!--   (involves setting viewBox when $explodeStore === false) -->
-<!--   (requires us to manually position each piece's SVG element) -->
 <!-- {#if subpiece}
 		{@debug piecePath, subPiecePath, d, area}
 	{/if} -->
@@ -81,10 +81,6 @@
 />
 
 <style>
-	/**
-	* TODO transform transition looks interesting,
-	* but is there a way to animate transition between exploded and not exploded?
-	*/
 	path {
 		fill: none;
 		stroke: transparent;
