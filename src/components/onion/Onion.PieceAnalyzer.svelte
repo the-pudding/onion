@@ -1,5 +1,5 @@
 <script>
-	import { run } from 'svelte/legacy';
+	import { run } from "svelte/legacy";
 
 	import { getContext, setContext } from "svelte";
 	import { interpolateHcl, scaleLinear, scaleSequential } from "d3";
@@ -21,57 +21,63 @@
 		meanArea,
 		standardDeviation
 	} = $derived($onionStore);
-	let verticalPieces = $derived(verticalAreas
-		.flatMap(({ cutX, pieceColumn }, cutNum) =>
-			pieceColumn.flatMap((piece, layerNumInColumn) => {
-				const pieceForSVG = {
-					...piece,
-					cutX,
-					cutNum,
-					layerNumInColumn
-				};
+	let verticalPieces = $derived(
+		verticalAreas
+			.flatMap(({ cutX, pieceColumn }, cutNum) =>
+				pieceColumn.flatMap((piece, layerNumInColumn) => {
+					const pieceForSVG = {
+						...piece,
+						cutX,
+						cutNum,
+						layerNumInColumn
+					};
 
-				return piece.subPieces.length
-					? piece.subPieces.map(({ subPieceArea, horizontalCutPathNum }) => ({
-							...pieceForSVG,
-							pieceArea: subPieceArea,
-							subPieceIndex: horizontalCutPathNum
-					  }))
-					: pieceForSVG;
-			})
-		)
-		.sort((a, b) => b.pieceArea - a.pieceArea));
-	let radialPieces = $derived(radialAreas
-		.flatMap(({ layerRadius, pieces }, layerNum) =>
-			pieces.flatMap((piece, pieceNum) => {
-				const pieceForSVG = {
-					...piece,
-					layerRadius,
-					layerNum,
-					numPieces: pieces.length,
-					isInnermostLayer: layerNum === 0,
-					isOutermostLayer: layerNum === radialAreas.length - 1,
-					pieceNum
-				};
+					return piece.subPieces.length
+						? piece.subPieces.map(({ subPieceArea, horizontalCutPathNum }) => ({
+								...pieceForSVG,
+								pieceArea: subPieceArea,
+								subPieceIndex: horizontalCutPathNum
+						  }))
+						: pieceForSVG;
+				})
+			)
+			.sort((a, b) => b.pieceArea - a.pieceArea)
+	);
+	let radialPieces = $derived(
+		radialAreas
+			.flatMap(({ layerRadius, pieces }, layerNum) =>
+				pieces.flatMap((piece, pieceNum) => {
+					const pieceForSVG = {
+						...piece,
+						layerRadius,
+						layerNum,
+						numPieces: pieces.length,
+						isInnermostLayer: layerNum === 0,
+						isOutermostLayer: layerNum === radialAreas.length - 1,
+						pieceNum
+					};
 
-				return piece.subPieces.length
-					? piece.subPieces.map(({ subPieceArea, horizontalCutPathNum }) => ({
-							...pieceForSVG,
-							area: subPieceArea,
-							subPieceIndex: horizontalCutPathNum
-					  }))
-					: pieceForSVG;
-			})
-		)
-		.sort((a, b) => b.area - a.area));
+					return piece.subPieces.length
+						? piece.subPieces.map(({ subPieceArea, horizontalCutPathNum }) => ({
+								...pieceForSVG,
+								area: subPieceArea,
+								subPieceIndex: horizontalCutPathNum
+						  }))
+						: pieceForSVG;
+				})
+			)
+			.sort((a, b) => b.area - a.area)
+	);
 
 	const explodeXScaleStore = writable();
-	let minArea =
-		$derived(cutType === "vertical"
+	let minArea = $derived(
+		cutType === "vertical"
 			? verticalPieces.at(-1).pieceArea
-			: radialPieces.at(-1).area);
-	let maxArea =
-		$derived(cutType === "vertical" ? verticalPieces[0].pieceArea : radialPieces[0].area);
+			: radialPieces.at(-1).area
+	);
+	let maxArea = $derived(
+		cutType === "vertical" ? verticalPieces[0].pieceArea : radialPieces[0].area
+	);
 	run(() => {
 		minArea,
 			maxArea,
@@ -82,8 +88,12 @@
 	setContext("explodeXScaleStore", explodeXScaleStore);
 
 	const colorScaleStore = writable();
-	let minStandardDeviations = $derived((minArea - meanArea) / standardDeviation);
-	let maxStandardDeviations = $derived((maxArea - meanArea) / standardDeviation);
+	let minStandardDeviations = $derived(
+		(minArea - meanArea) / standardDeviation
+	);
+	let maxStandardDeviations = $derived(
+		(maxArea - meanArea) / standardDeviation
+	);
 	// pieces with areas closer to average are more purple;
 	//   pieces with areas further from average are more orange
 	// TODO purple/orange are just placeholder colors
@@ -106,7 +116,7 @@
 
 <!-- TODO draw scale/ticks for exploded view? -->
 {#if cutType === "vertical"}
-	{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }}
+	{#each verticalPieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }, index}
 		{@const isInCenterColumn = cutNum === 0}
 		{@const isBottomPiece = layerNumInColumn === 0}
 		{@const columnArcFunctions = layerArcs.filter(
@@ -136,6 +146,7 @@
 		{/if} -->
 
 		<OnionPiece
+			{index}
 			area={pieceArea}
 			layerNum={layerNumInColumn +
 				layerRadii.findLastIndex((r) => r <= cutX) +
@@ -148,7 +159,7 @@
 		/>
 	{/each}
 {:else if cutType === "radial"}
-	{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }}
+	{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }, index}
 		{@const x = xOfLeftCutIntersection}
 		{@const layerArcFunction = layerArcs[layerNum]}
 		{@const y = layerArcFunction(x)}
@@ -157,6 +168,7 @@
 			cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
 		<OnionPiece
+			{index}
 			{area}
 			{layerNum}
 			{cutNum}

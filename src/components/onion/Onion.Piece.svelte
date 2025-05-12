@@ -3,6 +3,7 @@
 
 	/**
 	 * @typedef {Object} Props
+	 * @property {number} index
 	 * @property {any} area
 	 * @property {any} layerNum
 	 * @property {any} cutNum
@@ -14,6 +15,7 @@
 
 	/** @type {Props} */
 	let {
+		index,
 		area,
 		layerNum,
 		cutNum,
@@ -37,49 +39,46 @@
 	let layerPath = $derived($layerPathStore[layerNum]);
 	let cutPath = $derived($cutPathStore[cutNum]);
 	let piecePath = $derived(layerPath.intersect(cutPath));
-	let subPiecePath = $derived(piecePath.intersect($horizontalCutPathStore[subPieceIndex]));
+	let subPiecePath = $derived(
+		piecePath.intersect($horizontalCutPathStore[subPieceIndex])
+	);
 	let { width, height } = $derived(piecePath.strokeBounds);
 	let d = $derived((subpiece ? subPiecePath : piecePath).pathData);
 
 	const explodeStore = getContext("explodeStore");
 
 	const colorScaleStore = getContext("colorScaleStore");
+
+	// TODO move pieces to new row if they won't fit in the current one
+	let explodedX = $derived(
+		width / 2 - piecePath.position.x - 300 + (width + 2) * index
+	);
+	let explodedY = $derived(height / 2 - piecePath.position.y);
 </script>
 
 <!-- TODO can we prevent highlighted pieces next to y-axis from being truncated on the left? -->
 <!--   (involves setting viewBox when $explodeStore === false) -->
 <!--   (requires us to manually position each piece's SVG element) -->
-<svg
-	viewBox={$explodeStore
-		? `${-svgPadding} ${-svgPadding} ${width + 2 * svgPadding} ${
-				height + 2 * svgPadding
-		  }`
-		: undefined}
-	width={$explodeStore ? width : undefined}
->
-	<!-- {#if subpiece}
+<!-- {#if subpiece}
 		{@debug piecePath, subPiecePath, d, area}
 	{/if} -->
-	<path
-		{d}
-		style={$explodeStore
-			? `stroke: ${$colorScaleStore(
-					Math.abs(area - meanArea) / standardDeviation
-			  )}; transform: translate(${width / 2 - piecePath.position.x}px, ${
-					height / 2 - piecePath.position.y
-			  }px)`
-			: undefined}
-		class:highlight
-		class:primary={highlight && primary}
-		class:secondary={highlight && secondary}
-		class:thin={!$explodeStore &&
-			secondary &&
-			cutType === "radial" &&
-			cutTargetDepthPercentage === 0}
-		class:subpiece
-		data-area={area}
-	/>
-</svg>
+<path
+	{d}
+	style={$explodeStore
+		? `stroke: ${$colorScaleStore(
+				Math.abs(area - meanArea) / standardDeviation
+		  )}; transform: translate(${explodedX}px, ${explodedY}px)`
+		: undefined}
+	class:highlight
+	class:primary={highlight && primary}
+	class:secondary={highlight && secondary}
+	class:thin={!$explodeStore &&
+		secondary &&
+		cutType === "radial" &&
+		cutTargetDepthPercentage === 0}
+	class:subpiece
+	data-area={area}
+/>
 
 <style>
 	/**
@@ -90,8 +89,8 @@
 		fill: none;
 		stroke: transparent;
 		transition:
-			stroke 200ms 200ms,
-			transform 200ms;
+			stroke var(--duration-transform) var(--duration-transform),
+			transform var(--duration-transform);
 
 		&.highlight {
 			stroke-width: 4px;
@@ -114,6 +113,6 @@
 		stroke: black;
 		transition:
 			stroke 200ms,
-			transform 200ms;
+			transform var(--duration-transform);
 	}
 </style>

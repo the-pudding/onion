@@ -1,8 +1,9 @@
 <script>
-	import { run } from 'svelte/legacy';
+	import { run } from "svelte/legacy";
 
 	import { writable } from "svelte/store";
 	import { setContext } from "svelte";
+	import { Tween } from "svelte/motion";
 	import { scaleLinear } from "d3";
 	import paper from "paper";
 	import {
@@ -212,6 +213,13 @@
 	run(() => {
 		$explodeStore = explode === "on";
 	});
+
+	// TODO tween viewBox height instead of width
+	const viewBoxWidth = new Tween(width);
+
+	$effect(() => {
+		viewBoxWidth.target = $explodeStore ? 1450 : width;
+	});
 </script>
 
 <figure class:explode={explode === "on"}>
@@ -243,45 +251,37 @@
 		</div>
 	{/if}
 
-	{#if explode === "off"}
-		<svg
-			viewBox="{-width / 2} 0 {width} {showRadialTarget
-				? height * (5 / 3)
-				: height}"
-		>
-			<!-- <OnionAxisX {width} {height} /> -->
-			<OnionAxisX {width} {height} isBottom isHalfWidth={showRadialTarget} />
-			<!-- TODO responsive sizing: move y axis when screen resizes -->
-			<!-- <OnionAxisY {height} /> -->
+	<svg
+		viewBox="{-width / 2} 0 {viewBoxWidth.current} {showRadialTarget
+			? height * (5 / 3)
+			: height}"
+	>
+		<!-- <OnionAxisX {width} {height} /> -->
+		<OnionAxisX {width} {height} isBottom isHalfWidth={showRadialTarget} />
+		<!-- TODO responsive sizing: move y axis when screen resizes -->
+		<!-- <OnionAxisY {height} /> -->
 
-			<OnionLayers {height} />
+		<OnionLayers {height} />
 
-			{#if showCuts}
-				<OnionCuts {width} {height} {yScale} />
-			{/if}
+		{#if showCuts}
+			<OnionCuts {width} {height} {yScale} />
+		{/if}
 
-			{#if showRadialTarget}
-				<clipPath id="layer-mask">
-					<rect {width} {height} x={-width / 2} />
-				</clipPath>
+		{#if showRadialTarget}
+			<clipPath id="layer-mask">
+				<rect {width} {height} x={-width / 2} />
+			</clipPath>
 
-				<circle
-					r="10"
-					cx="0"
-					cy={yScale(-cutTargetDepth)}
-					class="radial-target"
-				/>
-			{/if}
+			<circle
+				r="10"
+				cx="0"
+				cy={yScale(-cutTargetDepth)}
+				class="radial-target"
+			/>
+		{/if}
 
-			{#key $onionStore}
-				<OnionPieceAnalyzer {yScale} {highlightExtremes} />
-			{/key}
-		</svg>
-	{:else if explode === "on"}
-		{#key $onionStore}
-			<OnionPieceAnalyzer {yScale} highlightExtremes={false} />
-		{/key}
-	{/if}
+		<OnionPieceAnalyzer {yScale} {highlightExtremes} />
+	</svg>
 
 	{#if showControls}
 		<div class="controls bottom">
@@ -344,6 +344,7 @@
 		--demo-spacing-y: 1rem;
 		--demo-spacing-x: 2rem;
 		--axis-thickness: 2;
+		--duration-transform: 800ms;
 	}
 
 	figure {
