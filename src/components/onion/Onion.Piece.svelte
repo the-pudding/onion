@@ -1,31 +1,45 @@
 <script>
 	import { getContext } from "svelte";
 
-	export let area;
-	export let layerNum;
-	export let cutNum;
-	export let subPieceIndex = undefined;
-	export let highlight = false;
-	export let primary = false;
-	export let secondary = false;
+	/**
+	 * @typedef {Object} Props
+	 * @property {any} area
+	 * @property {any} layerNum
+	 * @property {any} cutNum
+	 * @property {any} [subPieceIndex]
+	 * @property {boolean} [highlight]
+	 * @property {boolean} [primary]
+	 * @property {boolean} [secondary]
+	 */
+
+	/** @type {Props} */
+	let {
+		area,
+		layerNum,
+		cutNum,
+		subPieceIndex = undefined,
+		highlight = false,
+		primary = false,
+		secondary = false
+	} = $props();
 
 	const subpiece = subPieceIndex !== undefined;
 	const svgPadding = 1;
 
 	const onionStore = getContext("onionStore");
-	$: ({ cutType, cutTargetDepthPercentage, meanArea, standardDeviation } =
-		$onionStore);
+	let { cutType, cutTargetDepthPercentage, meanArea, standardDeviation } =
+		$derived($onionStore);
 
 	const layerPathStore = getContext("layerPathStore");
 	const cutPathStore = getContext("cutPathStore");
 	const horizontalCutPathStore = getContext("horizontalCutPathStore");
 
-	$: layerPath = $layerPathStore[layerNum];
-	$: cutPath = $cutPathStore[cutNum];
-	$: piecePath = layerPath.intersect(cutPath);
-	$: subPiecePath = piecePath.intersect($horizontalCutPathStore[subPieceIndex]);
-	$: ({ width, height } = piecePath.strokeBounds);
-	$: d = (subpiece ? subPiecePath : piecePath).pathData;
+	let layerPath = $derived($layerPathStore[layerNum]);
+	let cutPath = $derived($cutPathStore[cutNum]);
+	let piecePath = $derived(layerPath.intersect(cutPath));
+	let subPiecePath = $derived(piecePath.intersect($horizontalCutPathStore[subPieceIndex]));
+	let { width, height } = $derived(piecePath.strokeBounds);
+	let d = $derived((subpiece ? subPiecePath : piecePath).pathData);
 
 	const explodeStore = getContext("explodeStore");
 

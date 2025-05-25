@@ -12,7 +12,7 @@
 	const diagramExtent = halfDiagramSize - diagramPadding;
 	const radialTargetPosition = diagramPadding / 2;
 
-	let numLayers = 10;
+	let numLayers = $state(10);
 	const options = Array.from({ length: MAX_LAYERS - MIN_LAYERS + 1 }).map(
 		(_, i) => ({ value: MIN_LAYERS + i })
 	);
@@ -28,14 +28,14 @@
 		}
 	];
 
-	$: rowData = data
+	let rowData = $derived(data
 		.filter(([storageKey]) => storageKey.startsWith(numLayers))
 		.map(([storageKey, standardDeviation], i) => ({
 			numCuts: i + 1,
 			storageKey,
 			standardDeviation: format(".1f")(standardDeviation) + "%"
-		}));
-	$: rows = rowData.map((r) => {
+		})));
+	let rows = $derived(rowData.map((r) => {
 		// build an SVG string to render in table
 		const { numCuts, storageKey } = r;
 		const mainCutTypeMap = { v: "vertical", r: "radial" };
@@ -109,7 +109,7 @@
 		r.cuttingDiagram += title;
 
 		return r;
-	});
+	}));
 </script>
 
 <Select label="number of layers" bind:value={numLayers} {options} />

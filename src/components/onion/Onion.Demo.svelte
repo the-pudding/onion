@@ -1,4 +1,6 @@
 <script>
+	import { run } from 'svelte/legacy';
+
 	import { writable } from "svelte/store";
 	import { setContext } from "svelte";
 	import { scaleLinear } from "d3";
@@ -22,19 +24,39 @@
 	import Range from "$components/helpers/Range.svelte";
 	import Toggle from "$components/helpers/Toggle.svelte";
 
-	export let showCuts = true;
-	export let highlightExtremes = false;
-	export let showControls = true;
-	export let controlLayers = false;
-	export let controlCutType = false;
-	export let controlRadialDepth = false;
-	export let controlHorizontalCuts = false;
-	export let caption = "";
-	export let cutType = "vertical";
-	export let cutTargetDepthPercentage = 0;
-	export let toggleExplode = false;
-	export let showStandardDeviation = false;
-	export let showRadialTarget = false;
+	/**
+	 * @typedef {Object} Props
+	 * @property {boolean} [showCuts]
+	 * @property {boolean} [highlightExtremes]
+	 * @property {boolean} [showControls]
+	 * @property {boolean} [controlLayers]
+	 * @property {boolean} [controlCutType]
+	 * @property {boolean} [controlRadialDepth]
+	 * @property {boolean} [controlHorizontalCuts]
+	 * @property {string} [caption]
+	 * @property {string} [cutType]
+	 * @property {number} [cutTargetDepthPercentage]
+	 * @property {boolean} [toggleExplode]
+	 * @property {boolean} [showStandardDeviation]
+	 * @property {boolean} [showRadialTarget]
+	 */
+
+	/** @type {Props} */
+	let {
+		showCuts = true,
+		highlightExtremes = false,
+		showControls = true,
+		controlLayers = false,
+		controlCutType = false,
+		controlRadialDepth = false,
+		controlHorizontalCuts = false,
+		caption = "",
+		cutType = $bindable("vertical"),
+		cutTargetDepthPercentage = $bindable(0),
+		toggleExplode = false,
+		showStandardDeviation = false,
+		showRadialTarget = false
+	} = $props();
 
 	const width = 600;
 	const height = width / 2;
@@ -44,10 +66,10 @@
 	const yScale = scaleLinear().domain([0, height]).range([height, 0]);
 	const options = [{ value: "vertical" }, { value: "radial" }];
 
-	let numLayers = 10;
-	let numCuts = MAX_CUTS;
-	let numHorizontalCuts = MIN_HORIZONTAL_CUTS;
-	let explode = "off";
+	let numLayers = $state(10);
+	let numCuts = $state(MAX_CUTS);
+	let numHorizontalCuts = $state(MIN_HORIZONTAL_CUTS);
+	let explode = $state("off");
 
 	// use paper without canvas
 	// https://github.com/paperjs/paper.js/issues/1889#issuecomment-1323458006
@@ -69,117 +91,127 @@
 		})
 	);
 	setContext("onionStore", onionStore);
-	$: $onionStore = new Onion({
-		radius,
-		numLayers,
-		numCuts,
-		cutType,
-		cutTargetDepthPercentage,
-		numHorizontalCuts
+	run(() => {
+		$onionStore = new Onion({
+			radius,
+			numLayers,
+			numCuts,
+			cutType,
+			cutTargetDepthPercentage,
+			numHorizontalCuts
+		});
 	});
-	$: ({ cutTargetDepth } = $onionStore);
+	let { cutTargetDepth } = $derived($onionStore);
 
 	// each layer path is a semi-annulus, except for the innermost layer which is a semi-disk
 	const layerPathStore = writable([]);
 	setContext("layerPathStore", layerPathStore);
-	$: $layerPathStore = $onionStore.layerRadii.map((r) => {
-		const { layerThickness } = $onionStore;
-		const previousRadius = r - layerThickness;
-		const d = [
-			`M ${r} ${height}`,
-			`A ${r} ${r} 0 0 0 ${-r} ${height}`,
-			`H ${-previousRadius}`,
-			`A ${previousRadius} ${previousRadius} 0 0 1 ${previousRadius} ${height}`,
-			"z"
-		].join(" ");
-
-		return new paper.Path(d);
-	});
-
-	const cutPathStore = writable([]);
-	setContext("cutPathStore", cutPathStore);
-	$: $cutPathStore = $onionStore.cutNumbers.map((c, _, cutNumbers) => {
-		let d;
-
-		if (cutType === "vertical") {
-			const { cutThickness } = $onionStore;
-			const x = $onionStore.cutWidthScale(c);
-			d = [
-				`M ${x} ${height}`,
-				"V 0",
-				`h ${cutThickness}`,
-				`V ${height}`,
-				"z"
-			].join(" ");
-		}
-
-		if (cutType === "radial") {
-			// because cutAngleScale's range goes from PI/2 to 0 instead of the other way around,
-			//   _c is the c's complementary index (counting from 0 to PI/2)
-			const _c = cutNumbers.length - c;
-			const theta = $onionStore.cutAngleScale(_c);
-			const previousTheta = $onionStore.cutAngleScale(_c - 1);
-			const [xIntercept, yIntercept] = polarToCartesian(radius, theta);
-			const [previousXIntercept, previousYIntercept] = polarToCartesian(
-				radius,
-				previousTheta
-			);
-			d = [
-				`M 0 ${yScale(-cutTargetDepth)}`,
-				`L ${xIntercept * 2} ${yScale(yIntercept * 2 + cutTargetDepth)}`,
-				`L ${previousXIntercept * 2} ${yScale(
-					previousYIntercept * 2 + cutTargetDepth
-				)}`,
-				"z"
-			].join(" ");
-		}
-
-		return new paper.Path(d);
-	});
-
-	const horizontalCutPathStore = writable([]);
-	setContext("horizontalCutPathStore", horizontalCutPathStore);
-	$: $horizontalCutPathStore = [
-		// we need 2 paths if making 1 horizontal cut,
-		//   and 3 paths if making 2 horizontal cuts
-		...($onionStore.horizontalCutNumbers.length
-			? [
-					new paper.Path(
-						[
-							`M 0 ${yScale(radius)}`,
-							`V ${yScale(
-								$onionStore.horizontalCutScale(
-									$onionStore.horizontalCutNumbers.length - 1
-								) * radius
-							)}`,
-							`H ${radius}`,
-							`V ${yScale(radius)}`,
-							"z"
-						].join(" ")
-					)
-			  ]
-			: []),
-		...$onionStore.horizontalCutNumbers.map((h) => {
-			const y = $onionStore.horizontalCutScale(h) * radius;
-			const yNormalized = yScale(y);
-			const previousHeight = yScale(
-				$onionStore.horizontalCutScale(h - 1) * radius
-			);
+	run(() => {
+		$layerPathStore = $onionStore.layerRadii.map((r) => {
+			const { layerThickness } = $onionStore;
+			const previousRadius = r - layerThickness;
 			const d = [
-				`M 0 ${previousHeight}`,
-				`V ${yNormalized}`,
-				`H ${radius}`,
-				`V ${previousHeight}`,
+				`M ${r} ${height}`,
+				`A ${r} ${r} 0 0 0 ${-r} ${height}`,
+				`H ${-previousRadius}`,
+				`A ${previousRadius} ${previousRadius} 0 0 1 ${previousRadius} ${height}`,
 				"z"
 			].join(" ");
 
 			return new paper.Path(d);
-		})
-	].reverse();
+		});
+	});
+
+	const cutPathStore = writable([]);
+	setContext("cutPathStore", cutPathStore);
+	run(() => {
+		$cutPathStore = $onionStore.cutNumbers.map((c, _, cutNumbers) => {
+			let d;
+
+			if (cutType === "vertical") {
+				const { cutThickness } = $onionStore;
+				const x = $onionStore.cutWidthScale(c);
+				d = [
+					`M ${x} ${height}`,
+					"V 0",
+					`h ${cutThickness}`,
+					`V ${height}`,
+					"z"
+				].join(" ");
+			}
+
+			if (cutType === "radial") {
+				// because cutAngleScale's range goes from PI/2 to 0 instead of the other way around,
+				//   _c is the c's complementary index (counting from 0 to PI/2)
+				const _c = cutNumbers.length - c;
+				const theta = $onionStore.cutAngleScale(_c);
+				const previousTheta = $onionStore.cutAngleScale(_c - 1);
+				const [xIntercept, yIntercept] = polarToCartesian(radius, theta);
+				const [previousXIntercept, previousYIntercept] = polarToCartesian(
+					radius,
+					previousTheta
+				);
+				d = [
+					`M 0 ${yScale(-cutTargetDepth)}`,
+					`L ${xIntercept * 2} ${yScale(yIntercept * 2 + cutTargetDepth)}`,
+					`L ${previousXIntercept * 2} ${yScale(
+						previousYIntercept * 2 + cutTargetDepth
+					)}`,
+					"z"
+				].join(" ");
+			}
+
+			return new paper.Path(d);
+		});
+	});
+
+	const horizontalCutPathStore = writable([]);
+	setContext("horizontalCutPathStore", horizontalCutPathStore);
+	run(() => {
+		$horizontalCutPathStore = [
+			// we need 2 paths if making 1 horizontal cut,
+			//   and 3 paths if making 2 horizontal cuts
+			...($onionStore.horizontalCutNumbers.length
+				? [
+						new paper.Path(
+							[
+								`M 0 ${yScale(radius)}`,
+								`V ${yScale(
+									$onionStore.horizontalCutScale(
+										$onionStore.horizontalCutNumbers.length - 1
+									) * radius
+								)}`,
+								`H ${radius}`,
+								`V ${yScale(radius)}`,
+								"z"
+							].join(" ")
+						)
+				  ]
+				: []),
+			...$onionStore.horizontalCutNumbers.map((h) => {
+				const y = $onionStore.horizontalCutScale(h) * radius;
+				const yNormalized = yScale(y);
+				const previousHeight = yScale(
+					$onionStore.horizontalCutScale(h - 1) * radius
+				);
+				const d = [
+					`M 0 ${previousHeight}`,
+					`V ${yNormalized}`,
+					`H ${radius}`,
+					`V ${previousHeight}`,
+					"z"
+				].join(" ");
+
+				return new paper.Path(d);
+			})
+		].reverse();
+	});
 
 	const explodeStore = writable(explode === "on");
 	setContext("explodeStore", explodeStore);
-	$: $explodeStore = explode === "on";
+	run(() => {
+		$explodeStore = explode === "on";
+	});
 </script>
 
 <figure class:explode={explode === "on"}>

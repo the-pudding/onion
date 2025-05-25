@@ -2,13 +2,11 @@
 	import { getContext } from "svelte";
 	import { polarToCartesian } from "$utils/math";
 
-	export let width;
-	export let height;
-	export let yScale;
+	let { width, height, yScale } = $props();
 
 	const onionStore = getContext("onionStore");
 
-	$: ({
+	let {
 		radius,
 		cutNumbers,
 		cutType,
@@ -17,7 +15,7 @@
 		cutTargetDepth,
 		horizontalCutNumbers,
 		horizontalCutScale
-	} = $onionStore);
+	} = $derived($onionStore);
 </script>
 
 <g class="cuts">

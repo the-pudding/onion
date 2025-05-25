@@ -1,11 +1,11 @@
 <script>
 	import { getContext } from "svelte";
 
-	export let height;
+	let { height } = $props();
 
 	const onionStore = getContext("onionStore");
 
-	$: ({ layerRadii } = $onionStore);
+	let { layerRadii } = $derived($onionStore);
 </script>
 
 <g class="onion">
