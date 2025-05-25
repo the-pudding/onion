@@ -5,6 +5,7 @@
 	import { interpolateHcl, scaleLinear, scaleSequential } from "d3";
 	import OnionPiece from "$components/onion/Onion.Piece.svelte";
 	import { writable } from "svelte/store";
+	import { EXPLODED_GAP } from "$utils/constants";
 
 	let { yScale, highlightExtremes } = $props();
 
@@ -133,21 +134,20 @@
 			const subPiecePath = piecePath.intersect(
 				$horizontalCutPathStore[piece.subPieceIndex]
 			);
-			// TODO should we set each piece's x-coordinate too?
 			const { width, height } = (
 				piece.subPieceIndex === undefined ? piecePath : subPiecePath
 			).strokeBounds;
 			// TODO should these dimensions be set in onion.js instead?
 			piece.width = width;
 			piece.height = height;
-			piece.explodedX = width / 2 - piecePath.position.x - svgWidth / 2;
+			piece.explodedX =
+				width / 2 - piecePath.position.x - svgWidth / 2 + EXPLODED_GAP;
 
 			const lastRowWidth = rows.length ? lastRow.explodedRowWidth : 0;
-			const remainingWidth = svgWidth - lastRowWidth;
-			const additionalWidth = width;
+			const remainingWidth = svgWidth - lastRowWidth - EXPLODED_GAP;
+			const additionalWidth = width + EXPLODED_GAP;
 
 			// if there is enough width in the last row to fit this piece, add it
-			// TODO account for gaps between pieces
 			if (rows.length && additionalWidth <= remainingWidth) {
 				piece.explodedX += lastRowWidth;
 				lastRow.pieces.push(piece);
@@ -159,8 +159,10 @@
 					? Math.max(...lastRow.pieces.map((p) => p.height))
 					: 0;
 				const explodedRowY =
-					rows.reduce((rowHeights, row) => rowHeights + row.explodedRowY, 0) +
-					tallestPieceHeight;
+					rows.reduce(
+						(rowHeights, row) => rowHeights + row.explodedRowY,
+						EXPLODED_GAP
+					) + tallestPieceHeight;
 
 				rows.push({
 					pieces: [piece],
