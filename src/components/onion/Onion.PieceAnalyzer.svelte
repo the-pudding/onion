@@ -133,7 +133,6 @@
 			const subPiecePath = piecePath.intersect(
 				$horizontalCutPathStore[piece.subPieceIndex]
 			);
-			// TODO pass height to rows
 			// TODO should we set each piece's x-coordinate too?
 			const { width, height } = (
 				piece.subPieceIndex === undefined ? piecePath : subPiecePath
@@ -142,18 +141,15 @@
 			piece.width = width;
 			piece.height = height;
 
-			const lastRowWidth = rows.length
-				? lastRow.pieces.reduce(
-						(totalWidth, piece) => totalWidth + piece.width,
-						0
-				  )
-				: 0;
+			const lastRowWidth = rows.length ? lastRow.explodedRowWidth : 0;
 			const remainingWidth = svgWidth - lastRowWidth;
+			const additionalWidth = width;
 
 			// if there is enough width in the last row to fit this piece, add it
 			// TODO account for gaps between pieces
-			if (rows.length && width <= remainingWidth) {
+			if (rows.length && additionalWidth <= remainingWidth) {
 				lastRow.pieces.push(piece);
+				lastRow.explodedRowWidth += additionalWidth;
 			} else {
 				// otherwise, add it to a new row
 				// but first, take note of the tallest piece in the last row; the new row will sit below it
@@ -164,7 +160,11 @@
 					rows.reduce((rowHeights, row) => rowHeights + row.explodedRowY, 0) +
 					tallestPieceHeight;
 
-				rows.push({ pieces: [piece], explodedRowY });
+				rows.push({
+					pieces: [piece],
+					explodedRowY,
+					explodedRowWidth: additionalWidth
+				});
 			}
 
 			return rows;
