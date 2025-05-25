@@ -107,7 +107,7 @@
 	:global(figure.explode path) {
 		stroke: black;
 		transition:
-			stroke 200ms,
-			transform var(--duration-transform);
+			stroke var(--duration-fade),
+			transform var(--duration-transform) var(--duration-fade);
 	}
 </style>

@@ -341,6 +341,7 @@
 		--demo-spacing-x: 2rem;
 		--axis-thickness: 2;
 		--duration-transform: 800ms;
+		--duration-fade: 200ms;
 	}
 
 	figure {
@@ -350,11 +351,12 @@
 
 	:global(line, circle) {
 		stroke: black;
-		transition: stroke 200ms;
+		transition: stroke var(--duration-fade) var(--duration-transform);
 	}
 
 	:global(.explode :is(line, circle)) {
 		stroke: transparent;
+		transition: stroke var(--duration-fade);
 	}
 
 	.radial-target {
