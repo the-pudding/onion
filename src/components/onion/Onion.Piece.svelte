@@ -11,6 +11,7 @@
 	 * @property {boolean} [highlight]
 	 * @property {boolean} [primary]
 	 * @property {boolean} [secondary]
+	 * @property {number} explodedX
 	 * @property {number} explodedRowY
 	 */
 
@@ -24,6 +25,7 @@
 		highlight = false,
 		primary = false,
 		secondary = false,
+		explodedX,
 		explodedRowY
 	} = $props();
 
@@ -53,9 +55,6 @@
 
 	const colorScaleStore = getContext("colorScaleStore");
 
-	let explodedX = $derived(
-		width / 2 - piecePath.position.x - 300 + width * index
-	);
 	let explodedY = $derived(height / 2 - piecePath.position.y + explodedRowY);
 </script>
 

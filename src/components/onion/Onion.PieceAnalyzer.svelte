@@ -140,6 +140,7 @@
 			// TODO should these dimensions be set in onion.js instead?
 			piece.width = width;
 			piece.height = height;
+			piece.explodedX = width / 2 - piecePath.position.x - svgWidth / 2;
 
 			const lastRowWidth = rows.length ? lastRow.explodedRowWidth : 0;
 			const remainingWidth = svgWidth - lastRowWidth;
@@ -148,6 +149,7 @@
 			// if there is enough width in the last row to fit this piece, add it
 			// TODO account for gaps between pieces
 			if (rows.length && additionalWidth <= remainingWidth) {
+				piece.explodedX += lastRowWidth;
 				lastRow.pieces.push(piece);
 				lastRow.explodedRowWidth += additionalWidth;
 			} else {
@@ -177,7 +179,7 @@
 <!-- TODO draw scale/ticks for exploded view? -->
 {#if cutType === "vertical"}
 	{#each verticalPiecesLaidOut as { pieces, explodedRowY }}
-		{#each pieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn }, index}
+		{#each pieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX }, index}
 			{@const isInCenterColumn = cutNum === 0}
 			{@const isBottomPiece = layerNumInColumn === 0}
 			{@const columnArcFunctions = layerArcs.filter(
@@ -217,6 +219,7 @@
 				highlight={highlightExtremes}
 				primary={isInCenterColumn}
 				secondary={isBottomPiece}
+				{explodedX}
 				explodedRowY={explodedRowY ?? 0}
 			/>
 		{/each}
