@@ -6,6 +6,7 @@
 	import OnionPiece from "$components/onion/Onion.Piece.svelte";
 	import { writable } from "svelte/store";
 	import { EXPLODED_GAP } from "$utils/constants";
+	import { compareRadialPieceAreasDescending } from "$utils/math";
 
 	let { yScale, highlightExtremes } = $props();
 
@@ -67,7 +68,7 @@
 						: pieceForSVG;
 				})
 			)
-			.sort((a, b) => b.area - a.area)
+			.sort(compareRadialPieceAreasDescending)
 	);
 
 	const explodeXScaleStore = writable();
