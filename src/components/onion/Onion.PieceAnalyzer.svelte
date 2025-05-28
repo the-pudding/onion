@@ -160,11 +160,9 @@
 					const tallestPieceHeight = lastRow
 						? Math.max(...lastRow.pieces.map((p) => p.height))
 						: 0;
-					const explodedRowY =
-						rows.reduce(
-							(rowHeights, row) => rowHeights + row.explodedRowY,
-							EXPLODED_GAP
-						) + tallestPieceHeight;
+					const explodedRowY = rows.length
+						? rows.at(-1).explodedRowY + tallestPieceHeight + EXPLODED_GAP
+						: EXPLODED_GAP;
 
 					rows.push({
 						pieces: [piece],
