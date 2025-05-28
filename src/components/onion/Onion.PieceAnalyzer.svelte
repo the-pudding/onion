@@ -122,7 +122,7 @@
 
 	// create a data structure arranges pieces in rows for exploded view
 	// ^this will be mapped over in template--whether exploded or not--so that pieces animate smoothly
-	let piecesLaidOut = $derived(
+	let inlineLayoutPieces = $derived(
 		(cutType === "vertical" ? verticalPieces : radialPieces).reduce(
 			(rows, piece) => {
 				const lastRow = rows[rows.length - 1];
@@ -180,7 +180,7 @@
 </script>
 
 <!-- TODO draw scale/ticks for exploded view? -->
-{#each piecesLaidOut as { pieces, explodedRowY }}
+{#each inlineLayoutPieces as { pieces, explodedRowY }}
 	{#if cutType === "vertical"}
 		{#each pieces as { pieceArea, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX }, index}
 			{@const isInCenterColumn = cutNum === 0}
