@@ -203,11 +203,7 @@
 			/>
 		{/each}
 	{:else if cutType === "radial"}
-		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum, explodedX }, index}
-			{@const x = xOfLeftCutIntersection}
-			{@const layerArcFunction = layerArcs[layerNum]}
-			{@const y = layerArcFunction(x)}
-			{@const yNormalized = yScale(y)}
+		{#each pieces as { area, subPieceIndex, cutNum, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum, explodedX }, index}
 			{@const isBottomPiece =
 				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
@@ -224,42 +220,6 @@
 				{explodedX}
 				explodedRowY={explodedRowY ?? 0}
 			/>
-
-			<!-- <text {x} y={yNormalized} font-size="x-small">
-		({Math.round(x)}, {Math.round(y)})
-		</text> -->
-			<!-- <text {x} y={yNormalized} font-size="x-small">
-		{Math.round(area)}
-	</text> -->
-
-			<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
-
-			<!-- {#if numHorizontalCuts && subPieces.length}
-		<text
-			{x}
-			y={yNormalized}
-			font-size="xx-small"
-			alignment-baseline="hanging"
-			fill={yRangeColors[subPieces.length]}
-		>
-			y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
-			{JSON.stringify(subPieces.map(Math.round))}
-		</text>
-	{/if} -->
-
-			<!-- {@const markerY = yScale(layerArcFunction(xOfLeftCutIntersection))} -->
-			<!-- <text {x} y={markerY} font-size="x-small">
-		[{Math.round(xRange[0])}, {Math.round(xRange[1])}]
-	</text> -->
-
-			<!-- <line
-		x1={xRange[0]}
-		y1={markerY}
-		x2={xRange[1]}
-		y2={markerY}
-		stroke-width="2"
-		style="stroke: red"
-	/> -->
 		{/each}
 	{/if}
 {/each}
