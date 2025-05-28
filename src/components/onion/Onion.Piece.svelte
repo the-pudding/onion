@@ -3,7 +3,6 @@
 
 	/**
 	 * @typedef {Object} Props
-	 * @property {number} index
 	 * @property {any} area
 	 * @property {any} layerNum
 	 * @property {any} cutNum
@@ -17,7 +16,6 @@
 
 	/** @type {Props} */
 	let {
-		index,
 		area,
 		layerNum,
 		cutNum,

@@ -182,12 +182,11 @@
 <!-- TODO draw scale/ticks for exploded view? -->
 {#each inlineLayoutPieces as { pieces, explodedRowY }}
 	{#if cutType === "vertical"}
-		{#each pieces as { pieceArea, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX }, index}
+		{#each pieces as { pieceArea, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX }}
 			{@const isInCenterColumn = cutNum === 0}
 			{@const isBottomPiece = layerNumInColumn === 0}
 
 			<OnionPiece
-				{index}
 				area={pieceArea}
 				layerNum={layerNumInColumn +
 					layerRadii.findLastIndex((r) => r <= cutX) +
@@ -202,12 +201,11 @@
 			/>
 		{/each}
 	{:else if cutType === "radial"}
-		{#each pieces as { area, subPieceIndex, cutNum, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum, explodedX }, index}
+		{#each pieces as { area, subPieceIndex, cutNum, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum, explodedX }}
 			{@const isBottomPiece =
 				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
 			<OnionPiece
-				{index}
 				{area}
 				{layerNum}
 				{cutNum}
