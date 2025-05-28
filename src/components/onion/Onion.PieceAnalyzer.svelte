@@ -121,66 +121,68 @@
 
 	// create a data structure arranges pieces in rows for exploded view
 	// ^this will be mapped over in template--whether exploded or not--so that pieces animate smoothly
-	let verticalPiecesLaidOut = $derived(
-		verticalPieces.reduce((rows, piece) => {
-			const lastRow = rows[rows.length - 1];
-			const layerNum =
-				piece.layerNumInColumn +
-				layerRadii.findLastIndex((r) => r <= piece.cutX) +
-				1;
-			const layerPath = $layerPathStore[layerNum];
-			const cutPath = $cutPathStore[piece.cutNum];
-			const piecePath = layerPath.intersect(cutPath);
-			const subPiecePath = piecePath.intersect(
-				$horizontalCutPathStore[piece.subPieceIndex]
-			);
-			const { width, height } = (
-				piece.subPieceIndex === undefined ? piecePath : subPiecePath
-			).strokeBounds;
-			// TODO should these dimensions be set in onion.js instead?
-			piece.width = width;
-			piece.height = height;
-			piece.explodedX =
-				width / 2 - piecePath.position.x - svgWidth / 2 + EXPLODED_GAP;
+	let piecesLaidOut = $derived(
+		(cutType === "vertical" ? verticalPieces : radialPieces).reduce(
+			(rows, piece) => {
+				const lastRow = rows[rows.length - 1];
+				const layerNum =
+					piece.layerNum ??
+					piece.layerNumInColumn +
+						layerRadii.findLastIndex((r) => r <= piece.cutX) +
+						1;
+				const layerPath = $layerPathStore[layerNum];
+				const cutPath = $cutPathStore[piece.cutNum];
+				const piecePath = layerPath.intersect(cutPath);
+				const subPiecePath = piecePath.intersect(
+					$horizontalCutPathStore[piece.subPieceIndex]
+				);
+				const { width, height } = (
+					piece.subPieceIndex === undefined ? piecePath : subPiecePath
+				).strokeBounds;
+				// TODO should these dimensions be set in onion.js instead?
+				piece.width = width;
+				piece.height = height;
+				piece.explodedX =
+					width / 2 - piecePath.position.x - svgWidth / 2 + EXPLODED_GAP;
 
-			const lastRowWidth = rows.length ? lastRow.explodedRowWidth : 0;
-			const remainingWidth = svgWidth - lastRowWidth - EXPLODED_GAP;
-			const additionalWidth = width + EXPLODED_GAP;
+				const lastRowWidth = rows.length ? lastRow.explodedRowWidth : 0;
+				const remainingWidth = svgWidth - lastRowWidth - EXPLODED_GAP;
+				const additionalWidth = width + EXPLODED_GAP;
 
-			// if there is enough width in the last row to fit this piece, add it
-			if (rows.length && additionalWidth <= remainingWidth) {
-				piece.explodedX += lastRowWidth;
-				lastRow.pieces.push(piece);
-				lastRow.explodedRowWidth += additionalWidth;
-			} else {
-				// otherwise, add it to a new row
-				// but first, take note of the tallest piece in the last row; the new row will sit below it
-				const tallestPieceHeight = lastRow
-					? Math.max(...lastRow.pieces.map((p) => p.height))
-					: 0;
-				const explodedRowY =
-					rows.reduce(
-						(rowHeights, row) => rowHeights + row.explodedRowY,
-						EXPLODED_GAP
-					) + tallestPieceHeight;
+				// if there is enough width in the last row to fit this piece, add it
+				if (rows.length && additionalWidth <= remainingWidth) {
+					piece.explodedX += lastRowWidth;
+					lastRow.pieces.push(piece);
+					lastRow.explodedRowWidth += additionalWidth;
+				} else {
+					// otherwise, add it to a new row
+					// but first, take note of the tallest piece in the last row; the new row will sit below it
+					const tallestPieceHeight = lastRow
+						? Math.max(...lastRow.pieces.map((p) => p.height))
+						: 0;
+					const explodedRowY =
+						rows.reduce(
+							(rowHeights, row) => rowHeights + row.explodedRowY,
+							EXPLODED_GAP
+						) + tallestPieceHeight;
 
-				rows.push({
-					pieces: [piece],
-					explodedRowY,
-					explodedRowWidth: additionalWidth
-				});
-			}
+					rows.push({
+						pieces: [piece],
+						explodedRowY,
+						explodedRowWidth: additionalWidth
+					});
+				}
 
-			return rows;
-		}, [])
+				return rows;
+			},
+			[]
+		)
 	);
-
-	// TODO can radialPiecesLaidOut reuse the derivation for verticalPiecesLaidOut?
 </script>
 
 <!-- TODO draw scale/ticks for exploded view? -->
-{#if cutType === "vertical"}
-	{#each verticalPiecesLaidOut as { pieces, explodedRowY }}
+{#each piecesLaidOut as { pieces, explodedRowY }}
+	{#if cutType === "vertical"}
 		{#each pieces as { pieceArea, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX }, index}
 			{@const isInCenterColumn = cutNum === 0}
 			{@const isBottomPiece = layerNumInColumn === 0}
@@ -200,38 +202,39 @@
 				explodedRowY={explodedRowY ?? 0}
 			/>
 		{/each}
-	{/each}
-{:else if cutType === "radial"}
-	{#each radialPieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum }, index}
-		{@const x = xOfLeftCutIntersection}
-		{@const layerArcFunction = layerArcs[layerNum]}
-		{@const y = layerArcFunction(x)}
-		{@const yNormalized = yScale(y)}
-		{@const isBottomPiece =
-			cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
+	{:else if cutType === "radial"}
+		{#each pieces as { xOfLeftCutIntersection, xRange, area, yRange, subPieceIndex, cutNum, layerRadius, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum, explodedX }, index}
+			{@const x = xOfLeftCutIntersection}
+			{@const layerArcFunction = layerArcs[layerNum]}
+			{@const y = layerArcFunction(x)}
+			{@const yNormalized = yScale(y)}
+			{@const isBottomPiece =
+				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
-		<OnionPiece
-			{index}
-			{area}
-			{layerNum}
-			{cutNum}
-			{subPieceIndex}
-			highlight={highlightExtremes}
-			primary={(cutTargetDepthPercentage === 0 && isOutermostLayer) ||
-				isBottomPiece}
-			secondary={cutTargetDepthPercentage === 0 && isInnermostLayer}
-		/>
+			<OnionPiece
+				{index}
+				{area}
+				{layerNum}
+				{cutNum}
+				{subPieceIndex}
+				highlight={highlightExtremes}
+				primary={(cutTargetDepthPercentage === 0 && isOutermostLayer) ||
+					isBottomPiece}
+				secondary={cutTargetDepthPercentage === 0 && isInnermostLayer}
+				{explodedX}
+				explodedRowY={explodedRowY ?? 0}
+			/>
 
-		<!-- <text {x} y={yNormalized} font-size="x-small">
+			<!-- <text {x} y={yNormalized} font-size="x-small">
 		({Math.round(x)}, {Math.round(y)})
 		</text> -->
-		<!-- <text {x} y={yNormalized} font-size="x-small">
+			<!-- <text {x} y={yNormalized} font-size="x-small">
 		{Math.round(area)}
 	</text> -->
 
-		<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
+			<!-- <circle cx={x} cy={yNormalized} r="2" fill="red" /> -->
 
-		<!-- {#if numHorizontalCuts && subPieces.length}
+			<!-- {#if numHorizontalCuts && subPieces.length}
 		<text
 			{x}
 			y={yNormalized}
@@ -244,12 +247,12 @@
 		</text>
 	{/if} -->
 
-		<!-- {@const markerY = yScale(layerArcFunction(xOfLeftCutIntersection))} -->
-		<!-- <text {x} y={markerY} font-size="x-small">
+			<!-- {@const markerY = yScale(layerArcFunction(xOfLeftCutIntersection))} -->
+			<!-- <text {x} y={markerY} font-size="x-small">
 		[{Math.round(xRange[0])}, {Math.round(xRange[1])}]
 	</text> -->
 
-		<!-- <line
+			<!-- <line
 		x1={xRange[0]}
 		y1={markerY}
 		x2={xRange[1]}
@@ -257,5 +260,6 @@
 		stroke-width="2"
 		style="stroke: red"
 	/> -->
-	{/each}
-{/if}
+		{/each}
+	{/if}
+{/each}
