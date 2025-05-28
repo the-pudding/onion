@@ -3,6 +3,7 @@
 
 	/**
 	 * @typedef {Object} Props
+	 * @property {number} index
 	 * @property {any} area
 	 * @property {any} layerNum
 	 * @property {any} cutNum
@@ -10,17 +11,22 @@
 	 * @property {boolean} [highlight]
 	 * @property {boolean} [primary]
 	 * @property {boolean} [secondary]
+	 * @property {number} explodedX
+	 * @property {number} explodedRowY
 	 */
 
 	/** @type {Props} */
 	let {
+		index,
 		area,
 		layerNum,
 		cutNum,
 		subPieceIndex = undefined,
 		highlight = false,
 		primary = false,
-		secondary = false
+		secondary = false,
+		explodedX,
+		explodedRowY
 	} = $props();
 
 	const subpiece = subPieceIndex !== undefined;
@@ -34,64 +40,52 @@
 	const cutPathStore = getContext("cutPathStore");
 	const horizontalCutPathStore = getContext("horizontalCutPathStore");
 
+	// TODO this intersection logic was moved to OnionPieceAnalyzer;
+	//   it can be removed from here after radial pieces can smoothly transition to exploded
 	let layerPath = $derived($layerPathStore[layerNum]);
 	let cutPath = $derived($cutPathStore[cutNum]);
 	let piecePath = $derived(layerPath.intersect(cutPath));
-	let subPiecePath = $derived(piecePath.intersect($horizontalCutPathStore[subPieceIndex]));
+	let subPiecePath = $derived(
+		piecePath.intersect($horizontalCutPathStore[subPieceIndex])
+	);
 	let { width, height } = $derived(piecePath.strokeBounds);
 	let d = $derived((subpiece ? subPiecePath : piecePath).pathData);
 
 	const explodeStore = getContext("explodeStore");
 
 	const colorScaleStore = getContext("colorScaleStore");
+
+	let explodedY = $derived(height / 2 - piecePath.position.y + explodedRowY);
 </script>
 
-<!-- TODO can we prevent highlighted pieces next to y-axis from being truncated on the left? -->
-<!--   (involves setting viewBox when $explodeStore === false) -->
-<!--   (requires us to manually position each piece's SVG element) -->
-<svg
-	viewBox={$explodeStore
-		? `${-svgPadding} ${-svgPadding} ${width + 2 * svgPadding} ${
-				height + 2 * svgPadding
-		  }`
-		: undefined}
-	width={$explodeStore ? width : undefined}
->
-	<!-- {#if subpiece}
+<!-- {#if subpiece}
 		{@debug piecePath, subPiecePath, d, area}
 	{/if} -->
-	<path
-		{d}
-		style={$explodeStore
-			? `stroke: ${$colorScaleStore(
-					Math.abs(area - meanArea) / standardDeviation
-			  )}; transform: translate(${width / 2 - piecePath.position.x}px, ${
-					height / 2 - piecePath.position.y
-			  }px)`
-			: undefined}
-		class:highlight
-		class:primary={highlight && primary}
-		class:secondary={highlight && secondary}
-		class:thin={!$explodeStore &&
-			secondary &&
-			cutType === "radial" &&
-			cutTargetDepthPercentage === 0}
-		class:subpiece
-		data-area={area}
-	/>
-</svg>
+<path
+	{d}
+	style={$explodeStore
+		? `stroke: ${$colorScaleStore(
+				Math.abs(area - meanArea) / standardDeviation
+		  )}; transform: translate(${explodedX}px, ${explodedY}px)`
+		: undefined}
+	class:highlight
+	class:primary={highlight && primary}
+	class:secondary={highlight && secondary}
+	class:thin={!$explodeStore &&
+		secondary &&
+		cutType === "radial" &&
+		cutTargetDepthPercentage === 0}
+	class:subpiece
+	data-area={area}
+/>
 
 <style>
-	/**
-	* TODO transform transition looks interesting,
-	* but is there a way to animate transition between exploded and not exploded?
-	*/
 	path {
 		fill: none;
 		stroke: transparent;
 		transition:
-			stroke 200ms 200ms,
-			transform 200ms;
+			stroke var(--duration-transform) var(--duration-transform),
+			transform var(--duration-transform);
 
 		&.highlight {
 			stroke-width: 4px;
@@ -113,7 +107,7 @@
 	:global(figure.explode path) {
 		stroke: black;
 		transition:
-			stroke 200ms,
-			transform 200ms;
+			stroke var(--duration-fade),
+			transform var(--duration-transform) var(--duration-fade);
 	}
 </style>
