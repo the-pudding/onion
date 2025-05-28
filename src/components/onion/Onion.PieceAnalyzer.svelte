@@ -181,34 +181,9 @@
 <!-- TODO draw scale/ticks for exploded view? -->
 {#if cutType === "vertical"}
 	{#each verticalPiecesLaidOut as { pieces, explodedRowY }}
-		{#each pieces as { layerRadius, pieceArea, yRange, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX }, index}
+		{#each pieces as { pieceArea, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX }, index}
 			{@const isInCenterColumn = cutNum === 0}
 			{@const isBottomPiece = layerNumInColumn === 0}
-			{@const columnArcFunctions = layerArcs.filter(
-				(_, arcNum) => layerRadii[arcNum] > cutX
-			)}
-			{@const layerArcFunction =
-				columnArcFunctions[layerNumInColumn] ?? columnArcFunctions[0]}
-			{@const y = layerArcFunction(cutX)}
-			{@const cutY = yScale(y)}
-
-			<!-- <text x={cutX} y={cutY} font-size="xx-small">
-    			({Math.round(cutX)},{Math.round(y)})
-    		</text> -->
-			<!-- <circle r="2" cx={cutX} cy={cutY} fill="red" /> -->
-
-			<!-- {#if numHorizontalCuts && subPieces.length}
-    			<text
-    				x={cutX}
-    				y={cutY}
-    				font-size="xx-small"
-    				alignment-baseline="hanging"
-    				fill={yRangeColors[subPieces.length]}
-    			>
-    				y &isin; [{Math.round(yRange[0])},{Math.round(yRange[1])}]
-    				{JSON.stringify(subPieces.map(Math.round))}
-    			</text>
-    		{/if} -->
 
 			<OnionPiece
 				{index}
