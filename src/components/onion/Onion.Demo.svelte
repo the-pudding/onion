@@ -276,7 +276,9 @@
 			/>
 		{/if}
 
-		<OnionPieceAnalyzer {yScale} {highlightExtremes} />
+		{#key $onionStore}
+			<OnionPieceAnalyzer {yScale} {highlightExtremes} />
+		{/key}
 	</svg>
 
 	{#if showControls}
