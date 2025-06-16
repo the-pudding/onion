@@ -131,20 +131,20 @@
 					piece.layerNumInColumn +
 						layerRadii.findLastIndex((r) => r <= piece.cutX) +
 						1;
+				const isSubpiece = piece.subPieceIndex !== undefined;
 				const layerPath = $layerPathStore[layerNum];
 				const cutPath = $cutPathStore[piece.cutNum];
 				const piecePath = layerPath.intersect(cutPath);
 				const subPiecePath = piecePath.intersect(
 					$horizontalCutPathStore[piece.subPieceIndex]
 				);
-				const { width, height } = (
-					piece.subPieceIndex === undefined ? piecePath : subPiecePath
-				).strokeBounds;
+				const ownPath = isSubpiece ? subPiecePath : piecePath;
+				let { width, height } = ownPath.strokeBounds;
 				// TODO should these dimensions be set in onion.js instead?
 				piece.width = width;
 				piece.height = height;
 				piece.explodedX =
-					width / 2 - piecePath.position.x - svgWidth / 2 + EXPLODED_GAP;
+					width / 2 - ownPath.position.x - svgWidth / 2 + EXPLODED_GAP;
 
 				const lastRowWidth = rows.length ? lastRow.explodedRowWidth : 0;
 				const remainingWidth = svgWidth - lastRowWidth - EXPLODED_GAP;
@@ -197,7 +197,7 @@
 				primary={isInCenterColumn}
 				secondary={isBottomPiece}
 				{explodedX}
-				explodedRowY={explodedRowY ?? 0}
+				{explodedRowY}
 			/>
 		{/each}
 	{:else if cutType === "radial"}
@@ -215,7 +215,7 @@
 					isBottomPiece}
 				secondary={cutTargetDepthPercentage === 0 && isInnermostLayer}
 				{explodedX}
-				explodedRowY={explodedRowY ?? 0}
+				{explodedRowY}
 			/>
 		{/each}
 	{/if}

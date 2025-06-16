@@ -53,6 +53,7 @@
 
 	const colorScaleStore = getContext("colorScaleStore");
 
+	// TODO shift upward subpieces whose subPieceIndex > 0
 	let explodedY = $derived(height / 2 - piecePath.position.y + explodedRowY);
 </script>
 
