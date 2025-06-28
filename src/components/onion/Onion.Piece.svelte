@@ -31,8 +31,13 @@
 	const svgPadding = 1;
 
 	const onionStore = getContext("onionStore");
-	let { cutType, cutTargetDepthPercentage, meanArea, standardDeviation } =
-		$derived($onionStore);
+	let {
+		cutType,
+		cutTargetDepthPercentage,
+		meanArea,
+		standardDeviation,
+		numHorizontalCuts
+	} = $derived($onionStore);
 
 	const layerPathStore = getContext("layerPathStore");
 	const cutPathStore = getContext("cutPathStore");
@@ -53,8 +58,26 @@
 
 	const colorScaleStore = getContext("colorScaleStore");
 
-	// TODO shift upward subpieces whose subPieceIndex > 0
-	let explodedY = $derived(height / 2 - piecePath.position.y + explodedRowY);
+	let explodedY = $derived.by(() => {
+		let explodedY = height / 2 - piecePath.position.y + explodedRowY;
+
+		// shift lower subpieces upward
+		// TODO handle an arbitrary number of h-cuts
+
+		// handle 1 h-cut
+		if (subPieceIndex === 0) {
+			const upperSubPiecePath = piecePath.intersect($horizontalCutPathStore[1]);
+			explodedY -= upperSubPiecePath.strokeBounds.height;
+		}
+
+		// handle 2 h-cuts
+		if (numHorizontalCuts === 2 && subPieceIndex < 2) {
+			const topSubPiecePath = piecePath.intersect($horizontalCutPathStore[2]);
+			explodedY -= topSubPiecePath.strokeBounds.height;
+		}
+
+		return explodedY;
+	});
 </script>
 
 <!-- {#if subpiece}
@@ -76,6 +99,7 @@
 		cutTargetDepthPercentage === 0}
 	class:subpiece
 	data-area={area}
+	data-subpiece-index={subPieceIndex}
 />
 
 <style>
