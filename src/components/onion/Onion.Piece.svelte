@@ -62,18 +62,13 @@
 		let explodedY = height / 2 - piecePath.position.y + explodedRowY;
 
 		// shift lower subpieces upward
-		// TODO handle an arbitrary number of h-cuts
-
-		// handle 1 h-cut
-		if (subPieceIndex === 0) {
-			const upperSubPiecePath = piecePath.intersect($horizontalCutPathStore[1]);
-			explodedY -= upperSubPiecePath.strokeBounds.height;
-		}
-
-		// handle 2 h-cuts
-		if (numHorizontalCuts === 2 && subPieceIndex < 2) {
-			const topSubPiecePath = piecePath.intersect($horizontalCutPathStore[2]);
-			explodedY -= topSubPiecePath.strokeBounds.height;
+		if (subpiece) {
+			for (let i = subPieceIndex; i < numHorizontalCuts; i++) {
+				const upperSubPiecePath = piecePath.intersect(
+					$horizontalCutPathStore[i + 1]
+				);
+				explodedY -= upperSubPiecePath.strokeBounds.height;
+			}
 		}
 
 		return explodedY;
