@@ -112,3 +112,11 @@ export function flattenRadialAreas(radialAreas) {
 		)
 		.flat(2);
 }
+
+// adding/subtracting integrals to obtain areas means our precision is off by a little;
+// rounding areas to 10 decimal places before comparing them makes the exploded sort order more visually appealing
+// (for pieces with equal areas, i.e., cutTargetDepth === 0, left-to-right order is preserved)
+export function compareRadialPieceAreasDescending(a, b) {
+	const numDecimalPlaces = 10;
+	return +b.area.toFixed(numDecimalPlaces) - +a.area.toFixed(numDecimalPlaces);
+}

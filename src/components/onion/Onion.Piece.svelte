@@ -3,6 +3,7 @@
 
 	/**
 	 * @typedef {Object} Props
+	 * @property {any} path
 	 * @property {any} area
 	 * @property {any} layerNum
 	 * @property {any} cutNum
@@ -10,88 +11,88 @@
 	 * @property {boolean} [highlight]
 	 * @property {boolean} [primary]
 	 * @property {boolean} [secondary]
+	 * @property {number} explodedX
+	 * @property {number} explodedRowY
 	 */
 
 	/** @type {Props} */
 	let {
+		path,
 		area,
 		layerNum,
 		cutNum,
 		subPieceIndex = undefined,
 		highlight = false,
 		primary = false,
-		secondary = false
+		secondary = false,
+		explodedX,
+		explodedRowY
 	} = $props();
 
+	const d = path.pathData;
+	const { height } = path.strokeBounds;
 	const subpiece = subPieceIndex !== undefined;
 	const svgPadding = 1;
 
 	const onionStore = getContext("onionStore");
-	let { cutType, cutTargetDepthPercentage, meanArea, standardDeviation } =
-		$derived($onionStore);
+	let {
+		cutType,
+		cutTargetDepthPercentage,
+		meanArea,
+		standardDeviation,
+		numHorizontalCuts
+	} = $derived($onionStore);
 
-	const layerPathStore = getContext("layerPathStore");
-	const cutPathStore = getContext("cutPathStore");
 	const horizontalCutPathStore = getContext("horizontalCutPathStore");
-
-	let layerPath = $derived($layerPathStore[layerNum]);
-	let cutPath = $derived($cutPathStore[cutNum]);
-	let piecePath = $derived(layerPath.intersect(cutPath));
-	let subPiecePath = $derived(piecePath.intersect($horizontalCutPathStore[subPieceIndex]));
-	let { width, height } = $derived(piecePath.strokeBounds);
-	let d = $derived((subpiece ? subPiecePath : piecePath).pathData);
-
 	const explodeStore = getContext("explodeStore");
-
 	const colorScaleStore = getContext("colorScaleStore");
+
+	let explodedY = $derived.by(() => {
+		let explodedY = height / 2 - path.position.y + explodedRowY;
+
+		// shift lower subpieces upward
+		if (subpiece) {
+			for (let i = subPieceIndex; i < numHorizontalCuts; i++) {
+				const upperSubPiecePath = path.intersect(
+					$horizontalCutPathStore[i + 1]
+				);
+				explodedY -= upperSubPiecePath.strokeBounds.height;
+			}
+		}
+
+		return explodedY;
+	});
 </script>
 
-<!-- TODO can we prevent highlighted pieces next to y-axis from being truncated on the left? -->
-<!--   (involves setting viewBox when $explodeStore === false) -->
-<!--   (requires us to manually position each piece's SVG element) -->
-<svg
-	viewBox={$explodeStore
-		? `${-svgPadding} ${-svgPadding} ${width + 2 * svgPadding} ${
-				height + 2 * svgPadding
-		  }`
-		: undefined}
-	width={$explodeStore ? width : undefined}
->
-	<!-- {#if subpiece}
-		{@debug piecePath, subPiecePath, d, area}
+<!-- {#if subpiece}
+		{@debug path, subPiecePath, d, area}
 	{/if} -->
-	<path
-		{d}
-		style={$explodeStore
-			? `stroke: ${$colorScaleStore(
-					Math.abs(area - meanArea) / standardDeviation
-			  )}; transform: translate(${width / 2 - piecePath.position.x}px, ${
-					height / 2 - piecePath.position.y
-			  }px)`
-			: undefined}
-		class:highlight
-		class:primary={highlight && primary}
-		class:secondary={highlight && secondary}
-		class:thin={!$explodeStore &&
-			secondary &&
-			cutType === "radial" &&
-			cutTargetDepthPercentage === 0}
-		class:subpiece
-		data-area={area}
-	/>
-</svg>
+<path
+	{d}
+	style={$explodeStore
+		? `stroke: ${$colorScaleStore(
+				Math.abs(area - meanArea) / standardDeviation
+		  )}; transform: translate(${explodedX}px, ${explodedY}px)`
+		: undefined}
+	class:highlight
+	class:primary={highlight && primary}
+	class:secondary={highlight && secondary}
+	class:thin={!$explodeStore &&
+		secondary &&
+		cutType === "radial" &&
+		cutTargetDepthPercentage === 0}
+	class:subpiece
+	data-area={area}
+	data-subpiece-index={subPieceIndex}
+/>
 
 <style>
-	/**
-	* TODO transform transition looks interesting,
-	* but is there a way to animate transition between exploded and not exploded?
-	*/
 	path {
 		fill: none;
 		stroke: transparent;
 		transition:
-			stroke 200ms 200ms,
-			transform 200ms;
+			stroke var(--duration-transform) var(--duration-transform),
+			transform var(--duration-transform);
 
 		&.highlight {
 			stroke-width: 4px;
@@ -113,7 +114,7 @@
 	:global(figure.explode path) {
 		stroke: black;
 		transition:
-			stroke 200ms,
-			transform 200ms;
+			stroke var(--duration-fade),
+			transform var(--duration-transform) var(--duration-fade);
 	}
 </style>
