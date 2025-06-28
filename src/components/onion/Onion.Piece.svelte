@@ -3,6 +3,7 @@
 
 	/**
 	 * @typedef {Object} Props
+	 * @property {any} path
 	 * @property {any} area
 	 * @property {any} layerNum
 	 * @property {any} cutNum
@@ -16,6 +17,7 @@
 
 	/** @type {Props} */
 	let {
+		path,
 		area,
 		layerNum,
 		cutNum,
@@ -27,6 +29,8 @@
 		explodedRowY
 	} = $props();
 
+	const d = path.pathData;
+	const { height } = path.strokeBounds;
 	const subpiece = subPieceIndex !== undefined;
 	const svgPadding = 1;
 
@@ -39,32 +43,17 @@
 		numHorizontalCuts
 	} = $derived($onionStore);
 
-	const layerPathStore = getContext("layerPathStore");
-	const cutPathStore = getContext("cutPathStore");
 	const horizontalCutPathStore = getContext("horizontalCutPathStore");
-
-	// TODO this intersection logic was moved to OnionPieceAnalyzer;
-	//   it can be removed from here after radial pieces can smoothly transition to exploded
-	let layerPath = $derived($layerPathStore[layerNum]);
-	let cutPath = $derived($cutPathStore[cutNum]);
-	let piecePath = $derived(layerPath.intersect(cutPath));
-	let subPiecePath = $derived(
-		piecePath.intersect($horizontalCutPathStore[subPieceIndex])
-	);
-	let { width, height } = $derived(piecePath.strokeBounds);
-	let d = $derived((subpiece ? subPiecePath : piecePath).pathData);
-
 	const explodeStore = getContext("explodeStore");
-
 	const colorScaleStore = getContext("colorScaleStore");
 
 	let explodedY = $derived.by(() => {
-		let explodedY = height / 2 - piecePath.position.y + explodedRowY;
+		let explodedY = height / 2 - path.position.y + explodedRowY;
 
 		// shift lower subpieces upward
 		if (subpiece) {
 			for (let i = subPieceIndex; i < numHorizontalCuts; i++) {
-				const upperSubPiecePath = piecePath.intersect(
+				const upperSubPiecePath = path.intersect(
 					$horizontalCutPathStore[i + 1]
 				);
 				explodedY -= upperSubPiecePath.strokeBounds.height;
@@ -76,7 +65,7 @@
 </script>
 
 <!-- {#if subpiece}
-		{@debug piecePath, subPiecePath, d, area}
+		{@debug path, subPiecePath, d, area}
 	{/if} -->
 <path
 	{d}

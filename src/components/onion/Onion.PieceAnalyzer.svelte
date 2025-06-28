@@ -139,6 +139,7 @@
 					$horizontalCutPathStore[piece.subPieceIndex]
 				);
 				const ownPath = isSubpiece ? subPiecePath : piecePath;
+				piece.path = ownPath;
 				let { width, height } = ownPath.strokeBounds;
 				// TODO should these dimensions be set in onion.js instead?
 				piece.width = width;
@@ -182,11 +183,12 @@
 <!-- TODO draw scale/ticks for exploded view? -->
 {#each inlineLayoutPieces as { pieces, explodedRowY }}
 	{#if cutType === "vertical"}
-		{#each pieces as { pieceArea, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX }}
+		{#each pieces as { path, pieceArea, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX }}
 			{@const isInCenterColumn = cutNum === 0}
 			{@const isBottomPiece = layerNumInColumn === 0}
 
 			<OnionPiece
+				{path}
 				area={pieceArea}
 				layerNum={layerNumInColumn +
 					layerRadii.findLastIndex((r) => r <= cutX) +
@@ -201,11 +203,12 @@
 			/>
 		{/each}
 	{:else if cutType === "radial"}
-		{#each pieces as { area, subPieceIndex, cutNum, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum, explodedX }}
+		{#each pieces as { path, area, subPieceIndex, cutNum, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum, explodedX }}
 			{@const isBottomPiece =
 				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
 			<OnionPiece
+				{path}
 				{area}
 				{layerNum}
 				{cutNum}
