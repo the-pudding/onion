@@ -12,7 +12,7 @@
 	 * @property {boolean} [primary]
 	 * @property {boolean} [secondary]
 	 * @property {number} explodedX
-	 * @property {number} explodedRowY
+	 * @property {number} explodedY
 	 */
 
 	/** @type {Props} */
@@ -26,46 +26,23 @@
 		primary = false,
 		secondary = false,
 		explodedX,
-		explodedRowY
+		explodedY
 	} = $props();
 
 	const d = path.pathData;
-	const { height } = path.strokeBounds;
 	const subpiece = subPieceIndex !== undefined;
 	const svgPadding = 1;
 
 	const onionStore = getContext("onionStore");
-	let {
-		cutType,
-		cutTargetDepthPercentage,
-		meanArea,
-		standardDeviation,
-		numHorizontalCuts
-	} = $derived($onionStore);
+	let { cutType, cutTargetDepthPercentage, meanArea, standardDeviation } =
+		$derived($onionStore);
 
-	const horizontalCutPathStore = getContext("horizontalCutPathStore");
 	const explodeStore = getContext("explodeStore");
 	const colorScaleStore = getContext("colorScaleStore");
-
-	let explodedY = $derived.by(() => {
-		let explodedY = height / 2 - path.position.y + explodedRowY;
-
-		// shift lower subpieces upward
-		if (subpiece) {
-			for (let i = subPieceIndex; i < numHorizontalCuts; i++) {
-				const upperSubPiecePath = path.intersect(
-					$horizontalCutPathStore[i + 1]
-				);
-				explodedY -= upperSubPiecePath.strokeBounds.height;
-			}
-		}
-
-		return explodedY;
-	});
 </script>
 
 <!-- {#if subpiece}
-		{@debug path, subPiecePath, d, area}
+		{@debug path, d, area}
 	{/if} -->
 <path
 	{d}

@@ -173,6 +173,21 @@
 					});
 				}
 
+				let explodedY =
+					height / 2 - ownPath.position.y + rows.at(-1).explodedRowY;
+
+				// shift lower subpieces upward
+				if (isSubpiece) {
+					for (let i = piece.subPieceIndex; i < numHorizontalCuts; i++) {
+						const upperSubPiecePath = ownPath.intersect(
+							$horizontalCutPathStore[i + 1]
+						);
+						explodedY -= upperSubPiecePath.strokeBounds.height;
+					}
+				}
+
+				piece.explodedY = explodedY;
+
 				return rows;
 			},
 			[]
@@ -183,7 +198,7 @@
 <!-- TODO draw scale/ticks for exploded view? -->
 {#each inlineLayoutPieces as { pieces, explodedRowY }}
 	{#if cutType === "vertical"}
-		{#each pieces as { path, pieceArea, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX }}
+		{#each pieces as { path, pieceArea, subPieceIndex, cutX, cutNum, layerNumInColumn, explodedX, explodedY }}
 			{@const isInCenterColumn = cutNum === 0}
 			{@const isBottomPiece = layerNumInColumn === 0}
 
@@ -199,11 +214,11 @@
 				primary={isInCenterColumn}
 				secondary={isBottomPiece}
 				{explodedX}
-				{explodedRowY}
+				{explodedY}
 			/>
 		{/each}
 	{:else if cutType === "radial"}
-		{#each pieces as { path, area, subPieceIndex, cutNum, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum, explodedX }}
+		{#each pieces as { path, area, subPieceIndex, cutNum, layerNum, numPieces, isInnermostLayer, isOutermostLayer, pieceNum, explodedX, explodedY }}
 			{@const isBottomPiece =
 				cutTargetDepthPercentage !== 0 && pieceNum === numPieces - 1}
 
@@ -218,7 +233,7 @@
 					isBottomPiece}
 				secondary={cutTargetDepthPercentage === 0 && isInnermostLayer}
 				{explodedX}
-				{explodedRowY}
+				{explodedY}
 			/>
 		{/each}
 	{/if}
