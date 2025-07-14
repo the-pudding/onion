@@ -10,7 +10,7 @@
 	const copy = getContext("copy");
 	// const data = getContext("data");
 
-	console.log({ copy });
+	// console.log({ copy });
 </script>
 
 <WIP />

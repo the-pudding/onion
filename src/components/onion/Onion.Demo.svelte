@@ -1,8 +1,9 @@
 <script>
-	import { run } from 'svelte/legacy';
+	import { run } from "svelte/legacy";
 
 	import { writable } from "svelte/store";
 	import { setContext } from "svelte";
+	import { Tween } from "svelte/motion";
 	import { scaleLinear } from "d3";
 	import paper from "paper";
 	import {
@@ -59,6 +60,7 @@
 	} = $props();
 
 	const width = 600;
+	setContext("width", width);
 	const height = width / 2;
 	const radius = height * 0.8;
 	// SVG drawing is flipped upside down
@@ -212,6 +214,8 @@
 	run(() => {
 		$explodeStore = explode === "on";
 	});
+
+	let viewBoxHeight = $state(new Tween(height));
 </script>
 
 <figure class:explode={explode === "on"}>
@@ -243,45 +247,40 @@
 		</div>
 	{/if}
 
-	{#if explode === "off"}
-		<svg
-			viewBox="{-width / 2} 0 {width} {showRadialTarget
-				? height * (5 / 3)
-				: height}"
-		>
-			<!-- <OnionAxisX {width} {height} /> -->
-			<OnionAxisX {width} {height} isBottom isHalfWidth={showRadialTarget} />
-			<!-- TODO responsive sizing: move y axis when screen resizes -->
-			<!-- <OnionAxisY {height} /> -->
+	<svg viewBox="{-width / 2} 0 {width} {viewBoxHeight.current}">
+		<!-- <OnionAxisX {width} {height} /> -->
+		<OnionAxisX {width} {height} isBottom isHalfWidth={showRadialTarget} />
+		<!-- TODO responsive sizing: move y axis when screen resizes -->
+		<!-- <OnionAxisY {height} /> -->
 
-			<OnionLayers {height} />
+		<OnionLayers {height} />
 
-			{#if showCuts}
-				<OnionCuts {width} {height} {yScale} />
-			{/if}
+		{#if showCuts}
+			<OnionCuts {width} {height} {yScale} />
+		{/if}
 
-			{#if showRadialTarget}
-				<clipPath id="layer-mask">
-					<rect {width} {height} x={-width / 2} />
-				</clipPath>
+		{#if showRadialTarget}
+			<clipPath id="layer-mask">
+				<rect {width} {height} x={-width / 2} />
+			</clipPath>
 
-				<circle
-					r="10"
-					cx="0"
-					cy={yScale(-cutTargetDepth)}
-					class="radial-target"
-				/>
-			{/if}
+			<circle
+				r="10"
+				cx="0"
+				cy={yScale(-cutTargetDepth)}
+				class="radial-target"
+			/>
+		{/if}
 
-			{#key $onionStore}
-				<OnionPieceAnalyzer {yScale} {highlightExtremes} />
-			{/key}
-		</svg>
-	{:else if explode === "on"}
 		{#key $onionStore}
-			<OnionPieceAnalyzer {yScale} highlightExtremes={false} />
+			<OnionPieceAnalyzer
+				{yScale}
+				{highlightExtremes}
+				{showRadialTarget}
+				bind:viewBoxHeight
+			/>
 		{/key}
-	{/if}
+	</svg>
 
 	{#if showControls}
 		<div class="controls bottom">
@@ -344,6 +343,8 @@
 		--demo-spacing-y: 1rem;
 		--demo-spacing-x: 2rem;
 		--axis-thickness: 2;
+		--duration-transform: 800ms;
+		--duration-fade: 200ms;
 	}
 
 	figure {
@@ -353,11 +354,12 @@
 
 	:global(line, circle) {
 		stroke: black;
-		transition: stroke 200ms;
+		transition: stroke var(--duration-fade) var(--duration-transform);
 	}
 
 	:global(.explode :is(line, circle)) {
 		stroke: transparent;
+		transition: stroke var(--duration-fade);
 	}
 
 	.radial-target {
