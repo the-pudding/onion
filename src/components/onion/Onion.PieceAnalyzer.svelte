@@ -8,7 +8,12 @@
 	import { EXPLODED_GAP } from "$utils/constants";
 	import { compareRadialPieceAreasDescending } from "$utils/math";
 
-	let { yScale, highlightExtremes } = $props();
+	let {
+		yScale,
+		highlightExtremes,
+		showRadialTarget,
+		viewBoxHeight = $bindable()
+	} = $props();
 
 	const onionStore = getContext("onionStore");
 	let {
@@ -119,6 +124,7 @@
 	const layerPathStore = getContext("layerPathStore");
 	const cutPathStore = getContext("cutPathStore");
 	const horizontalCutPathStore = getContext("horizontalCutPathStore");
+	const explodeStore = getContext("explodeStore");
 
 	// create a data structure arranges pieces in rows for exploded view
 	// ^this will be mapped over in template--whether exploded or not--so that pieces animate smoothly
@@ -193,6 +199,27 @@
 			[]
 		)
 	);
+
+	// TODO might make more sense to set viewBoxHeight.target in OnionDemo,
+	//   which would eliminate need for showRadialTarget prop here
+	$effect(() => {
+		// TODO import this value from constants file
+		const defaultWidth = 300;
+
+		viewBoxHeight.target = showRadialTarget
+			? defaultWidth * (5 / 3)
+			: explodeStore
+			  ? // increase viewBoxHeight to fit up to last row, including its tallest piece
+			    Math.max(
+						inlineLayoutPieces.at(-1).explodedRowY +
+							Math.max(
+								...inlineLayoutPieces.at(-1).pieces.map((piece) => piece.height)
+							) +
+							EXPLODED_GAP,
+						defaultWidth
+			    )
+			  : defaultWidth;
+	});
 </script>
 
 <!-- TODO draw scale/ticks for exploded view? -->

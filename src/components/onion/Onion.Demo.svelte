@@ -215,7 +215,7 @@
 		$explodeStore = explode === "on";
 	});
 
-	// TODO tween viewBox height instead of width
+	let viewBoxHeight = $state(new Tween(height));
 </script>
 
 <figure class:explode={explode === "on"}>
@@ -247,11 +247,7 @@
 		</div>
 	{/if}
 
-	<svg
-		viewBox="{-width / 2} 0 {width} {showRadialTarget
-			? height * (5 / 3)
-			: height}"
-	>
+	<svg viewBox="{-width / 2} 0 {width} {viewBoxHeight.current}">
 		<!-- <OnionAxisX {width} {height} /> -->
 		<OnionAxisX {width} {height} isBottom isHalfWidth={showRadialTarget} />
 		<!-- TODO responsive sizing: move y axis when screen resizes -->
@@ -277,7 +273,12 @@
 		{/if}
 
 		{#key $onionStore}
-			<OnionPieceAnalyzer {yScale} {highlightExtremes} />
+			<OnionPieceAnalyzer
+				{yScale}
+				{highlightExtremes}
+				{showRadialTarget}
+				bind:viewBoxHeight
+			/>
 		{/key}
 	</svg>
 
