@@ -208,7 +208,7 @@
 
 		viewBoxHeight.target = showRadialTarget
 			? defaultWidth * (5 / 3)
-			: explodeStore
+			: $explodeStore
 			  ? // increase viewBoxHeight to fit up to last row, including its tallest piece
 			    Math.max(
 						inlineLayoutPieces.at(-1).explodedRowY +
