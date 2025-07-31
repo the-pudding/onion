@@ -234,15 +234,10 @@
 			<h3>vertical cuts</h3>
 			<OnionStandardDeviationGraph /> -->
 			{#if showStandardDeviation}
-				<label class="standard-deviation">
-					standard deviation
-					<input
-						type="number"
-						readonly
-						bind:value={$onionStore.standardDeviationString}
-					/>
-					%
-				</label>
+				<p>
+					standard deviation:
+					<span>{$onionStore.standardDeviationString}</span>%
+				</p>
 			{/if}
 		</div>
 	{/if}
@@ -372,10 +367,6 @@
 
 		&.top {
 			margin-bottom: var(--demo-spacing-y);
-
-			& .standard-deviation {
-				display: block;
-			}
 		}
 
 		&.bottom {
