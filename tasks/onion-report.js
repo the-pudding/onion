@@ -24,29 +24,36 @@ function getEntryWithMinimumValue(data) {
 	return Object.entries(data).find(([, value]) => value === minimumValue);
 }
 
+// find the minimum standard deviations for every layer/cut combo + how to obtain it
+//   (vertical, radial / what depth, horizontal if any)
+async function findMinimumStandardDeviations(data) {
+	let reportData = [];
+
+	for (let l = MIN_LAYERS; l <= MAX_LAYERS; l++) {
+		for (let c = MIN_CUTS; c <= MAX_CUTS; c++) {
+			const configurationData = getConfigurationData({
+				data,
+				numLayers: l,
+				numCuts: c
+			});
+			const e = getEntryWithMinimumValue(configurationData);
+			reportData.push(e);
+		}
+	}
+
+	await writeFile(outputFilename, JSON.stringify(reportData), "utf8");
+
+	console.log(`Wrote onion report to ${outputFilename}`);
+}
+
 (async () => {
 	try {
 		const inputFile = await readFile(
 			path.join(DATA_DIRECTORY, "onion-standard-deviation.json")
 		);
 		const data = JSON.parse(inputFile);
-		let reportData = [];
 
-		for (let l = MIN_LAYERS; l <= MAX_LAYERS; l++) {
-			for (let c = MIN_CUTS; c <= MAX_CUTS; c++) {
-				const configurationData = getConfigurationData({
-					data,
-					numLayers: l,
-					numCuts: c
-				});
-				const e = getEntryWithMinimumValue(configurationData);
-				reportData.push(e);
-			}
-		}
-
-		await writeFile(outputFilename, JSON.stringify(reportData), "utf8");
-
-		console.log(`Wrote onion report to ${outputFilename}`);
+		await findMinimumStandardDeviations(data);
 	} catch (error) {
 		console.error(error);
 	}

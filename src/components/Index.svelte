@@ -1,5 +1,6 @@
 <script>
-	import { getContext } from "svelte";
+	import { getContext, setContext } from "svelte";
+	import { quantile } from "d3";
 	import WIP from "$components/helpers/WIP.svelte";
 	import Intro from "./Intro.svelte";
 	import Story from "./Story.svelte";
@@ -7,10 +8,23 @@
 	import Appendix from "./Appendix.svelte";
 	// import Footer from "$components/Footer.svelte";
 
-	const copy = getContext("copy");
-	// const data = getContext("data");
+	const data = getContext("data");
 
-	// console.log({ copy });
+	// determine the quartiles we'll use to label RSD as very low, low, high, very high
+	const standardDeviations = Object.values(data);
+	const min = Math.min(...standardDeviations);
+	const q1 = quantile(standardDeviations, 0.25);
+	const median = quantile(standardDeviations, 0.5);
+	const q3 = quantile(standardDeviations, 0.75);
+	const max = Math.max(...standardDeviations);
+
+	setContext("rsdBuckets", {
+		min,
+		q1,
+		median,
+		q3,
+		max
+	});
 </script>
 
 <WIP />

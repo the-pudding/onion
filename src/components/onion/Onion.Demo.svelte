@@ -2,7 +2,7 @@
 	import { run } from "svelte/legacy";
 
 	import { writable } from "svelte/store";
-	import { setContext } from "svelte";
+	import { getContext, setContext } from "svelte";
 	import { Tween } from "svelte/motion";
 	import { scaleLinear } from "d3";
 	import paper from "paper";
@@ -58,6 +58,7 @@
 		showStandardDeviation = false,
 		showRadialTarget = false
 	} = $props();
+	const id = $props.id();
 
 	const width = 600;
 	setContext("width", width);
@@ -216,6 +217,19 @@
 	});
 
 	let viewBoxHeight = $state(new Tween(height));
+
+	const rsdBuckets = getContext("rsdBuckets");
+	let rsdRating = $derived.by(() => {
+		if ($onionStore.standardDeviation < rsdBuckets.q1) {
+			return "very low";
+		} else if ($onionStore.standardDeviation < rsdBuckets.median) {
+			return "low";
+		} else if ($onionStore.standardDeviation < rsdBuckets.q3) {
+			return "high";
+		} else {
+			return "very high";
+		}
+	});
 </script>
 
 <figure class:explode={explode === "on"}>
@@ -234,15 +248,24 @@
 			<h3>vertical cuts</h3>
 			<OnionStandardDeviationGraph /> -->
 			{#if showStandardDeviation}
-				<label class="standard-deviation">
-					standard deviation
-					<input
-						type="number"
-						readonly
-						bind:value={$onionStore.standardDeviationString}
-					/>
-					%
-				</label>
+				<div class="standard-deviation-info">
+					<label for="{id}-meter">standard deviation:</label>
+					<output>{$onionStore.standardDeviationString}%</output>
+					<div>
+						<meter
+							value={$onionStore.standardDeviation}
+							min={rsdBuckets.min}
+							max={rsdBuckets.max}
+							low={rsdBuckets.q1}
+							high={rsdBuckets.q3}
+							optimum={rsdBuckets.min}
+							id="{id}-meter"
+						>
+							{$onionStore.standardDeviationString}%
+						</meter>
+						<p>{rsdRating}</p>
+					</div>
+				</div>
 			{/if}
 		</div>
 	{/if}
@@ -368,18 +391,30 @@
 	}
 
 	.controls {
-		width: 350px;
+		width: 400px;
 
 		&.top {
 			margin-bottom: var(--demo-spacing-y);
-
-			& .standard-deviation {
-				display: block;
-			}
 		}
 
 		&.bottom {
 			margin-top: var(--demo-spacing-y);
+		}
+	}
+
+	.standard-deviation-info {
+		display: inline-grid;
+		column-gap: 1ch;
+
+		> div {
+			grid-column: 2;
+			display: flex;
+			align-items: center;
+			gap: 1ch;
+
+			p {
+				margin: 0;
+			}
 		}
 	}
 
