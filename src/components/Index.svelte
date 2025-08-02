@@ -4,7 +4,7 @@
 	import WIP from "$components/helpers/WIP.svelte";
 	import Intro from "./Intro.svelte";
 	import Story from "./Story.svelte";
-	import Conclustion from "./Conclustion.svelte";
+	import Conclusion from "./Conclusion.svelte";
 	import Appendix from "./Appendix.svelte";
 	// import Footer from "$components/Footer.svelte";
 
@@ -30,7 +30,7 @@
 <WIP />
 <Intro />
 <Story />
-<Conclustion />
+<Conclusion />
 <Appendix />
 
 <!-- <Footer /> -->
