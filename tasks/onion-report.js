@@ -6,7 +6,6 @@ import {
 	MIN_CUTS,
 	MIN_LAYERS
 } from "../src/utils/constants.js";
-import { quantile } from "d3";
 
 const CWD = process.cwd();
 const DATA_DIRECTORY = path.join(CWD, "src/data");
@@ -47,25 +46,6 @@ async function findMinimumStandardDeviations(data) {
 	console.log(`Wrote onion report to ${outputFilename}`);
 }
 
-// determine the quartiles we'll use to label RSD as very low, low, high, very high
-// TODO run this after loading onion-standard-deviation.json in +page.svelte's load function
-function findBuckets(data) {
-	const standardDeviations = Object.values(data);
-	const minStandardDeviation = Math.min(...standardDeviations);
-	const q1StandardDeviation = quantile(standardDeviations, 0.25);
-	const medianStandardDeviation = quantile(standardDeviations, 0.5);
-	const q3StandardDeviation = quantile(standardDeviations, 0.75);
-	const maxStandardDeviation = Math.max(...standardDeviations);
-
-	console.log({
-		minStandardDeviation,
-		q1StandardDeviation,
-		medianStandardDeviation,
-		q3StandardDeviation,
-		maxStandardDeviation
-	});
-}
-
 (async () => {
 	try {
 		const inputFile = await readFile(
@@ -73,10 +53,7 @@ function findBuckets(data) {
 		);
 		const data = JSON.parse(inputFile);
 
-		// await findMinimumStandardDeviations(data);
-
-		// TODO find the median standard deviation, for determining RSD buckets
-		findBuckets(data);
+		await findMinimumStandardDeviations(data);
 	} catch (error) {
 		console.error(error);
 	}
