@@ -116,6 +116,8 @@
 		width: 100%;
 		margin: 0 auto;
 		table-layout: auto;
+		font-family: var(--sans);
+		font-size: var(--14px);
 	}
 
 	
@@ -142,6 +144,7 @@
 	th {
 		padding: 0px;
 		vertical-align: bottom;
+		padding: 8px;
 	}
 
 	th button {
@@ -154,7 +157,7 @@
 		width: 100%;
 		height: 100%;
 		line-height: 1.2;
-		padding: 8px;
+		padding: 0;
 		padding-right: 1.25em;
 		text-align: left;
 		font-weight: bold;
@@ -166,7 +169,7 @@
 		content: "⇅";
 		display: flex;
 		position: absolute;
-		bottom: 0.5em;
+		bottom: 0;
 		right: 0;
 		width: 1.25em;
 		justify-content: center;

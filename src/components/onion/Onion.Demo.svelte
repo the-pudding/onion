@@ -34,7 +34,6 @@
 	 * @property {boolean} [controlCutType]
 	 * @property {boolean} [controlRadialDepth]
 	 * @property {boolean} [controlHorizontalCuts]
-	 * @property {string} [caption]
 	 * @property {string} [cutType]
 	 * @property {number} [cutTargetDepthPercentage]
 	 * @property {boolean} [toggleExplode]
@@ -51,7 +50,6 @@
 		controlCutType = false,
 		controlRadialDepth = false,
 		controlHorizontalCuts = false,
-		caption = "",
 		cutType = $bindable("vertical"),
 		cutTargetDepthPercentage = $bindable(0),
 		toggleExplode = false,
@@ -189,7 +187,7 @@
 								"z"
 							].join(" ")
 						)
-				  ]
+					]
 				: []),
 			...$onionStore.horizontalCutNumbers.map((h) => {
 				const y = $onionStore.horizontalCutScale(h) * radius;
@@ -221,13 +219,13 @@
 	const rsdBuckets = getContext("rsdBuckets");
 	let rsdRating = $derived.by(() => {
 		if ($onionStore.standardDeviation < rsdBuckets.q1) {
-			return "very low";
+			return "excellent uniformity";
 		} else if ($onionStore.standardDeviation < rsdBuckets.median) {
-			return "low";
+			return "good uniformity";
 		} else if ($onionStore.standardDeviation < rsdBuckets.q3) {
-			return "high";
+			return "fair uniformity";
 		} else {
-			return "very high";
+			return "poor uniformity";
 		}
 	});
 </script>
@@ -235,10 +233,6 @@
 <figure class:explode={explode === "on"}>
 	{#if toggleExplode || showStandardDeviation}
 		<div class="controls top">
-			{#if toggleExplode}
-				<Toggle label="explode" style="slider" bind:value={explode} />
-			{/if}
-
 			<!-- TODO are these multiline graphs more informative than a number printout? -->
 			<!-- <h2>standard deviation in piece size</h2>
 
@@ -247,12 +241,22 @@
 
 			<h3>vertical cuts</h3>
 			<OnionStandardDeviationGraph /> -->
-			{#if showStandardDeviation}
+			<div class="showhide" class:visible={toggleExplode}>
+				<Toggle label="explode" style="slider" bind:value={explode} />
+			</div>
+
+			<div class="showhide" class:visible={showStandardDeviation}>
+				<div class="std-dev-rating">
+					<span class="rating {rsdRating.replace(/ /g, '')}">{rsdRating}</span>
+				</div>
+			</div>
+			<div class="showhide" class:visible={showStandardDeviation}>
 				<div class="standard-deviation-info">
-					<label for="{id}-meter">standard deviation:</label>
-					<output>{$onionStore.standardDeviationString}%</output>
+					<span>std dev:</span>
+					<span>{$onionStore.standardDeviationString}%</span>
+
 					<div>
-						<meter
+						<!-- <meter
 							value={$onionStore.standardDeviation}
 							min={rsdBuckets.min}
 							max={rsdBuckets.max}
@@ -262,11 +266,82 @@
 							id="{id}-meter"
 						>
 							{$onionStore.standardDeviationString}%
-						</meter>
-						<p>{rsdRating}</p>
+						</meter> -->
 					</div>
 				</div>
-			{/if}
+			</div>
+		</div>
+	{/if}
+
+	{#if showControls}
+		<div class="controls bottom">
+			<div class="left">
+				{#if controlLayers}
+					<div class="control-unit">
+						<span class="label">Layers</span>
+						<Range
+							min={MIN_LAYERS}
+							max={MAX_LAYERS}
+							label="number of layers"
+							bind:value={numLayers}
+						/>
+						<span class="output">{numLayers}</span>
+					</div>
+				{/if}
+
+				<div class="control-unit">
+					<span class="label">Cuts (vertical)</span>
+					<Range
+						min={MIN_CUTS}
+						max={MAX_CUTS}
+						label="number of cuts"
+						bind:value={numCuts}
+					/>
+					<span class="output">{numCuts}</span>
+				</div>
+
+				{#if controlHorizontalCuts}
+					<div class="control-unit">
+						<!-- <p>horizontal cuts</p> -->
+						<span class="label">Cuts (horiz.)</span>
+						<Range
+							min={MIN_HORIZONTAL_CUTS}
+							max={MAX_HORIZONTAL_CUTS}
+							label="horizontal cuts"
+							bind:value={numHorizontalCuts}
+						/>
+						<!-- <p>{numHorizontalCuts}</p> -->
+						<span class="output">{numHorizontalCuts}</span>
+					</div>
+				{/if}
+			</div>
+
+			<div class="right">
+				{#if controlCutType}
+					<div class="control-unit">
+						<ButtonSet legend="cut type" {options} bind:value={cutType} />
+					</div>
+				{/if}
+
+				{#if controlCutType}
+					<div class:hidden={!(cutType === "radial" && controlRadialDepth)}>
+						<div class="control-unit">
+							<!-- <p>cut target height</p> -->
+							<span class="label">target height</span>
+
+							<Range
+								min={0}
+								max={1}
+								step={0.01}
+								bind:value={cutTargetDepthPercentage}
+								label="cut target depth percentage"
+							/>
+							<span class="output"
+								>{formatPercentage(-cutTargetDepthPercentage)}</span
+							>
+						</div>
+					</div>{/if}
+			</div>
 		</div>
 	{/if}
 
@@ -304,75 +379,19 @@
 			/>
 		{/key}
 	</svg>
-
-	{#if showControls}
-		<div class="controls bottom">
-			{#if controlLayers}
-				<p>number of layers: {numLayers}</p>
-				<Range
-					min={MIN_LAYERS}
-					max={MAX_LAYERS}
-					label="number of layers"
-					bind:value={numLayers}
-				/>
-			{/if}
-
-			<p>number of cuts: {numCuts}</p>
-			<Range
-				min={MIN_CUTS}
-				max={MAX_CUTS}
-				label="number of cuts"
-				bind:value={numCuts}
-			/>
-
-			{#if controlCutType}
-				<ButtonSet legend="cut type" {options} bind:value={cutType} />
-
-				<div class:hidden={!(cutType === "radial" && controlRadialDepth)}>
-					<p>
-						cut target height:
-						{formatPercentage(-cutTargetDepthPercentage)} of outer radius
-					</p>
-
-					<Range
-						min={0}
-						max={1}
-						step={0.01}
-						bind:value={cutTargetDepthPercentage}
-						label="cut target depth percentage"
-					/>
-				</div>
-			{/if}
-
-			{#if controlHorizontalCuts}
-				<p>horizontal cuts: {numHorizontalCuts}</p>
-				<Range
-					min={MIN_HORIZONTAL_CUTS}
-					max={MAX_HORIZONTAL_CUTS}
-					label="horizontal cuts"
-					bind:value={numHorizontalCuts}
-				/>
-			{/if}
-		</div>
-	{/if}
-
-	{#if caption}
-		<figcaption>{caption}</figcaption>
-	{/if}
 </figure>
 
 <style>
-	:root {
-		--demo-spacing-y: 1rem;
-		--demo-spacing-x: 2rem;
-		--axis-thickness: 2;
-		--duration-transform: 800ms;
-		--duration-fade: 200ms;
-	}
-
 	figure {
 		margin-block: calc(var(--demo-spacing-y) * 4);
+		margin-top: calc(var(--demo-spacing-y) * 2);
 		padding-inline: var(--demo-spacing-x);
+		font-family: var(--sans);
+	}
+
+	figure * {
+		font-size: var(--12px);
+		text-transform: uppercase;
 	}
 
 	:global(line, circle) {
@@ -387,23 +406,29 @@
 
 	.radial-target {
 		stroke: transparent;
-		fill: red;
+		fill: var(--color-primary);
 	}
 
 	.controls {
-		width: 400px;
-
 		&.top {
 			margin-bottom: var(--demo-spacing-y);
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 8px;
+			background: var(--color-gray-100);
 		}
 
 		&.bottom {
-			margin-top: var(--demo-spacing-y);
+			margin-top: calc(var(--demo-spacing-y) * 1);
+			margin-bottom: var(--demo-spacing-y);
+			display: flex;
+			justify-content: space-between;
 		}
 	}
 
 	.standard-deviation-info {
-		display: inline-grid;
+		/* display: inline-grid;
 		column-gap: 1ch;
 
 		> div {
@@ -414,11 +439,93 @@
 
 			p {
 				margin: 0;
-			}
-		}
+			} */
+		/* } */
 	}
 
 	.hidden {
 		visibility: hidden;
+	}
+
+	span.rating {
+		font-weight: bold;
+		padding: 4px 8px;
+	}
+
+	span.pooruniformity {
+		background: var(--color-purple);
+		color: var(--color-white);
+	}
+
+	span.fairuniformity {
+		background: var(--color-purple-light);
+		color: var(--color-black);
+	}
+
+	span.gooduniformity {
+		background: var(--color-green-light);
+		color: var(--color-black);
+	}
+
+	span.excellentuniformity {
+		background: var(--color-green);
+		color: var(--color-white);
+	}
+
+	.control-unit {
+		display: flex;
+		align-items: center;
+		margin-bottom: 12px;
+	}
+
+	.control-unit span {
+		line-height: 1;
+		display: inline-block;
+	}
+
+	.showhide {
+		visibility: hidden;
+	}
+
+	.showhide.visible {
+		visibility: visible;
+	}
+
+	.left,
+	.right {
+		width: 50%;
+	}
+
+	.left {
+		padding-right: 8px;
+	}
+
+	.right {
+		padding-left: 8px;
+		transform: translateY(-8px);
+	}
+
+	.right .control-unit {
+		justify-content: flex-end;
+	}
+	span.label {
+		margin-right: 8px;
+	}
+
+	.left span.output {
+		display: inline-block;
+		margin-left: 8px;
+	}
+
+	.right span.output {
+		display: inline-block;
+		margin-left: 8px;
+		width: 3.5em;
+		text-align: right;
+	}
+
+	.left .label {
+		width: 9em;
+		/* text-align: right; */
 	}
 </style>

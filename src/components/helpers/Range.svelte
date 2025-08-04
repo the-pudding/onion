@@ -30,7 +30,7 @@
 		--thumb-width: 24px;
 		--tick-font-size: 12px;
 		position: relative;
-		margin-bottom: calc(var(--thumb-width) * 2);
+		/* margin-bottom: calc(var(--thumb-width) * 2); */
 	}
 
 	input[type="range"] {
@@ -83,7 +83,9 @@
 	}
 
 	input[type="range"]::-moz-range-thumb {
-		box-shadow: 1px 1px 1px var(--color-black), 0 0 1px var(--color-black);
+		box-shadow:
+			1px 1px 1px var(--color-black),
+			0 0 1px var(--color-black);
 		height: var(--thumb-width);
 		width: var(--thumb-width);
 		border-radius: 50%;
@@ -104,7 +106,9 @@
 		background: var(--color-gray-300);
 		border: 0.2px solid var(--color-black);
 		border-radius: 4px;
-		box-shadow: 1px 1px 1px var(--color-black), 0 0 1px var(--color-black);
+		box-shadow:
+			1px 1px 1px var(--color-black),
+			0 0 1px var(--color-black);
 	}
 
 	input[type="range"]::-ms-thumb {

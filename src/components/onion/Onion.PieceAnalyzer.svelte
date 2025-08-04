@@ -44,7 +44,7 @@
 								...pieceForSVG,
 								pieceArea: subPieceArea,
 								subPieceIndex: horizontalCutPathNum
-						  }))
+							}))
 						: pieceForSVG;
 				})
 			)
@@ -69,7 +69,7 @@
 								...pieceForSVG,
 								area: subPieceArea,
 								subPieceIndex: horizontalCutPathNum
-						  }))
+							}))
 						: pieceForSVG;
 				})
 			)
@@ -86,11 +86,11 @@
 		cutType === "vertical" ? verticalPieces[0].pieceArea : radialPieces[0].area
 	);
 	run(() => {
-		minArea,
+		(minArea,
 			maxArea,
 			($explodeXScaleStore = scaleLinear()
 				.domain([minArea, maxArea])
-				.range([-radius, radius]));
+				.range([-radius, radius])));
 	});
 	setContext("explodeXScaleStore", explodeXScaleStore);
 
@@ -105,14 +105,14 @@
 	//   pieces with areas further from average are more orange
 	// TODO purple/orange are just placeholder colors
 	run(() => {
-		minStandardDeviations,
+		(minStandardDeviations,
 			maxStandardDeviations,
 			($colorScaleStore = scaleSequential()
 				.domain([
 					0,
 					Math.max(maxStandardDeviations, Math.abs(minStandardDeviations))
 				])
-				.interpolator(interpolateHcl("purple", "orange")));
+				.interpolator(interpolateHcl("#2a827f", "#a239ca"))));
 	});
 	setContext("colorScaleStore", colorScaleStore);
 
@@ -209,16 +209,16 @@
 		viewBoxHeight.target = showRadialTarget
 			? defaultWidth * (5 / 3)
 			: $explodeStore
-			  ? // increase viewBoxHeight to fit up to last row, including its tallest piece
-			    Math.max(
+				? // increase viewBoxHeight to fit up to last row, including its tallest piece
+					Math.max(
 						inlineLayoutPieces.at(-1).explodedRowY +
 							Math.max(
 								...inlineLayoutPieces.at(-1).pieces.map((piece) => piece.height)
 							) +
 							EXPLODED_GAP,
 						defaultWidth
-			    )
-			  : defaultWidth;
+					)
+				: defaultWidth;
 	});
 </script>
 

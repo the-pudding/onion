@@ -47,9 +47,9 @@
 <path
 	{d}
 	style={$explodeStore
-		? `stroke: ${$colorScaleStore(
+		? `fill: ${$colorScaleStore(
 				Math.abs(area - meanArea) / standardDeviation
-		  )}; transform: translate(${explodedX}px, ${explodedY}px)`
+			)}; transform: translate(${explodedX}px, ${explodedY}px)`
 		: undefined}
 	class:highlight
 	class:primary={highlight && primary}
@@ -80,7 +80,7 @@
 		}
 
 		&.subpiece {
-			stroke: blue;
+			stroke: var(--color-primary);
 		}
 	}
 
@@ -89,7 +89,7 @@
 	}
 
 	:global(figure.explode path) {
-		stroke: black;
+		stroke: var(--color-fg);
 		transition:
 			stroke var(--duration-fade),
 			transform var(--duration-transform) var(--duration-fade);

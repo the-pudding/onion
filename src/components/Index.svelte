@@ -1,7 +1,6 @@
 <script>
 	import { getContext, setContext } from "svelte";
 	import { quantile } from "d3";
-	import WIP from "$components/helpers/WIP.svelte";
 	import Intro from "./Intro.svelte";
 	import Story from "./Story.svelte";
 	import Conclusion from "./Conclusion.svelte";
@@ -27,34 +26,9 @@
 	});
 </script>
 
-<WIP />
 <Intro />
 <Story />
 <Conclusion />
 <Appendix />
 
 <!-- <Footer /> -->
-
-<style global>
-	:root {
-		--text-size: var(--24px);
-		--color-primary: var(--color-purple);
-		--color-secondary: var(--color-green);
-	}
-
-	#content {
-		max-width: 600px;
-		margin-inline: auto;
-	}
-
-	/* TODO Inter font */
-
-	.text,
-	li {
-		font-size: var(--text-size);
-	}
-
-	.small {
-		font-size: var(--14px);
-	}
-</style>

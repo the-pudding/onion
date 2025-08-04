@@ -7,11 +7,12 @@
 	const copy = getContext("copy");
 </script>
 
-<h1>{copy.hed}</h1>
+<div class="title">
+	<h1>{copy.hed}</h1>
 
-<div class="authors">
-	<span>By {@html copy.author1}</span>
-	<span>With {@html copy.author2}</span>
+	<p class="authors">
+		<span>By {@html copy.author1}</span> <span>with {@html copy.author2}</span>
+	</p>
 </div>
 
 {#each copy.story as { type, value }, i}
@@ -34,18 +35,20 @@
 {/each}
 
 <style>
+	.title {
+		margin: 64px auto;
+	}
+
+	h1 {
+		margin-top: 0;
+		line-height: 1.125;
+		font-size: clamp(38px, 7.5vw, 62px);
+		font-family: var(--sans);
+		font-weight: bold;
+	}
+
 	.authors {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-
-		& > :first-child {
-			font-size: var(--24px);
-		}
-
-		& > :last-child {
-			font-size: var(--16px);
-		}
+		margin-bottom: 0;
 	}
 
 	:global(.primary) {
