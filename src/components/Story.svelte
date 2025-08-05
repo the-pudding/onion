@@ -13,13 +13,16 @@
 <svelte:window bind:innerWidth={w} />
 
 <div class="title">
-	<h1>Dicing an
-		<Letters string="ONION" height={w/3.5}/>
+	<h1>
+		Dicing an
+		<Letters string="ONION" height={w / 3.5} />
 		the Mathematically Optimal Way
 	</h1>
 
 	<p class="authors">
-		By {@html copy.author1} with {@html copy.author2}
+		By {@html copy.author1}
+		<br />
+		<small>with {@html copy.author2} and {@html copy.author3}</small>
 	</p>
 </div>
 
