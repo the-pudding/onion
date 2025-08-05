@@ -10,18 +10,18 @@
 
 <section class="conclusion">
 	<h2>The importance of optimal</h2>
-	<Letters string="TECHNIQUE" height={w/8}/>
+	<Letters string="TECHNIQUE" height={w / 8} />
 	{#each copy.conclusion as { type, value }}
 		{@const isBlockquote = ["us", "kenji"].includes(type)}
 		{@const wrapper = isBlockquote ? "blockquote" : "svelte:fragment"}
 
-			<p class={type}>
-				{#if isBlockquote}
-					<b class="speaker">{type}:</b>
-				{/if}
+		<p class={type}>
+			{#if isBlockquote}
+				<b class="speaker">{type}:</b>
+			{/if}
 
-				{@html value}
-			</p>
+			{@html value}
+		</p>
 	{/each}
 </section>
 
@@ -36,7 +36,7 @@
 
 	.conclusion p:nth-of-type(3)::before {
 		content: "";
-		background: url("./assets/kenji.gif") no-repeat center;
+		background: url("assets/kenji.gif") no-repeat center;
 		background-size: contain;
 		width: 100px;
 		height: 100px;

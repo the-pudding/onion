@@ -87,7 +87,7 @@
 		position: absolute;
 		width: 24px;
 		height: 24px;
-		background: url("./assets/dot.png") no-repeat center;
+		background: url("assets/dot.png") no-repeat center;
 		background-size: contain;
 		top: 0.35em;
 		right: 2em;
