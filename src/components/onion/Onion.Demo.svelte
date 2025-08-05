@@ -428,19 +428,8 @@
 	}
 
 	.standard-deviation-info {
-		/* display: inline-grid;
-		column-gap: 1ch;
-
-		> div {
-			grid-column: 2;
-			display: flex;
-			align-items: center;
-			gap: 1ch;
-
-			p {
-				margin: 0;
-			} */
-		/* } */
+		width: 9em;
+		text-align: right;
 	}
 
 	.hidden {
