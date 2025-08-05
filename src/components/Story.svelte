@@ -6,11 +6,15 @@
 	import Letters from "$components/Letters.svelte";
 
 	const copy = getContext("copy");
+
+	let w = $state();
 </script>
+
+<svelte:window bind:innerWidth={w} />
 
 <div class="title">
 	<h1>Dicing an
-		<Letters string="ONION" height={300}/>
+		<Letters string="ONION" height={w/3.5}/>
 		the Mathematically Optimal Way
 	</h1>
 

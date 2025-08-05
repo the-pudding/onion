@@ -28,4 +28,10 @@
 		left: -120px;
 		transform: rotate(-10deg);
 	}
+
+	@media (max-width: 850px) {
+		.intro p:last-of-type::before {
+			display: none;
+		}
+	}
 </style>

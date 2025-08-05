@@ -146,6 +146,7 @@
 		padding: 0px;
 		vertical-align: bottom;
 		padding: 8px;
+		font-size: var(--12px);
 	}
 
 	th button {

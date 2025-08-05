@@ -18,7 +18,9 @@ const getRandomIndex = (max) => {
             {#if letter !== " "}
                 <img src="./assets/letters/{letter}.png" 
                     alt="{letter} styled as an Onion" 
-                    style="height: {height}px; transform: rotate({rotations[getRandomIndex(rotations.length - 1)]}deg);"
+                    style="height: {height}px; 
+                        max-height: {space == "extra" ? "100px" : "300px"};
+                        transform: rotate({rotations[getRandomIndex(rotations.length - 1)]}deg);"
                 />
             {:else}
                 <span style="width: {height}px;"></span>
@@ -36,6 +38,7 @@ const getRandomIndex = (max) => {
     }
 
     img {
+        max-height: 300px;
         filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.06)) 
           drop-shadow(0 2px 2px rgba(0, 0, 0, 0.06)) 
           drop-shadow(0 4px 4px rgba(0, 0, 0, 0.06));

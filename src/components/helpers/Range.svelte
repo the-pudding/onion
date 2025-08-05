@@ -27,7 +27,8 @@
 
 <style>
 	.range {
-		--thumb-width: 20px;
+		width: 100%;
+		--thumb-width: 24px;
 		--tick-font-size: 12px;
 		position: relative;
 		/* margin-bottom: calc(var(--thumb-width) * 2); */

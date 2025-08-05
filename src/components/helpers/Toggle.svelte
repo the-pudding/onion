@@ -70,8 +70,8 @@
 	}
 
 	.toggle--slider button {
-		width: 3.6em;
-		height: 2.1em;
+		width: 4.5em;
+		height: 2.75em;
 		position: relative;
 		margin-left: 0.5em;
 		background-color: var(--onion-yellow-light);
@@ -85,16 +85,16 @@
 	.toggle--slider button::before {
 		content: "";
 		position: absolute;
-		width: 1.5em;
-		height: 1.5em;
+		width: 24px;
+		height: 24px;
 		background: url("./assets/dot.png") no-repeat center;
 		background-size: contain;
-		top: 0.25em;
-		right: 1.75em;
+		top: 0.35em;
+		right: 2em;
 	}
 
 	.toggle--slider button[aria-checked="true"] {
-		background-color: var(--onion-yellow-light);
+		background-color: var(--onion-yellow-mid);
 	}
 
 	.toggle--slider button[aria-checked="true"]::before {

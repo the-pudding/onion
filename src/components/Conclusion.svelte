@@ -3,11 +3,14 @@
 	import Letters from "$components/Letters.svelte";
 
 	const copy = getContext("copy");
+	let w = $state();
 </script>
+
+<svelte:window bind:innerWidth={w} />
 
 <section class="conclusion">
 	<h2>The importance of optimal</h2>
-	<Letters string="TECHNIQUE" height={100}/>
+	<Letters string="TECHNIQUE" height={w/8}/>
 	{#each copy.conclusion as { type, value }}
 		{@const isBlockquote = ["us", "kenji"].includes(type)}
 		{@const wrapper = isBlockquote ? "blockquote" : "svelte:fragment"}

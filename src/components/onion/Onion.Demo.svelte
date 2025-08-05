@@ -59,6 +59,7 @@
 		letters = undefined
 	} = $props();
 	const id = $props.id();
+	let w = $state();
 
 	const width = 600;
 	setContext("width", width);
@@ -232,8 +233,10 @@
 	});
 </script>
 
+<svelte:window bind:innerWidth={w} />
+
 {#if letters !== undefined}
-	<Letters string={letters} height={100} space={"extra"} />
+	<Letters string={letters} height={w/8} space={"extra"} />
 {/if}
 <figure class:explode={explode === "on"}>
 	{#if toggleExplode || showStandardDeviation}
@@ -246,32 +249,36 @@
 
 			<h3>vertical cuts</h3>
 			<OnionStandardDeviationGraph /> -->
-			<div class="showhide" class:visible={toggleExplode}>
-				<Toggle label="explode" style="slider" bind:value={explode} />
-			</div>
-
-			<div class="showhide" class:visible={showStandardDeviation}>
-				<div class="std-dev-rating">
-					<span class="rating {rsdRating.replace(/ /g, '')}">{rsdRating}</span>
+			<div class="top-left">
+				<div class="showhide" class:visible={toggleExplode}>
+					<Toggle label="explode" style="slider" bind:value={explode} />
 				</div>
 			</div>
-			<div class="showhide" class:visible={showStandardDeviation}>
-				<div class="standard-deviation-info">
-					<span>std dev:</span>
-					<span>{$onionStore.standardDeviationString}%</span>
 
-					<div>
-						<!-- <meter
-							value={$onionStore.standardDeviation}
-							min={rsdBuckets.min}
-							max={rsdBuckets.max}
-							low={rsdBuckets.q1}
-							high={rsdBuckets.q3}
-							optimum={rsdBuckets.min}
-							id="{id}-meter"
-						>
-							{$onionStore.standardDeviationString}%
-						</meter> -->
+			<div class="top-right">
+				<div class="showhide" class:visible={showStandardDeviation}>
+					<div class="std-dev-rating">
+						<span class="rating {rsdRating.replace(/ /g, '')}">{rsdRating}</span>
+					</div>
+				</div>
+				<div class="showhide" class:visible={showStandardDeviation}>
+					<div class="standard-deviation-info">
+						<span>std dev:</span>
+						<span>{$onionStore.standardDeviationString}%</span>
+
+						<div>
+							<!-- <meter
+								value={$onionStore.standardDeviation}
+								min={rsdBuckets.min}
+								max={rsdBuckets.max}
+								low={rsdBuckets.q1}
+								high={rsdBuckets.q3}
+								optimum={rsdBuckets.min}
+								id="{id}-meter"
+							>
+								{$onionStore.standardDeviationString}%
+							</meter> -->
+						</div>
 					</div>
 				</div>
 			</div>
@@ -448,6 +455,9 @@
 		font-weight: bold;
 		padding: 6px 8px;
 		border-radius: 4px;
+		height: 2.75em;
+		display: inline-block;
+		line-height: 1.6;
 	}
 
 	span.pooruniformity {
@@ -489,6 +499,17 @@
 		visibility: visible;
 	}
 
+	.top-left {
+		width: 33%;
+	}
+
+	.top-right {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		width: 66%;
+	}
+
 	.left,
 	.right {
 		width: 50%;
@@ -515,6 +536,7 @@
 		display: inline-block;
 		margin-left: 8px;
 		font-weight: 700;
+		width: 1rem;
 	}
 
 	.right span.output {
@@ -527,5 +549,33 @@
 	.left .label {
 		width: 9em;
 		/* text-align: right; */
+	}
+
+	@media(max-width: 620px) {
+		.bottom {
+			flex-direction: column;
+		}
+		.left, .right {
+			width: 100%;
+		}
+		.right {
+			padding: 1rem 0 0 0;
+		}
+		.right .control-unit {
+			justify-content: flex-start;
+		}
+	}
+
+	@media(max-width: 500px) {
+		.controls {
+			&.top {
+				flex-direction: column;
+				justify-content: flex-start;
+				gap: 0.25rem;
+			}
+		}
+		.top-left, .top-right {
+			width: 100%;
+		}
 	}
 </style>
