@@ -1,7 +1,7 @@
 <script>
 	export let options = [];
 	export let legend = "";
-	export let legendPosition = "top";
+	export let legendPosition = "";
 	export let labelClass = "";
 	export let disabled = false;
 	export let value = options.length ? options[0].value : "";

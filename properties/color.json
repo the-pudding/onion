@@ -42,17 +42,20 @@
 		"purple": {
 			"value": "#a239ca"
 		},
-		"blue": {
-			"value": "#4717f6"
+		"purple-light": {
+			"value": "#c079db"
 		},
 		"green": {
-			"value": "#34a29e"
+			"value": "#2a827f"
+		},
+		"green-light": {
+			"value": "#35a4a0"
 		},
 		"red": {
-			"value": "#ff533d"
+			"value": "#e91a00"
 		},
-		"yellow": {
-			"value": "#e5e338"
+		"blue": {
+			"value": "#4717f6"
 		}
 	}
 }

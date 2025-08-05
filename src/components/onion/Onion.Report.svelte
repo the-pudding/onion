@@ -6,7 +6,7 @@
 	import { ESCAPED_NBSP, MAX_LAYERS, MIN_LAYERS } from "$utils/constants";
 	import data from "$data/onion-report.json";
 
-	const diagramSize = 32;
+	const diagramSize = 36;
 	const diagramPadding = 4;
 	const halfDiagramSize = diagramSize / 2;
 	const diagramExtent = halfDiagramSize - diagramPadding;
@@ -28,42 +28,47 @@
 		}
 	];
 
-	let rowData = $derived(data
-		.filter(([storageKey]) => storageKey.startsWith(numLayers))
-		.map(([storageKey, standardDeviation], i) => ({
-			numCuts: i + 1,
-			storageKey,
-			standardDeviation: format(".1f")(standardDeviation) + "%"
-		})));
-	let rows = $derived(rowData.map((r) => {
-		// build an SVG string to render in table
-		const { numCuts, storageKey } = r;
-		const mainCutTypeMap = { v: "vertical", r: "radial" };
+	let rowData = $derived(
+		data
+			.filter(([storageKey]) => storageKey.startsWith(numLayers))
+			.map(([storageKey, standardDeviation], i) => ({
+				numCuts: i + 1,
+				storageKey,
+				standardDeviation: format(".1f")(standardDeviation) + "%"
+			}))
+	);
+	let rows = $derived(
+		rowData.map((r) => {
+			// build an SVG string to render in table
+			const { numCuts, storageKey } = r;
+			const mainCutTypeMap = { v: "vertical", r: "radial" };
 
-		const mainCutType = storageKey[storageKey.indexOf("c") + 2]; // v | r
-		const cutTargetDepthPercentage = +storageKey.substring(
-			storageKey.indexOf(mainCutType) + 2,
-			storageKey.indexOf("%")
-		); // 0-100
-		const numHorizontalCuts = +storageKey[storageKey.indexOf("h") - 1]; // 0 | 1 | 2
-		const horizontalCutScale = scaleLinear()
-			.domain([0, numHorizontalCuts])
-			.range([1 / (numHorizontalCuts + 1), 1]);
-		const isRadial = mainCutType === "r";
-		const title = [
-			`${mainCutTypeMap[mainCutType]}`,
-			...(isRadial ? [`${cutTargetDepthPercentage}%${ESCAPED_NBSP}depth`] : []),
-			...(numHorizontalCuts
-				? [
-						`${numHorizontalCuts} horizontal${ESCAPED_NBSP}${pluralize(
-							"cut",
-							numHorizontalCuts
-						)}`
-				  ]
-				: [])
-		].join(", ");
+			const mainCutType = storageKey[storageKey.indexOf("c") + 2]; // v | r
+			const cutTargetDepthPercentage = +storageKey.substring(
+				storageKey.indexOf(mainCutType) + 2,
+				storageKey.indexOf("%")
+			); // 0-100
+			const numHorizontalCuts = +storageKey[storageKey.indexOf("h") - 1]; // 0 | 1 | 2
+			const horizontalCutScale = scaleLinear()
+				.domain([0, numHorizontalCuts])
+				.range([1 / (numHorizontalCuts + 1), 1]);
+			const isRadial = mainCutType === "r";
+			const title = [
+				`${mainCutTypeMap[mainCutType]}`,
+				...(isRadial
+					? [`${cutTargetDepthPercentage}%${ESCAPED_NBSP}depth`]
+					: []),
+				...(numHorizontalCuts
+					? [
+							`${numHorizontalCuts} horizontal${ESCAPED_NBSP}${pluralize(
+								"cut",
+								numHorizontalCuts
+							)}`
+						]
+					: [])
+			].join(", ");
 
-		r.cuttingDiagram = `<svg viewBox="${-halfDiagramSize} ${-halfDiagramSize} ${diagramSize} ${diagramSize}" width="${diagramSize}" style="min-width: ${diagramSize}">
+			r.cuttingDiagram = `<svg viewBox="${-halfDiagramSize} ${-halfDiagramSize} ${diagramSize} ${diagramSize}" width="${diagramSize}" style="min-width: ${diagramSize}">
 			<style>
 				rect {
 					fill: rgba(239, 239, 239, 1);
@@ -88,7 +93,7 @@
 
 							<circle r="1.5" cy="${radialTargetPosition}" />
 
-							<text y=${diagramExtent} text-anchor="middle" font-size="8">
+							<text y=${diagramExtent} text-anchor="middle" font-size="10">
 								${cutTargetDepthPercentage}%
 							</text>
 						`
@@ -101,18 +106,21 @@
 							const y =
 								-diagramExtent + horizontalCutScale(h) * 2 * diagramExtent;
 							return `<line x1="${-diagramExtent}" y1="${y}" x2="${diagramExtent}" y2="${y}" class="cut" />`;
-					  })
+						})
 					: ""
 			}
 		</svg>`;
 
-		r.cuttingDiagram += title;
+			r.cuttingDiagram += title;
 
-		return r;
-	}));
+			return r;
+		})
+	);
 </script>
 
-<Select label="number of layers" bind:value={numLayers} {options} />
+<div class="c">
+	<Select label="number of layers" bind:value={numLayers} {options} />
+</div>
 
 <SortTable {rows} {columns} />
 
@@ -121,5 +129,10 @@
 		display: flex;
 		align-items: flex-end;
 		gap: 1.5ch;
+	}
+
+	.c {
+		width: 15em;
+		font-family: var(--sans);
 	}
 </style>

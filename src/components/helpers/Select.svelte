@@ -21,6 +21,8 @@
 <style>
 	.select {
 		position: relative;
+		display: flex;
+		align-items: center;
 	}
 
 	label {
@@ -29,11 +31,15 @@
 		font-weight: inherit;
 		font-size: 1em;
 		margin-bottom: 0.25em;
+		min-width: 12em;
+		text-transform: uppercase;
+		font-family: var(--sans);
+		font-size: var(--12px);
 	}
 
 	select {
 		width: 100%;
-		height: 50px;
+		height: 40px;
 		font-family: inherit;
 		font-size: 1em;
 		cursor: pointer;
@@ -44,6 +50,7 @@
 		padding: 0.5em;
 		appearance: none;
 		line-height: 1.4;
+		font-family: var(--sans);
 	}
 
 	select::-ms-expand {
@@ -54,7 +61,7 @@
 		display: block;
 		content: "";
 		position: absolute;
-		bottom: 1.25em;
+		bottom: 1em;
 		right: 0.75em;
 		width: 1em;
 		height: 1em;

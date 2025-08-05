@@ -26,10 +26,6 @@
 		text-transform: capitalize;
 	}
 
-	blockquote {
-		font-size: var(--text-size);
-	}
-
 	blockquote :global(em),
 	.note {
 		color: var(--color-primary);
