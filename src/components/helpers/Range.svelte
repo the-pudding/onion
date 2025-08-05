@@ -67,7 +67,7 @@
 		height: var(--thumb-width);
 		width: var(--thumb-width);
 		border-radius: 4px;
-		background: url("assets/dot.png") no-repeat center;
+		background: url("/assets/dot.png") no-repeat center;
 		background-size: contain;
 		appearance: none;
 		margin-top: calc(var(--thumb-width) / -3);

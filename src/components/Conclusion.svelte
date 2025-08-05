@@ -36,7 +36,7 @@
 
 	.conclusion p:nth-of-type(3)::before {
 		content: "";
-		background: url("assets/kenji.gif") no-repeat center;
+		background: url("/assets/kenji.gif") no-repeat center;
 		background-size: contain;
 		width: 100px;
 		height: 100px;

@@ -19,7 +19,7 @@
 
 	.intro p:last-of-type::before {
 		content: "";
-		background: url("assets/kenji.gif") no-repeat center;
+		background: url("/assets/kenji.gif") no-repeat center;
 		background-size: contain;
 		width: 100px;
 		height: 100px;
