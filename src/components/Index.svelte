@@ -5,7 +5,7 @@
 	import Story from "./Story.svelte";
 	import Conclusion from "./Conclusion.svelte";
 	import Appendix from "./Appendix.svelte";
-	// import Footer from "$components/Footer.svelte";
+	import Footer from "$components/Footer.svelte";
 
 	const data = getContext("data");
 
@@ -26,9 +26,19 @@
 	});
 </script>
 
-<Intro />
-<Story />
-<Conclusion />
-<Appendix />
+<article>
+	<Intro />
+	<Story />
+	<Conclusion />
+	<Appendix />
+</article>
 
-<!-- <Footer /> -->
+<Footer recirc={true} />
+
+<style>
+	article {
+		max-width: 640px;
+		margin-inline: auto;
+		padding: 0 16px;
+	}
+</style>

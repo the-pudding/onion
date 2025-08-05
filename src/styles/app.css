@@ -97,14 +97,6 @@ svg {
 	display: block;
 }
 
-#content {
-	max-width: 640px;
-	margin-inline: auto;
-	padding: 0 16px;
-}
-
-/* TODO Inter font */
-
 .text,
 li, blockquote, span, details, summary {
 	font-size: 22px;
@@ -150,3 +142,7 @@ details {
 	}
 }
 
+footer svg {
+	width: 100%;
+	height: auto;
+}
