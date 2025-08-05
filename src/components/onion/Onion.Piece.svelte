@@ -89,7 +89,7 @@
 	}
 
 	:global(figure.explode path) {
-		stroke: var(--color-fg);
+		stroke: var(--onion-dark);
 		transition:
 			stroke var(--duration-fade),
 			transform var(--duration-transform) var(--duration-fade);

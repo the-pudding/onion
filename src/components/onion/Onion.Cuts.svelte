@@ -54,6 +54,7 @@
 
 <style>
 	line {
-		stroke-dasharray: 5;
+		stroke-dasharray: 2;
+		stroke: var(--onion-dark);
 	}
 </style>

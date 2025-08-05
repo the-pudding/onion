@@ -71,7 +71,7 @@
 			r.cuttingDiagram = `<svg viewBox="${-halfDiagramSize} ${-halfDiagramSize} ${diagramSize} ${diagramSize}" width="${diagramSize}" style="min-width: ${diagramSize}">
 			<style>
 				rect {
-					fill: rgba(239, 239, 239, 1);
+					fill: #FDE9A8;
 				}
 
 				.cut {
@@ -127,8 +127,13 @@
 <style>
 	:global(td[data-th="Method"]) {
 		display: flex;
-		align-items: flex-end;
+		align-items: center;
 		gap: 1.5ch;
+	}
+
+	:global(td[data-th="Cuts"], td[data-th="Standard Deviation"]) {
+		align-items: center;
+		vertical-align: middle;
 	}
 
 	.c {

@@ -164,12 +164,13 @@
 <style>
 	footer {
 		margin-top: 100px;
+		padding-bottom: 100px;
 	}
 
 	.c {
 		max-width: calc(var(--width-column-wide, 1280px) - var(--margin, 16px) * 2);
-		padding: 16px;
-		margin: 32px auto 100px auto;
+		padding: 16px 32px;
+		margin: 32px auto 0 auto;
 		font-family: var(--sans);
 	}
 
@@ -262,13 +263,11 @@
 
 	a {
 		font-weight: 700;
-		color: var(--color-fg);
-		text-decoration: 2px underline var(--color-fg);
+		color: var(--onion-dark);
 	}
 
 	a:hover {
 		color: var(--color-link-hover);
-		text-decoration: 2px underline var(--color-link-hover);
 	}
 
 	a:hover + .arrow {
@@ -314,6 +313,10 @@
 		max-width: none;
 		width: 100%;
 		height: auto;
+	}
+
+	.links a.img-wrapper, .cta-wrapper .img-wrapper a  {
+		background-image: none;
 	}
 
 	.donate img {

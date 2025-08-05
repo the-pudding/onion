@@ -51,6 +51,8 @@
 	.button-set {
 		display: inline-block;
 		margin-bottom: 4px;
+		font-weight: 700;
+		color: var(--onion-dark);
 	}
 
 	.group {
@@ -83,7 +85,7 @@
 		margin: 0;
 		padding: 0.5em;
 		border-radius: 0;
-		border: 2px solid var(--color-gray-900);
+		border: 1px solid var(--onion-dark);
 		outline: none;
 		cursor: pointer;
 		font-family: inherit;
@@ -108,18 +110,18 @@
 	}
 
 	input[type="radio"] + label {
-		background: var(--color-white);
-		color: var(--color-gray-900);
+		background: var(--onion-cream);
+		color: var(--onion-dark);
 	}
 
 	input[type="radio"]:checked + label,
 	input[type="radio"]:checked:hover + label {
-		background: var(--color-gray-900);
-		color: var(--color-white);
+		background: var(--onion-dark);
+		color: var(--onion-cream);
 	}
 
 	input[type="radio"]:hover + label {
-		background: var(--color-gray-100);
+		background: var(--onion-yellow-light);
 	}
 
 	input[type="radio"]:focus + label {

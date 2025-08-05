@@ -12,20 +12,26 @@
 </header>
 
 <style>
+	header {
+		padding: 2rem 0;
+	}
 	.wordmark {
 		max-width: 14em;
 		margin: 0 auto;
 		padding: 32px 0;
-		transform: rotate(-4deg);
 	}
 
 	.wordmark a {
 		border: none;
 		display: block;
 		color: var(--color-fg);
+		background-image: none;
+		transform: rotate(-4deg);
+		transition: transform calc(var(--1s) * 0.25);
 	}
 
 	.wordmark a:hover {
 		background-color: transparent;
+		transform: rotate(0) scale(1.05);
 	}
 </style>

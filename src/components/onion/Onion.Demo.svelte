@@ -24,6 +24,7 @@
 	import ButtonSet from "$components/helpers/ButtonSet.svelte";
 	import Range from "$components/helpers/Range.svelte";
 	import Toggle from "$components/helpers/Toggle.svelte";
+	import Letters from "$components/Letters.svelte";
 
 	/**
 	 * @typedef {Object} Props
@@ -54,7 +55,8 @@
 		cutTargetDepthPercentage = $bindable(0),
 		toggleExplode = false,
 		showStandardDeviation = false,
-		showRadialTarget = false
+		showRadialTarget = false,
+		letters = undefined
 	} = $props();
 	const id = $props.id();
 
@@ -230,6 +232,9 @@
 	});
 </script>
 
+{#if letters !== undefined}
+	<Letters string={letters} height={100} space={"extra"} />
+{/if}
 <figure class:explode={explode === "on"}>
 	{#if toggleExplode || showStandardDeviation}
 		<div class="controls top">
@@ -395,7 +400,7 @@
 	}
 
 	:global(line, circle) {
-		stroke: black;
+		stroke: var(--onion-dark);
 		transition: stroke var(--duration-fade) var(--duration-transform);
 	}
 
@@ -415,8 +420,11 @@
 			display: flex;
 			justify-content: space-between;
 			align-items: center;
-			padding: 8px;
-			background: var(--color-gray-100);
+			padding: 8px 0;
+			/* background: var(--onion-yellow-light);
+			border-radius: 4px; */
+			font-weight: 700;
+			border-bottom: 1px solid var(--onion-dark);
 		}
 
 		&.bottom {
@@ -438,27 +446,28 @@
 
 	span.rating {
 		font-weight: bold;
-		padding: 4px 8px;
+		padding: 6px 8px;
+		border-radius: 4px;
 	}
 
 	span.pooruniformity {
-		background: var(--color-purple);
-		color: var(--color-white);
+		background: var(--onion-pink-dark);
+		color: var(--onion-cream);
 	}
 
 	span.fairuniformity {
-		background: var(--color-purple-light);
-		color: var(--color-black);
+		background: #723a80;
+		color: var(--onion-cream);
 	}
 
 	span.gooduniformity {
-		background: var(--color-green-light);
-		color: var(--color-black);
+		background: #196693;
+		color: var(--onion-cream);
 	}
 
 	span.excellentuniformity {
-		background: var(--color-green);
-		color: var(--color-white);
+		background: var(--onion-teal);
+		color: var(--onion-cream);
 	}
 
 	.control-unit {
@@ -499,11 +508,13 @@
 	}
 	span.label {
 		margin-right: 8px;
+		font-weight: 700;
 	}
 
 	.left span.output {
 		display: inline-block;
 		margin-left: 8px;
+		font-weight: 700;
 	}
 
 	.right span.output {
