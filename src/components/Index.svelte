@@ -39,6 +39,6 @@
 	article {
 		max-width: 640px;
 		margin-inline: auto;
-		padding: 0 16px;
+		padding: 0 2rem;
 	}
 </style>

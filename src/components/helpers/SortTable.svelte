@@ -138,6 +138,7 @@
 	}
 
 	thead tr {
+		text-transform: uppercase;
 		border-bottom: 2px solid currentColor;
 	}
 
@@ -145,6 +146,7 @@
 		padding: 0px;
 		vertical-align: bottom;
 		padding: 8px;
+		font-size: var(--12px);
 	}
 
 	th button {
@@ -162,6 +164,7 @@
 		text-align: left;
 		font-weight: bold;
 		position: relative;
+		text-transform: uppercase;
 	}
 
 	
@@ -174,7 +177,7 @@
 		width: 1.25em;
 		justify-content: center;
 		align-items: flex-end;
-		opacity: 0.5;
+		opacity: 1;
 	}
 
 	th.is-sortable.is-asc button:after {

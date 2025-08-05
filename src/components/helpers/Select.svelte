@@ -23,6 +23,8 @@
 		position: relative;
 		display: flex;
 		align-items: center;
+		font-weight: 700;
+		color: var(--onion-dark);
 	}
 
 	label {
@@ -43,9 +45,9 @@
 		font-family: inherit;
 		font-size: 1em;
 		cursor: pointer;
-		background: var(--color-white);
-		color: var(--color-gray-900);
-		border: 2px solid var(--color-gray-900);
+		background: var(--color-cream);
+		color: var(--onion-dark);
+		border: 1px solid var(--onion-dark);
 		border-radius: 4px;
 		padding: 0.5em;
 		appearance: none;
@@ -66,7 +68,7 @@
 		width: 1em;
 		height: 1em;
 		z-index: 1;
-		background: var(--color-gray-900);
+		background: var(--onion-dark);
 		clip-path: polygon(0% 0%, 100% 100%, 0% 100%);
 		border-radius: 4px;
 		transform-origin: center center;
@@ -75,7 +77,7 @@
 	}
 
 	select:hover {
-		background: var(--color-gray-100);
+		background: var(--onion-yellow-light);
 	}
 
 	select:focus {

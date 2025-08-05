@@ -42,13 +42,13 @@
 	[role="switch"][aria-checked="false"] :last-child {
 		display: inline-block;
 		border-radius: 4px;
-		background: var(--color-gray-900);
+		background: var(--onion-cream);
 		color: var(--color-gray-100);
 	}
 
 	.toggle--inner button {
 		padding: 0.5em;
-		background-color: var(--color-white);
+		background-color: var(--onion-dark);
 		border: 2px solid var(--color-gray-900);
 	}
 
@@ -70,11 +70,12 @@
 	}
 
 	.toggle--slider button {
-		width: 3.5em;
-		height: 2em;
+		width: 4.5em;
+		height: 2.75em;
 		position: relative;
 		margin-left: 0.5em;
-		background: var(--color-gray-300);
+		background-color: var(--onion-yellow-light);
+		border-radius: 4px;
 	}
 
 	.toggle--slider button:focus {
@@ -84,16 +85,16 @@
 	.toggle--slider button::before {
 		content: "";
 		position: absolute;
-		width: 1.5em;
-		height: 1.5em;
-		background: var(--color-white);
-		border-radius: 4px;
-		top: 0.25em;
-		right: 1.75em;
+		width: 24px;
+		height: 24px;
+		background: url("./assets/dot.png") no-repeat center;
+		background-size: contain;
+		top: 0.35em;
+		right: 2em;
 	}
 
 	.toggle--slider button[aria-checked="true"] {
-		background-color: var(--color-gray-900);
+		background-color: var(--onion-yellow-mid);
 	}
 
 	.toggle--slider button[aria-checked="true"]::before {

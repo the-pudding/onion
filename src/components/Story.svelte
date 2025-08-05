@@ -3,15 +3,23 @@
 	import getCopyObjectWithBooleans from "$utils/getCopyObjectWithBooleans";
 	import OnionDemo from "$components/onion/Onion.Demo.svelte";
 	import OnionReport from "./onion/Onion.Report.svelte";
+	import Letters from "$components/Letters.svelte";
 
 	const copy = getContext("copy");
+
+	let w = $state();
 </script>
 
+<svelte:window bind:innerWidth={w} />
+
 <div class="title">
-	<h1>{copy.hed}</h1>
+	<h1>Dicing an
+		<Letters string="ONION" height={w/3.5}/>
+		the Mathematically Optimal Way
+	</h1>
 
 	<p class="authors">
-		<span>By {@html copy.author1}</span> <span>with {@html copy.author2}</span>
+		By {@html copy.author1} with {@html copy.author2}
 	</p>
 </div>
 
@@ -35,6 +43,12 @@
 {/each}
 
 <style>
+	.kenji {
+		width: 100px;
+		margin-top: -120px;
+		margin-left: -120px;
+		transform: rotate(-10deg);
+	}
 	.title {
 		margin: 64px auto;
 	}
@@ -42,22 +56,27 @@
 	h1 {
 		margin-top: 0;
 		line-height: 1.125;
-		font-size: clamp(38px, 7.5vw, 62px);
+		font-size: clamp(38px, 7.5vw, 54px);
 		font-family: var(--sans);
 		font-weight: bold;
+		text-align: center;
+		font-style: italic;
 	}
 
 	.authors {
 		margin-bottom: 0;
+		font-family: var(--sans);
+		font-size: var(--18px);
+		text-align: center;
 	}
 
 	:global(.primary) {
-		color: var(--color-primary);
-		stroke: var(--color-primary) !important;
+		color: var(--onion-teal);
+		stroke: var(--onion-teal) !important;
 	}
 
 	:global(.secondary:not(.primary)) {
-		color: var(--color-secondary);
-		stroke: var(--color-secondary) !important;
+		color: var(--onion-pink-dark);
+		stroke: var(--onion-pink-dark) !important;
 	}
 </style>

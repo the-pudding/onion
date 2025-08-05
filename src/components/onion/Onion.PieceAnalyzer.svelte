@@ -112,7 +112,7 @@
 					0,
 					Math.max(maxStandardDeviations, Math.abs(minStandardDeviations))
 				])
-				.interpolator(interpolateHcl("#2a827f", "#a239ca"))));
+				.interpolator(interpolateHcl("#2B7679", "#891555"))));
 	});
 	setContext("colorScaleStore", colorScaleStore);
 

@@ -27,6 +27,7 @@
 
 <style>
 	.range {
+		width: 100%;
 		--thumb-width: 24px;
 		--tick-font-size: 12px;
 		position: relative;
@@ -58,27 +59,28 @@
 	input[type="range"]::-webkit-slider-runnable-track {
 		width: 100%;
 		height: calc(var(--thumb-width) / 4);
-		background: var(--color-gray-300);
+		background: var(--onion-yellow-light);
 		border-radius: 4px;
 	}
 
 	input[type="range"]::-webkit-slider-thumb {
 		height: var(--thumb-width);
 		width: var(--thumb-width);
-		border-radius: 50%;
-		background: var(--color-gray-900);
+		border-radius: 4px;
+		background: url("./assets/dot.png") no-repeat center;
+		background-size: contain;
 		appearance: none;
 		margin-top: calc(var(--thumb-width) / -3);
 	}
 
 	input[type="range"]:focus::-webkit-slider-runnable-track {
-		background: var(--color-gray-300);
+		background: var(--onion-yellow-light);
 	}
 
 	input[type="range"]::-moz-range-track {
 		width: 100%;
 		height: calc(var(--thumb-width) / 4);
-		background: var(--color-gray-300);
+		background: var(--onion-yellow-light);
 		border-radius: 4px;
 	}
 
@@ -89,7 +91,7 @@
 		height: var(--thumb-width);
 		width: var(--thumb-width);
 		border-radius: 50%;
-		background: var(--color-gray-900);
+		background: var(--onion-dark);
 	}
 
 	input[type="range"]::-ms-track {

@@ -18,5 +18,6 @@
 <style>
 	circle {
 		fill: none;
+		stroke: var(--onion-dark);
 	}
 </style>
