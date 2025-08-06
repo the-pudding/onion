@@ -264,7 +264,7 @@
 				<div class="showhide" class:visible={showStandardDeviation}>
 					<div class="standard-deviation-info">
 						<span>std dev:</span>
-						<span>{$onionStore.standardDeviationString}%</span>
+						<output>{$onionStore.standardDeviationString}%</output>
 
 						<div>
 							<!-- <meter
@@ -446,7 +446,7 @@
 		width: 9em;
 		text-align: right;
 
-		> span:nth-of-type(2) {
+		output {
 			display: inline-block;
 			width: 3.6em;
 		}
