@@ -49,8 +49,8 @@
 	style={$explodeStore
 		? `fill: ${$colorScaleStore(
 				Math.abs(area - meanArea) / standardDeviation
-			)}; transform: translate(${explodedX}px, ${explodedY}px)`
-		: undefined}
+		  )}; transform: translate(${explodedX}px, ${explodedY}px)`
+		: "fill: transparent"}
 	class:highlight
 	class:primary={highlight && primary}
 	class:secondary={highlight && secondary}
@@ -68,6 +68,7 @@
 		fill: none;
 		stroke: transparent;
 		transition:
+			fill var(--duration-transform) var(--duration-transform),
 			stroke var(--duration-transform) var(--duration-transform),
 			transform var(--duration-transform);
 
@@ -91,6 +92,7 @@
 	:global(figure.explode path) {
 		stroke: var(--onion-dark);
 		transition:
+			fill var(--duration-fade),
 			stroke var(--duration-fade),
 			transform var(--duration-transform) var(--duration-fade);
 	}
