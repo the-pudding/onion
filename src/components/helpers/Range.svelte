@@ -71,6 +71,7 @@
 		background-size: contain;
 		appearance: none;
 		margin-top: calc(var(--thumb-width) / -3);
+		box-shadow: none;
 	}
 
 	input[type="range"]:focus::-webkit-slider-runnable-track {
