@@ -263,7 +263,7 @@
 				<div class="showhide" class:visible={showStandardDeviation}>
 					<div class="standard-deviation-info">
 						<span>std dev:</span>
-						<span>{$onionStore.standardDeviationString}%</span>
+						<output>{$onionStore.standardDeviationString}%</output>
 
 						<div>
 							<!-- <meter
@@ -444,6 +444,11 @@
 	.standard-deviation-info {
 		width: 9em;
 		text-align: right;
+
+		output {
+			display: inline-block;
+			width: 3.6em;
+		}
 	}
 
 	.hidden {
@@ -541,7 +546,7 @@
 	.right span.output {
 		display: inline-block;
 		margin-left: 8px;
-		width: 3.5em;
+		width: 5.5em;
 		text-align: right;
 	}
 

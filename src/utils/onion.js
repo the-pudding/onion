@@ -495,6 +495,6 @@ export default class Onion {
 	}
 
 	get standardDeviationString() {
-		return +format(".1f")(this.standardDeviation);
+		return format(".1f")(this.standardDeviation);
 	}
 }
