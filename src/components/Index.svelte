@@ -33,7 +33,7 @@
 	<Appendix />
 </article>
 
-<Footer recirc={true} />
+<!-- <Footer recirc={true} /> -->
 
 <style>
 	article {
