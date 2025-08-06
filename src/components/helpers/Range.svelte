@@ -47,7 +47,7 @@
 	}
 
 	input[type="range"]:focus {
-		box-shadow: 0 0 4px 0 var(--color-focus, #999);
+		box-shadow: 0 0 0 4px var(--color-focus, #999);
 	}
 
 	input[type="range"]:focus::-webkit-slider-thumb,
