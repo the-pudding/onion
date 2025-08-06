@@ -445,6 +445,11 @@
 	.standard-deviation-info {
 		width: 9em;
 		text-align: right;
+
+		> span:nth-of-type(2) {
+			display: inline-block;
+			width: 3.6em;
+		}
 	}
 
 	.hidden {
