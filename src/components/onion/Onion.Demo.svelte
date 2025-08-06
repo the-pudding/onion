@@ -542,7 +542,7 @@
 	.right span.output {
 		display: inline-block;
 		margin-left: 8px;
-		width: 3.5em;
+		width: 6em;
 		text-align: right;
 	}
 
