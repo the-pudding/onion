@@ -233,10 +233,8 @@
 	});
 </script>
 
-<svelte:window bind:innerWidth={w} />
-
 {#if letters !== undefined}
-	<Letters string={letters} height={w/8} space={"extra"} />
+	<Letters string={letters} />
 {/if}
 <figure class:explode={explode === "on"}>
 	{#if toggleExplode || showStandardDeviation}
@@ -258,7 +256,8 @@
 			<div class="top-right">
 				<div class="showhide" class:visible={showStandardDeviation}>
 					<div class="std-dev-rating">
-						<span class="rating {rsdRating.replace(/ /g, '')}">{rsdRating}</span>
+						<span class="rating {rsdRating.replace(/ /g, '')}">{rsdRating}</span
+						>
 					</div>
 				</div>
 				<div class="showhide" class:visible={showStandardDeviation}>
@@ -551,11 +550,12 @@
 		/* text-align: right; */
 	}
 
-	@media(max-width: 620px) {
+	@media (max-width: 620px) {
 		.bottom {
 			flex-direction: column;
 		}
-		.left, .right {
+		.left,
+		.right {
 			width: 100%;
 		}
 		.right {
@@ -566,7 +566,7 @@
 		}
 	}
 
-	@media(max-width: 500px) {
+	@media (max-width: 500px) {
 		.controls {
 			&.top {
 				flex-direction: column;
@@ -574,7 +574,8 @@
 				gap: 0.25rem;
 			}
 		}
-		.top-left, .top-right {
+		.top-left,
+		.top-right {
 			width: 100%;
 		}
 	}
