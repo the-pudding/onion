@@ -80,14 +80,16 @@
 			stroke-width: 2px;
 		}
 
-		&.subpiece {
+		/* make subpieces more visible for debugging */
+		/*&.subpiece {
 			stroke: var(--color-primary);
-		}
+		}*/
 	}
 
-	:global(figure:not(.explode) .subpiece) {
+	/* make subpieces more visible for debugging */
+	/*:global(figure:not(.explode) .subpiece) {
 		stroke-width: 2px;
-	}
+	}*/
 
 	:global(figure.explode path) {
 		stroke: var(--onion-dark);
