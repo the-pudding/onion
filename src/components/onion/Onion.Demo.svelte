@@ -302,7 +302,7 @@
 				{/if}
 
 				<div class="control-unit">
-					<span class="label">Cuts (vertical)</span>
+					<span class="label">Cuts ({cutType})</span>
 					<Range
 						min={MIN_CUTS}
 						max={MAX_CUTS}
