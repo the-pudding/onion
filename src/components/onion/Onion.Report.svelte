@@ -24,6 +24,7 @@
 			label: "Standard Deviation",
 			prop: "standardDeviation",
 			sort: true,
+			dir: "asc",
 			type: "number"
 		}
 	];
