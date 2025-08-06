@@ -125,7 +125,8 @@
 	}
 
 	input[type="radio"]:focus + label {
-		box-shadow: 0 0 4px 0 var(--color-focus);
+		position: relative;
+		box-shadow: 0 0 0 4px var(--color-focus);
 	}
 
 	input[type="radio"]:disabled + label {
