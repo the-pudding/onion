@@ -247,26 +247,23 @@
 
 			<h3>vertical cuts</h3>
 			<OnionStandardDeviationGraph /> -->
-			<div class="top-left">
-				<div class="showhide" class:visible={toggleExplode}>
-					<Toggle label="explode" style="slider" bind:value={explode} />
-				</div>
+			<div class="toggle-wrapper" class:hidden={!toggleExplode}>
+				<Toggle label="explode" style="slider" bind:value={explode} />
 			</div>
 
-			<div class="top-right">
-				<div class="showhide" class:visible={showStandardDeviation}>
-					<div class="std-dev-rating">
-						<span class="rating {rsdRating.replace(/ /g, '')}">{rsdRating}</span
-						>
-					</div>
-				</div>
-				<div class="showhide" class:visible={showStandardDeviation}>
-					<div class="standard-deviation-info">
-						<span>std dev:</span>
-						<output>{$onionStore.standardDeviationString}%</output>
+			<div class="std-dev-rating" class:hidden={!showStandardDeviation}>
+				<span class="rating {rsdRating.replace(/ /g, '')}">{rsdRating}</span>
+			</div>
 
-						<div>
-							<!-- <meter
+			<div
+				class="standard-deviation-info"
+				class:hidden={!showStandardDeviation}
+			>
+				<span>std dev:</span>
+				<output>{$onionStore.standardDeviationString}%</output>
+
+				<div>
+					<!-- <meter
 								value={$onionStore.standardDeviation}
 								min={rsdBuckets.min}
 								max={rsdBuckets.max}
@@ -277,8 +274,6 @@
 							>
 								{$onionStore.standardDeviationString}%
 							</meter> -->
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -423,8 +418,8 @@
 	.controls {
 		&.top {
 			margin-bottom: var(--demo-spacing-y);
-			display: flex;
-			justify-content: space-between;
+			display: grid;
+			grid-auto-flow: column;
 			align-items: center;
 			padding: 8px 0;
 			/* background: var(--onion-yellow-light);
@@ -441,9 +436,14 @@
 		}
 	}
 
+	.std-dev-rating {
+		justify-self: center;
+	}
+
 	.standard-deviation-info {
 		width: 9em;
 		text-align: right;
+		justify-self: end;
 
 		output {
 			display: inline-block;
@@ -493,25 +493,6 @@
 	.control-unit span {
 		line-height: 1;
 		display: inline-block;
-	}
-
-	.showhide {
-		visibility: hidden;
-	}
-
-	.showhide.visible {
-		visibility: visible;
-	}
-
-	.top-left {
-		width: 33%;
-	}
-
-	.top-right {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		width: 66%;
 	}
 
 	.left,
@@ -574,14 +555,18 @@
 	@media (max-width: 500px) {
 		.controls {
 			&.top {
-				flex-direction: column;
-				justify-content: flex-start;
-				gap: 0.25rem;
+				grid-auto-flow: row;
+				grid-template-columns: 1fr min-content;
+				row-gap: 0.25rem;
+
+				.toggle-wrapper {
+					grid-column: 1 / -1;
+				}
+
+				.std-dev-rating {
+					justify-self: start;
+				}
 			}
-		}
-		.top-left,
-		.top-right {
-			width: 100%;
 		}
 	}
 </style>
