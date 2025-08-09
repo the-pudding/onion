@@ -259,8 +259,10 @@
 				class="standard-deviation-info"
 				class:hidden={!showStandardDeviation}
 			>
-				<span>std dev:</span>
-				<output>{$onionStore.standardDeviationString}%</output>
+				<label for="{id}-std-dev">std dev:</label>
+				<output id="{id}-std-dev">
+					{$onionStore.standardDeviationString}%
+				</output>
 
 				<div>
 					<!-- <meter
